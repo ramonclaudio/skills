@@ -1,0 +1,39 @@
+# Frames Plugin
+
+Extract frames from video files to view them as images. Claude cannot view videos directly but can view images — this bridge lets Claude "watch" videos.
+
+## Usage
+
+```bash
+/frames:run ~/Desktop/recording.mov
+/frames:run ~/Videos/demo.mp4
+```
+
+## How It Works
+
+1. Copies the video to `/tmp/video.mov` using glob patterns (handles spaces and special characters in filenames)
+2. Probes video metadata (frame rate, duration)
+3. Extracts all frames as PNGs to `/tmp/video-frames/`
+4. Reads a sample of frames evenly distributed across the video
+
+Frame sampling scales with video length:
+
+| Video length | Frames read |
+|-------------|-------------|
+| Short (<30 frames) | 3 (first, middle, last) |
+| Medium (30-100) | 5-6 evenly spaced |
+| Long (>100) | 10-15 evenly distributed |
+
+For long videos (>10s), automatically reduces extraction FPS.
+
+## Why the Copy Pattern?
+
+macOS screen recordings have filenames like `Screen Recording 2026-01-10 at 11.33.27 AM.mov`. These break most quoting strategies. The plugin copies to a clean `/tmp/video.mov` path using glob matching to sidestep the problem entirely.
+
+## Requirements
+
+- `ffmpeg` (`brew install ffmpeg` on macOS, `apt install ffmpeg` on Linux)
+
+## Version
+
+1.0.0
