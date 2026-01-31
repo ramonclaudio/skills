@@ -26,7 +26,6 @@ allowed-tools:
   - TaskUpdate
   - TaskGet
   - TaskList
-  - mcp__plugin_linear_linear__list_issues
 model: sonnet
 ---
 
@@ -247,11 +246,11 @@ gh pr list --state=merged --search "merged:>YYYY-MM-DD" --json number,title,body
 gh pr list --state=all --search "created:>YYYY-MM-DD" --json number,title,body,state 2>/dev/null
 ```
 
-**3f. Linear Issues (if configured)**
+**3f. Active Tasks**
 ```
-mcp__plugin_linear_linear__list_issues
+TaskList  # Check for active tasks from previous sessions
 ```
-Filter to issues updated since last session.
+Review any pending or in-progress tasks. Note tasks with `handoff: true` metadata as resume points from prior sessions.
 
 ### Phase 4: Assess Current Health
 

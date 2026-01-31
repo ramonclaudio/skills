@@ -58,7 +58,7 @@ Creates `.handoff/` structure with `CONTEXT.md` (project info) and `HANDOFF.md` 
 ## Requirements
 
 - `git`
-- Optional: `gh` (GitHub CLI), Linear MCP
+- Optional: `gh` (GitHub CLI)
 
 ## Version
 
