@@ -18,33 +18,11 @@ Add the marketplace, then install:
 
 ## Usage
 
-Three ways to invoke:
-
-| Method | Example | When to use |
-|--------|---------|-------------|
-| **Command** | `/handoff start` | Explicit control |
-| **Skill** | Claude auto-invokes | Says "handoff", "save progress", "resume" |
-| **Agent** | "Use handoff agent" | Delegate to specialized agent |
-
-### Commands
-
 ```shell
-/handoff init    # First time: create .handoff/ structure
-/handoff start   # Beginning of session: gather context
-/handoff end     # End of session: archive state
+/handoff:handoff init    # First time: create .handoff/ structure
+/handoff:handoff start   # Beginning of session: gather context
+/handoff:handoff end     # End of session: archive state
 ```
-
-### As a Skill
-
-Claude automatically invokes handoff when you mention:
-- "let's do a handoff", "save my progress", "context is full"
-- "pick up where we left off", "resume work", "start session"
-
-### As an Agent
-
-Ask Claude to use the handoff agent for autonomous session management:
-- "Use the handoff agent to save my progress"
-- "Have the handoff agent gather context"
 
 ## Structure
 
@@ -52,7 +30,6 @@ Ask Claude to use the handoff agent for autonomous session management:
 .handoff/
 ├── CONTEXT.md       # Project: stack, commands, critical paths, gotchas
 ├── HANDOFF.md       # Session: severity, health, done, failed, blockers, resume
-├── .subagents.log   # Subagent activity during current session (auto-cleared on END)
 └── sessions/        # Archived handoffs by session ID
 ```
 
