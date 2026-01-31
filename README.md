@@ -37,9 +37,9 @@ After installing a plugin, invoke its skill:
 /audit:run --dry-run
 /audit:run --recent
 /audit:run src/
-/handoff:handoff init
-/handoff:handoff start
-/handoff:handoff end
+/handoff:run init
+/handoff:run start
+/handoff:run end
 ```
 
 See each plugin's README for full documentation.

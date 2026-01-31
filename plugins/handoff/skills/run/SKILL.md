@@ -166,12 +166,12 @@ _None._
 _None yet._
 
 ## Resume
-**Next:** Run `/handoff start` to begin
+**Next:** Run `/handoff:run start` to begin
 **Files:** -
 **Context:** Fresh initialization
 ```
 
-Done. Run `/handoff start` to begin first session.
+Done. Run `/handoff:run start` to begin first session.
 
 ## START
 
