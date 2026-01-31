@@ -21,6 +21,7 @@ Add the marketplace:
 | [**audit**](plugins/audit) | `/plugin install audit@skills` | Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight. | `git` |
 | [**gif**](plugins/gif) | `/plugin install gif@skills` | Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method | `ffmpeg` |
 | [**frames**](plugins/frames) | `/plugin install frames@skills` | Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos | `ffmpeg` |
+| [**handoff**](plugins/handoff) | `/plugin install handoff@skills` | Session continuity — structured handoffs preserve context between sessions | `git` |
 
 ## Usage
 
@@ -36,6 +37,9 @@ After installing a plugin, invoke its skill:
 /audit:run --dry-run
 /audit:run --recent
 /audit:run src/
+/handoff:handoff init
+/handoff:handoff start
+/handoff:handoff end
 ```
 
 See each plugin's README for full documentation.
