@@ -1,6 +1,6 @@
 # Frames Plugin
 
-Extract frames from video files to view them as images. Claude cannot view videos directly but can view images — this bridge lets Claude "watch" videos.
+Claude can't watch videos. But it can look at images. This extracts frames from screen recordings so Claude can see what happened. Useful for bug reproductions and demos.
 
 ## Usage
 

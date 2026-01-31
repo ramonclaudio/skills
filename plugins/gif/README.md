@@ -1,6 +1,6 @@
 # GIF Plugin
 
-Convert screen recordings to compressed GIFs using ffmpeg's two-pass palette method. Produces small, high-quality GIFs ideal for sharing.
+I share screen recordings in PRs and docs constantly. Converting .mov to .gif by hand is annoying, and the ffmpeg incantation for two-pass palette encoding is impossible to remember. This does it in one command.
 
 ## Usage
 

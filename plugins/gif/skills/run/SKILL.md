@@ -79,7 +79,7 @@ Check the `color_transfer` value:
 
 ### Step 1b: HDR → SDR conversion (only if color_transfer=smpte2084)
 
-macOS screen recordings on XDR displays use HDR10 (PQ/BT.2020/10-bit). The base Homebrew ffmpeg cannot tone-map PQ without the `zimg` library. Use macOS-native `avconvert` instead — it uses AVFoundation which handles HDR→SDR tone mapping correctly.
+macOS screen recordings on XDR displays use HDR10 (PQ/BT.2020/10-bit). The base Homebrew ffmpeg cannot tone-map PQ without the `zimg` library. Use macOS-native `avconvert` instead. It uses AVFoundation which handles HDR to SDR tone mapping correctly.
 
 ```bash
 avconvert -s /tmp/video.mov -o /tmp/video_sdr.mov -p PresetHighestQuality --replace --progress

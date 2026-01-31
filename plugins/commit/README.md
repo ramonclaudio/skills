@@ -1,6 +1,8 @@
 # Commit Plugin
 
-Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.
+One feature spread across 5 files shouldn't be 5 separate commits, and it shouldn't be one giant commit either. This groups changes by architectural layer so each commit is atomic and revertable.
+
+GPG signs when available.
 
 ## Usage
 

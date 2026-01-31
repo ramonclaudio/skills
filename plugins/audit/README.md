@@ -1,6 +1,8 @@
 # Audit Plugin
 
-Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight.
+I wanted a second opinion on my code that doesn't sugarcoat anything. This runs 4 parallel agents, each focused on a different audit dimension, then validates findings to cut false positives.
+
+Finds bugs, architectural rot, and dead weight.
 
 ## Usage
 

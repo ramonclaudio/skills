@@ -1,6 +1,6 @@
 # Simplify Plugin
 
-Analyze and simplify entire codebases using parallel background agents. Reduces complexity, removes redundancy, improves clarity.
+Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Cleaning it up file by file is tedious. This runs parallel agents across the whole codebase and only touches what actually needs work.
 
 ## Usage
 
@@ -11,11 +11,11 @@ Analyze and simplify entire codebases using parallel background agents. Reduces 
 
 ## How It Works
 
-1. **Discovery** — Globs all source files in the codebase
-2. **Analysis** — Reads every file and scores 0-10 on simplification potential
-3. **Work Queue** — Creates tasks for files scoring 5+
-4. **Parallel Simplification** — Launches up to 5 background agents (sonnet) simultaneously, each simplifying one file
-5. **Report** — Summarizes files analyzed, simplified, and key changes
+1. **Discovery**: Globs all source files in the codebase
+2. **Analysis**: Reads every file and scores 0-10 on simplification potential
+3. **Work Queue**: Creates tasks for files scoring 5+
+4. **Parallel Simplification**: Launches up to 5 background agents (sonnet) simultaneously, each simplifying one file
+5. **Report**: Summarizes files analyzed, simplified, and key changes
 
 ## What It Looks For
 
@@ -30,7 +30,7 @@ Analyze and simplify entire codebases using parallel background agents. Reduces 
 
 ## Constraints
 
-- Never changes functionality — only improves how code is written
+- Never changes functionality. Only improves how code is written.
 - Skips generated files, vendored code, and config files
 - Uncertain changes are skipped
 
