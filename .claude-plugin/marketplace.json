@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Custom Claude Code skills by @ramonclaudio",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "pluginRoot": "./plugins"
   },
   "plugins": [
@@ -51,6 +51,15 @@
       "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos",
       "category": "utility",
       "keywords": ["video", "ffmpeg", "frames", "extraction"],
+      "license": "MIT",
+      "repository": "https://github.com/ramonclaudio/skills"
+    },
+    {
+      "name": "handoff",
+      "source": "./handoff",
+      "description": "Session continuity for Claude Code. Structured handoffs preserve context between sessions.",
+      "category": "workflow",
+      "keywords": ["session", "continuity", "handoff", "context", "sbar"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     }
