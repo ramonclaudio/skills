@@ -168,10 +168,10 @@ Notes:
 <scenario>Adding subscription feature across 5 architectural layers</scenario>
 
 <analysis>
-Group 1 - Data: convex/schema.ts | "feat(schema): add subscription and tier tables" | Independent: yes
-Group 2 - Backend: convex/productsSync.ts, convex/polarCustomer.ts | "feat(api): add subscription sync endpoints" | Independent: yes
+Group 1 - Data: db/schema.ts | "feat(schema): add subscription and tier tables" | Independent: yes
+Group 2 - Backend: api/products-sync.ts, api/customer.ts | "feat(api): add subscription sync endpoints" | Independent: yes
 Group 3 - UI: components/pricing-card.tsx | "feat(components): add pricing card component" | Independent: yes
-Group 4 - Pages: app/(shop)/pricing/page.tsx | "feat(pages): add subscription pricing page" | Independent: yes
+Group 4 - Pages: app/pricing/page.tsx | "feat(pages): add subscription pricing page" | Independent: yes
 Group 5 - Docs: README.md, CHANGELOG.md | "docs: document subscription feature setup" | Independent: yes
 </analysis>
 
