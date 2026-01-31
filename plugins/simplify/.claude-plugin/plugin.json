@@ -1,0 +1,11 @@
+{
+  "name": "simplify",
+  "description": "Analyze and simplify entire codebases using parallel background agents",
+  "version": "1.0.0",
+  "author": {
+    "name": "ramonclaudio"
+  },
+  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/simplify",
+  "repository": "https://github.com/ramonclaudio/skills",
+  "license": "MIT"
+}
