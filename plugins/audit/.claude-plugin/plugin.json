@@ -1,0 +1,11 @@
+{
+  "name": "audit",
+  "description": "Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight.",
+  "version": "1.0.0",
+  "author": {
+    "name": "ramonclaudio"
+  },
+  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/audit",
+  "repository": "https://github.com/ramonclaudio/skills",
+  "license": "MIT"
+}
