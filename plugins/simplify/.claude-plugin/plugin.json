@@ -3,9 +3,13 @@
   "description": "Analyze and simplify entire codebases using parallel background agents",
   "version": "1.0.0",
   "author": {
-    "name": "ramonclaudio"
+    "name": "ramonclaudio",
+    "email": "hello@ramonclaudio.com",
+    "url": "https://github.com/ramonclaudio"
   },
   "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/simplify",
   "repository": "https://github.com/ramonclaudio/skills",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": ["refactor", "simplify", "codebase", "analysis"],
+  "skills": "./skills/"
 }
