@@ -1,5 +1,7 @@
 # Skills
 
+I use Claude Code all day. After hitting the same gaps over and over, I built these skills to fix them.
+
 Custom [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills, installable individually as plugins.
 
 ## Setup
@@ -21,7 +23,7 @@ Add the marketplace:
 | [**audit**](plugins/audit) | `/plugin install audit@skills` | Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight. | `git` |
 | [**gif**](plugins/gif) | `/plugin install gif@skills` | Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method | `ffmpeg` |
 | [**frames**](plugins/frames) | `/plugin install frames@skills` | Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos | `ffmpeg` |
-| [**handoff**](plugins/handoff) | `/plugin install handoff@skills` | Session continuity — structured handoffs preserve context between sessions | `git` |
+| [**handoff**](plugins/handoff) | `/plugin install handoff@skills` | Session continuity. Structured handoffs preserve context between sessions. | `git` |
 
 ## Usage
 
