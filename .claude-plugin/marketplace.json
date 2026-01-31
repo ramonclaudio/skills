@@ -1,7 +1,8 @@
 {
   "name": "skills",
   "owner": {
-    "name": "ramonclaudio"
+    "name": "ramonclaudio",
+    "email": "hello@ramonclaudio.com"
   },
   "metadata": {
     "description": "Custom Claude Code skills by @ramonclaudio",
@@ -13,8 +14,15 @@
       "name": "commit",
       "source": "./commit",
       "description": "Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.",
+      "version": "1.0.0",
+      "author": {
+        "name": "ramonclaudio",
+        "email": "hello@ramonclaudio.com"
+      },
+      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/commit",
       "category": "development",
       "keywords": ["git", "commit", "conventional-commits", "gpg"],
+      "tags": ["git", "workflow", "automation"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     },
@@ -22,8 +30,15 @@
       "name": "simplify",
       "source": "./simplify",
       "description": "Analyze and simplify entire codebases using parallel background agents",
+      "version": "1.0.0",
+      "author": {
+        "name": "ramonclaudio",
+        "email": "hello@ramonclaudio.com"
+      },
+      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/simplify",
       "category": "development",
       "keywords": ["refactor", "simplify", "codebase", "analysis"],
+      "tags": ["refactoring", "code-quality", "parallel-agents"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     },
@@ -31,8 +46,15 @@
       "name": "audit",
       "source": "./audit",
       "description": "Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight.",
+      "version": "1.0.0",
+      "author": {
+        "name": "ramonclaudio",
+        "email": "hello@ramonclaudio.com"
+      },
+      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/audit",
       "category": "development",
       "keywords": ["audit", "review", "bugs", "security", "architecture", "quality"],
+      "tags": ["code-review", "security", "parallel-agents"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     },
@@ -40,8 +62,15 @@
       "name": "gif",
       "source": "./gif",
       "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method",
+      "version": "1.0.0",
+      "author": {
+        "name": "ramonclaudio",
+        "email": "hello@ramonclaudio.com"
+      },
+      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/gif",
       "category": "utility",
       "keywords": ["video", "ffmpeg", "gif", "conversion", "screen-recording"],
+      "tags": ["media", "conversion", "ffmpeg"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     },
@@ -49,8 +78,15 @@
       "name": "frames",
       "source": "./frames",
       "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos",
+      "version": "1.0.0",
+      "author": {
+        "name": "ramonclaudio",
+        "email": "hello@ramonclaudio.com"
+      },
+      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/frames",
       "category": "utility",
       "keywords": ["video", "ffmpeg", "frames", "extraction"],
+      "tags": ["media", "analysis", "ffmpeg"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     },
@@ -58,8 +94,15 @@
       "name": "handoff",
       "source": "./handoff",
       "description": "Session continuity for Claude Code. Structured handoffs preserve context between sessions.",
+      "version": "1.0.0",
+      "author": {
+        "name": "ramonclaudio",
+        "email": "hello@ramonclaudio.com"
+      },
+      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/handoff",
       "category": "workflow",
       "keywords": ["session", "continuity", "handoff", "context", "sbar"],
+      "tags": ["workflow", "session-management", "tasks"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     }
