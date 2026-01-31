@@ -1,46 +1,52 @@
 ---
-name: handoff
-description: Session continuity for Claude Code. Gather context at start, archive state at end. Use when user mentions handoff, saving progress, or resuming work.
-argument-hint: start|end|init
+name: run
+description: Session continuity for Claude Code. Gather context at start, archive state at end.
+argument-hint: init | start | end
+disable-model-invocation: true
 allowed-tools:
-  # Git & GitHub
-  - Bash(git:*)
-  - Bash(gh:*)
-  # Package managers
-  - Bash(npm:*)
-  - Bash(bun:*)
-  - Bash(pnpm:*)
-  - Bash(yarn:*)
-  # File operations (bash-only)
-  - Bash(mkdir:*)
-  - Bash(cp:*)
-  - Bash(rm:*)
-  - Bash(date:*)
-  - Bash(ls:*)
-  - Bash(test:*)
-  - Bash(wc:*)
-  # Dedicated tools (preferred over bash)
+  - Bash(git *)
+  - Bash(gh *)
+  - Bash(npm *)
+  - Bash(bun *)
+  - Bash(pnpm *)
+  - Bash(yarn *)
+  - Bash(mkdir *)
+  - Bash(cp *)
+  - Bash(rm *)
+  - Bash(date *)
+  - Bash(ls *)
+  - Bash(test *)
+  - Bash(wc *)
   - Read
   - Write
   - Edit
   - Glob
   - Grep
-  # Task management (cross-session persistence)
   - TaskCreate
   - TaskUpdate
   - TaskGet
   - TaskList
-  # External integrations
   - mcp__plugin_linear_linear__list_issues
+model: sonnet
 ---
 
 # Handoff
 
-Session continuity for Claude Code. Like hospital shift changes, bad handoffs lose context.
+ultrathink
 
-## Argument: $ARGUMENTS
+<role>
+You are a senior engineer who treats session continuity like hospital shift changes. Bad handoffs lose context, waste time, and repeat mistakes. You capture state precisely — exact errors, specific file:line references, honest severity assessments. You never write vague resume points.
+</role>
 
----
+<task>
+Manage session handoffs: gather context at start, archive state at end. Each handoff must be specific enough that a fresh session can resume without asking questions.
+</task>
+
+## Arguments
+
+- `$ARGUMENTS` containing `init`: Run INIT (create .handoff/ structure)
+- `$ARGUMENTS` containing `start` or empty: Run START (gather context)
+- `$ARGUMENTS` containing `end`: Run END (archive state)
 
 ## CONTEXT.md Design
 
@@ -55,8 +61,6 @@ CONTEXT.md has two types of sections:
 - `## Stack` - technologies, versions
 - `## Patterns` - how things work
 - `## What Never Works` - gotchas, anti-patterns
-
----
 
 ## INIT
 
@@ -169,8 +173,6 @@ _None yet._
 
 Done. Run `/handoff start` to begin first session.
 
----
-
 ## START
 
 If `$ARGUMENTS` is empty or = "start":
@@ -251,12 +253,6 @@ mcp__plugin_linear_linear__list_issues
 ```
 Filter to issues updated since last session.
 
-**3g. Subagent Activity (if present)**
-```bash
-cat .handoff/.subagents.log 2>/dev/null | tail -20
-```
-Shows which subagents ran during previous session (logged by SubagentStart/SubagentStop hooks).
-
 ### Phase 4: Assess Current Health
 
 Check if state has drifted since handoff:
@@ -327,8 +323,6 @@ Ready. What would you like to work on?
 
 **Context loaded. Ready to proceed with user's task.**
 
----
-
 ## END
 
 If `$ARGUMENTS` = "end":
@@ -337,11 +331,6 @@ If `$ARGUMENTS` = "end":
 
 ```bash
 cp .handoff/HANDOFF.md ".handoff/sessions/${CLAUDE_SESSION_ID}.md"
-```
-
-Clear subagent activity log (will be regenerated during next session):
-```bash
-rm -f .handoff/.subagents.log 2>/dev/null
 ```
 
 ### Phase 2: Capture Health Status
@@ -552,8 +541,6 @@ RESUME POINT
 Safe to end session.
 ```
 
----
-
 ## Severity Guide
 
 | Level | When | Meaning |
@@ -561,8 +548,6 @@ Safe to end session.
 | 🔴 CRITICAL | Production down, data loss risk, security issue | Drop everything, fix now |
 | 🟡 IN PROGRESS | Mid-feature, tests failing, WIP | Continue current work |
 | 🟢 READY | All green, clean state | Pick up new work |
-
----
 
 ## Health Check Commands
 
@@ -574,8 +559,6 @@ Detect from CONTEXT.md or infer from lockfile:
 | package-lock.json | `npm run build` | `npm test` | `npm run lint` |
 | pnpm-lock.yaml | `pnpm build` | `pnpm test` | `pnpm lint` |
 | yarn.lock | `yarn build` | `yarn test` | `yarn lint` |
-
----
 
 ## Anti-Patterns
 
