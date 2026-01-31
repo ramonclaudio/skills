@@ -1,0 +1,11 @@
+{
+  "name": "frames",
+  "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos",
+  "version": "1.0.0",
+  "author": {
+    "name": "ramonclaudio"
+  },
+  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/frames",
+  "repository": "https://github.com/ramonclaudio/skills",
+  "license": "MIT"
+}

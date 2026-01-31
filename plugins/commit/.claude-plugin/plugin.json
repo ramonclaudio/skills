@@ -1,0 +1,11 @@
+{
+  "name": "commit",
+  "description": "Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.",
+  "version": "1.0.0",
+  "author": {
+    "name": "ramonclaudio"
+  },
+  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/commit",
+  "repository": "https://github.com/ramonclaudio/skills",
+  "license": "MIT"
+}
