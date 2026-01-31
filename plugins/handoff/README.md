@@ -55,6 +55,33 @@ Creates `.handoff/` structure with `CONTEXT.md` (project info) and `HANDOFF.md` 
 | IN PROGRESS | Mid-feature, tests failing |
 | READY | All green, clean state |
 
+## Hooks (Automatic)
+
+The plugin ships with lifecycle hooks that run without manual invocation:
+
+| Hook | Event | What it does |
+|------|-------|-------------|
+| `session-start.sh` | SessionStart (startup) | Auto-injects severity, resume point, and blockers from `.handoff/HANDOFF.md` into fresh sessions |
+| `compact-reinject.sh` | SessionStart (compact) | Re-injects handoff context after compaction so resume state survives |
+| `pre-compact.sh` | PreCompact | Snapshots git state to `.handoff/.pre-compact` before compaction destroys conversation detail |
+
+This means every fresh session automatically sees the handoff resume point — even without running `/handoff:run start`. The full START is still available for deep hydration (tasks, git activity, drift check).
+
+## CLAUDE.md Integration
+
+On INIT and END, the plugin syncs the resume point to CLAUDE.md's Compact Instructions section. This ensures:
+- Fresh sessions see the resume point before any skill runs
+- Compacted sessions retain it through auto-compaction
+- Full state lives in `.handoff/` — CLAUDE.md just has the pointer
+
+## Task Integration
+
+END creates Tasks with metadata (`handoff: true`, `resume: true`, `blocker: true`) visible via `Ctrl+T`. START hydrates blockers and resume points from HANDOFF.md into Tasks with `addBlockedBy` dependencies. For cross-session task sharing:
+
+```bash
+CLAUDE_CODE_TASK_LIST_ID=my-project claude
+```
+
 ## Requirements
 
 - `git`
