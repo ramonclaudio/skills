@@ -1,4 +1,4 @@
-# Handoff
+# Handoff Plugin
 
 Session continuity for Claude Code.
 
@@ -6,34 +6,19 @@ Every Claude session starts fresh. You remember what you were working on yesterd
 
 Think hospital shift change. Doctors don't try to remember everything about every patient. They do structured handoffs: current status, what happened, what to watch for, what's next. Same idea here.
 
-Nothing fancy. Hope it's useful.
-
-## Installation
-
-Add the marketplace, then install:
-```shell
-/plugin marketplace add ramonclaudio/skills
-/plugin install handoff@skills
-```
-
 ## Usage
 
-```shell
-/handoff:handoff init    # First time: create .handoff/ structure
-/handoff:handoff start   # Beginning of session: gather context
-/handoff:handoff end     # End of session: archive state
-```
-
-## Structure
-
-```text
-.handoff/
-├── CONTEXT.md       # Project: stack, commands, critical paths, gotchas
-├── HANDOFF.md       # Session: severity, health, done, failed, blockers, resume
-└── sessions/        # Archived handoffs by session ID
+```bash
+/handoff:run init    # First time: create .handoff/ structure
+/handoff:run start   # Beginning of session: gather context
+/handoff:run end     # End of session: archive state
 ```
 
 ## How It Works
+
+### INIT
+
+Creates `.handoff/` structure with `CONTEXT.md` (project info) and `HANDOFF.md` (session state). Scans project to auto-populate stack, structure, and invocation commands.
 
 ### START
 
@@ -45,7 +30,7 @@ Add the marketplace, then install:
 
 ### END
 
-1. Archive current `HANDOFF.md`
+1. Archive current `HANDOFF.md` to `sessions/`
 2. Run health checks (build/test/lint)
 3. Capture git state
 4. Document: done, failed (with why), blockers, watch-outs
@@ -53,20 +38,28 @@ Add the marketplace, then install:
 6. Validate handoff quality
 7. Create resume Task (persists to `~/.claude/tasks`)
 
+## Structure
+
+```text
+.handoff/
+├── CONTEXT.md       # Project: stack, commands, critical paths, gotchas
+├── HANDOFF.md       # Session: severity, health, done, failed, blockers, resume
+└── sessions/        # Archived handoffs by session ID
+```
+
 ## Severity
 
 | Level | Meaning |
 |-------|---------|
-| 🔴 CRITICAL | Production down, security issue |
-| 🟡 IN PROGRESS | Mid-feature, tests failing |
-| 🟢 READY | All green, clean state |
+| CRITICAL | Production down, security issue |
+| IN PROGRESS | Mid-feature, tests failing |
+| READY | All green, clean state |
 
 ## Requirements
 
-- Claude Code 2.1.16+ (uses Task system and `${CLAUDE_SESSION_ID}`)
-- Git
+- `git`
 - Optional: `gh` (GitHub CLI), Linear MCP
 
-## License
+## Version
 
-[MIT](LICENSE)
+1.0.0
