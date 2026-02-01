@@ -107,4 +107,4 @@ CLAUDE_CODE_TASK_LIST_ID=my-project claude
 > HANDOFF_DISABLED=1 claude -p "explain this function"
 > ```
 
-[^version]: 2.0.0
+[^version]: 1.0.0
