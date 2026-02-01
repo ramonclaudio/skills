@@ -2,7 +2,7 @@
 # Zero-config project bootstrap.
 # Creates minimal .handoff/ with auto-detected project info.
 # Called by session-start.sh when no .handoff/ exists in a git repo.
-# Must complete in <2s — heavy scanning deferred to END phase.
+# Must complete in <2s — heavy scanning deferred to /handoff:end.
 
 source "$(dirname "$0")/state.sh"
 
@@ -11,6 +11,15 @@ DIR="${CLAUDE_PROJECT_DIR:-.}"
 git -C "$DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 
 mkdir -p "$DIR/.handoff/sessions"
+
+# Prevent committing transient state; CONTEXT.md stays unignored for team sharing
+if [ ! -f "$DIR/.handoff/.gitignore" ]; then
+  cat > "$DIR/.handoff/.gitignore" <<'GITIGNORE'
+state.json
+events.jsonl
+sessions/
+GITIGNORE
+fi
 
 # Quick project detection
 NAME=$(jq -r '.name // empty' "$DIR/package.json" 2>/dev/null)
@@ -96,20 +105,16 @@ fi)
 <!-- CURATED: Edit manually -->
 | Problem | Solution |
 |---------|----------|
+
+## Corrections
+
+<!-- AUTO: Appended from session corrections -->
 EOF
 
 # Reinitialize STATE_DIR after mkdir
 STATE_DIR="$DIR/.handoff"
-CTX_FILE="$STATE_DIR/.context-state"
 JSON_FILE="$STATE_DIR/state.json"
-state_init
-state_to_markdown
+EVENTS_FILE="$STATE_DIR/events.jsonl"
+json_init
 
-# Add handoff ref to CLAUDE.md if it exists
-if [ -f "$DIR/CLAUDE.md" ]; then
-  if ! grep -q "Compact Instructions" "$DIR/CLAUDE.md" 2>/dev/null; then
-    printf '\n<!-- Compact Instructions -->\n<!-- Handoff: see .handoff/HANDOFF.md for session state -->\n' >> "$DIR/CLAUDE.md"
-  fi
-fi
-
-echo "AUTO-INIT: Bootstrapped .handoff/ for ${NAME} (${RUNTIME:-unknown}). Run /handoff:run init for thorough setup."
+echo "AUTO-INIT: Bootstrapped .handoff/ for ${NAME} (${RUNTIME:-unknown}). Run /handoff:end when ready to preserve session state."
