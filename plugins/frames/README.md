@@ -19,21 +19,23 @@ Claude can't watch videos. But it can look at images. This extracts frames from 
 Frame sampling scales with video length:
 
 | Video length | Frames read |
-|-------------|-------------|
+|:---|:---|
 | Short (<30 frames) | 3 (first, middle, last) |
 | Medium (30-100) | 5-6 evenly spaced |
 | Long (>100) | 10-15 evenly distributed |
 
 For long videos (>10s), automatically reduces extraction FPS.
 
-## Why the Copy Pattern?
+<details>
+<summary>Why the Copy Pattern?</summary>
 
 macOS screen recordings have filenames like `Screen Recording 2026-01-10 at 11.33.27 AM.mov`. These break most quoting strategies. The plugin copies to a clean `/tmp/video.mov` path using glob matching to sidestep the problem entirely.
 
-## Requirements
+</details>
 
-- `ffmpeg` (`brew install ffmpeg` on macOS, `apt install ffmpeg` on Linux)
+---
 
-## Version
+> [!IMPORTANT]
+> Requires `ffmpeg` (`brew install ffmpeg` on macOS, `apt install ffmpeg` on Linux).
 
-1.0.0
+[^version]: 1.0.0

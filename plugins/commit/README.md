@@ -4,6 +4,8 @@ One feature spread across 5 files shouldn't be 5 separate commits, and it should
 
 GPG signs when available.
 
+[Usage](#usage) / [How It Works](#how-it-works) / [Commit Types](#commit-types) / [GPG Signing](#gpg-signing)
+
 ## Usage
 
 ```bash
@@ -23,7 +25,7 @@ Groups changes by architectural layer (data, backend, UI, config, docs) and comm
 
 Tests GPG availability. If configured, signs with `-S`. If not, commits unsigned. Creates a feature branch when using `--pr` from main.
 
-```
+```bash
 git commit [-S] -m "type(scope): description"
 ```
 
@@ -42,7 +44,7 @@ Merges via `gh pr merge`, checks out main, cleans up local and remote branches.
 ## Commit Types
 
 | Type | Purpose |
-|------|---------|
+|:---|:---|
 | feat | New feature |
 | fix | Bug fix |
 | docs | Documentation |
@@ -53,9 +55,13 @@ Merges via `gh pr merge`, checks out main, cleans up local and remote branches.
 | ci | CI/CD |
 | build | Build system |
 
-## GPG Signing
+<details>
+<summary>GPG Signing</summary>
 
-Auto-detected. To enable:
+> [!NOTE]
+> GPG signing is auto-detected. If `commit.gpgsign` is set in your git config, commits are signed automatically.
+
+To enable:
 
 ```bash
 gpg --full-generate-key
@@ -64,12 +70,11 @@ git config --global user.signingkey <KEY_ID>
 git config --global commit.gpgsign true
 ```
 
-## Requirements
+</details>
 
-- `git`
-- `gh` (GitHub CLI, for `--pr` and `--merge`)
-- `gpg` (optional, for signed commits)
+---
 
-## Version
+> [!IMPORTANT]
+> Requires `git` and `gh` (GitHub CLI, for `--pr` and `--merge`). Optional: `gpg` for signed commits.
 
-1.0.0
+[^version]: 1.0.0
