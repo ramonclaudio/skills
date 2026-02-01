@@ -101,4 +101,4 @@ Project scope would push it to all collaborators and add MCP context cost to the
 
 ## Version
 
-1.2.0
+1.0.0
