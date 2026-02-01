@@ -1,20 +1,9 @@
 {
-  "description": "Session continuity hooks. Auto-inits projects, smart reinjects context, captures events, auto-saves before compaction, and escalates context degradation.",
+  "description": "Session continuity hooks. Auto-inits projects, reinjects context after compaction, captures tool events, auto-saves before compaction and on exit, and escalates context degradation.",
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh",
-            "timeout": 10,
-            "statusMessage": "Loading handoff context..."
-          }
-        ]
-      },
-      {
-        "matcher": "resume",
+        "matcher": "startup|resume",
         "hooks": [
           {
             "type": "command",
@@ -62,7 +51,20 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "",
+        "matcher": "Bash|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/event-capture.sh",
+            "timeout": 3,
+            "statusMessage": ""
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash|Write|Edit",
         "hooks": [
           {
             "type": "command",
@@ -86,15 +88,15 @@
         ]
       }
     ],
-    "Stop": [
+    "SessionEnd": [
       {
-        "matcher": "",
+        "matcher": "logout|prompt_input_exit|other",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/stop-gatekeeper.sh",
-            "timeout": 5,
-            "statusMessage": ""
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-compact.sh",
+            "timeout": 10,
+            "statusMessage": "Auto-saving session state..."
           }
         ]
       }

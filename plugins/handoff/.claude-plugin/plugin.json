@@ -1,6 +1,6 @@
 {
   "name": "handoff",
-  "description": "Session continuity for Claude Code.",
+  "description": "Session continuity for Claude Code. Structured handoffs preserve context across sessions, machines, and compactions.",
   "version": "1.0.0",
   "author": {
     "name": "ramonclaudio",
@@ -12,5 +12,5 @@
   "license": "MIT",
   "keywords": ["session", "continuity", "handoff", "context", "sbar"],
   "skills": "./skills/",
-  "hooks": "./hooks/"
+  "hooks": "./hooks/hooks.json"
 }

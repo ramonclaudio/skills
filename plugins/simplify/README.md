@@ -17,10 +17,11 @@ Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Clean
 4. **Parallel Simplification**: Launches up to 5 background agents (sonnet) simultaneously, each simplifying one file
 5. **Report**: Summarizes files analyzed, simplified, and key changes
 
-## What It Looks For
+<details open>
+<summary>What It Looks For</summary>
 
 | Criteria | Examples |
-|----------|---------|
+|:---|:---|
 | Unnecessary complexity | Deep nesting (>3 levels), overly clever solutions |
 | Redundant code | Duplicate logic, unused variables/imports, dead code |
 | Poor clarity | Unclear naming, dense one-liners |
@@ -28,16 +29,14 @@ Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Clean
 | Inconsistent style | Mixed conventions, arrow vs function inconsistency |
 | Over-abstraction | Premature optimization, unnecessary indirection |
 
-## Constraints
+</details>
 
-- Never changes functionality. Only improves how code is written.
-- Skips generated files, vendored code, and config files
-- Uncertain changes are skipped
+> [!CAUTION]
+> Never changes functionality. Only improves how code is written. Skips generated files, vendored code, and config files. Uncertain changes are skipped.
 
-## Requirements
+---
 
-- `git`
+> [!IMPORTANT]
+> Requires `git`.
 
-## Version
-
-1.0.0
+[^version]: 1.0.0

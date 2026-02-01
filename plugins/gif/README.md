@@ -22,7 +22,7 @@ I share screen recordings in PRs and docs constantly. Converting .mov to .gif by
 ## Defaults
 
 | Setting | Default | Why |
-|---------|---------|-----|
+|:---|:---|:---|
 | FPS | 10 | Good for screen recordings, keeps size down |
 | Width | 640px | Shareable size, lanczos scaling |
 | Palette | `stats_mode=diff` | Optimizes for screen recordings with static areas |
@@ -31,19 +31,21 @@ I share screen recordings in PRs and docs constantly. Converting .mov to .gif by
 ## Options
 
 | Flag | Effect |
-|------|--------|
+|:---|:---|
 | `--width N` | Change output width (default: 640) |
 | `--fps N` | Change frame rate (default: 10) |
 | `--full` | No scaling, keep original resolution |
 
-## Why the Copy Pattern?
+<details>
+<summary>Why the Copy Pattern?</summary>
 
 macOS screen recordings have filenames like `Screen Recording 2026-01-10 at 11.33.27 AM.mov`. These break most quoting strategies. The plugin copies to a clean `/tmp/video.mov` path using glob matching to sidestep the problem entirely.
 
-## Requirements
+</details>
 
-- `ffmpeg` (`brew install ffmpeg` on macOS, `apt install ffmpeg` on Linux)
+---
 
-## Version
+> [!IMPORTANT]
+> Requires `ffmpeg` (`brew install ffmpeg` on macOS, `apt install ffmpeg` on Linux).
 
-1.0.0
+[^version]: 1.0.0

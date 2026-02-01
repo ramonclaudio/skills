@@ -6,87 +6,105 @@ Every Claude session starts fresh. You remember what you were working on yesterd
 
 Think hospital shift change. Doctors don't try to remember everything about every patient. They do structured handoffs: current status, what happened, what to watch for, what's next. Same idea here.
 
+[Usage](#usage) / [How It Works](#how-it-works) / [Structure](#structure) / [Hooks](#hooks-automatic)
+
 ## Usage
 
 ```bash
-/handoff:run init    # First time: create .handoff/ structure
-/handoff:run start   # Beginning of session: gather context
-/handoff:run end     # End of session: archive state
+/handoff:end     # End of session: archive state
+/handoff:start   # Optional: deep context hydration (tasks, git, drift)
 ```
+
+Hooks handle everything else automatically — auto-init on first run, context injection on startup, auto-save before compaction.
 
 ## How It Works
 
-### INIT
+### Skills
 
-Creates `.handoff/` structure with `CONTEXT.md` (project info) and `HANDOFF.md` (session state). Scans project to auto-populate stack, structure, and invocation commands.
+| Skill | Model | Side effects | Model-invocable |
+|:---|:---|:---|:---|
+| `/handoff:start` | sonnet | Light (reads + tasks) | Yes (auto for CRITICAL) |
+| `/handoff:end` | sonnet | Heavy (health, writes) | No (user-only) |
 
 ### START
 
-1. Find last session archive
-2. Read `CONTEXT.md` and `HANDOFF.md`
-3. Get commits/PRs/issues since last session
-4. Check for drift (state changed since handoff?)
+1. Read `CONTEXT.md` and `state.json`
+2. Get commits/PRs/issues since last session
+3. Check for drift (state changed since handoff?)
+4. Hydrate tasks from blockers/resume
 5. Output structured summary
 
 ### END
 
-1. Archive current `HANDOFF.md` to `sessions/`
+1. Archive current `state.json` to `sessions/`
 2. Run health checks (build/test/lint)
 3. Capture git state
 4. Document: done, failed (with why), blockers, watch-outs
-5. Set severity and resume point
-6. Validate handoff quality
-7. Create resume Task (persists to `~/.claude/tasks`)
+5. Set severity (reflects current state) and resume point
+6. Persist corrections to `CONTEXT.md`
+7. Validate handoff quality
+8. Create resume Task (persists to `~/.claude/tasks`)
 
 ## Structure
 
 ```text
 .handoff/
-├── CONTEXT.md       # Project: stack, commands, critical paths, gotchas
-├── HANDOFF.md       # Session: severity, health, done, failed, blockers, resume
-└── sessions/        # Archived handoffs by session ID
+├── CONTEXT.md       # Project: stack, commands, critical paths, gotchas, corrections
+├── state.json       # Single source of truth (structured state + runtime counters)
+├── events.jsonl     # Append-only raw event log (bash cmd/exit, file writes/edits)
+└── sessions/        # Archived state + event logs by session ID
 ```
 
 ## Severity
 
 | Level | Meaning |
-|-------|---------|
+|:---|:---|
 | CRITICAL | Production down, security issue |
 | IN PROGRESS | Mid-feature, tests failing |
 | READY | All green, clean state |
 
-## Hooks (Automatic)
+<details open>
+<summary>Hooks (Automatic)</summary>
 
 The plugin ships with lifecycle hooks that run without manual invocation:
 
 | Hook | Event | What it does |
-|------|-------|-------------|
-| `session-start.sh` | SessionStart (startup) | Auto-injects severity, resume point, and blockers from `.handoff/HANDOFF.md` into fresh sessions |
-| `compact-reinject.sh` | SessionStart (compact) | Re-injects handoff context after compaction so resume state survives |
-| `pre-compact.sh` | PreCompact | Snapshots git state to `.handoff/.pre-compact` before compaction destroys conversation detail |
+|:---|:---|:---|
+| `session-start.sh` | SessionStart (startup/resume) | Auto-inits projects, injects severity, resume point, and blockers |
+| `compact-reinject.sh` | SessionStart (compact) | Re-injects handoff context after compaction with escalating suggestions |
+| `session-clear.sh` | SessionStart (clear) | Resets runtime counters, archives events, preserves corrections |
+| `pre-compact.sh` | PreCompact | Triggers auto-save before compaction |
+| `event-capture.sh` | PostToolUse | Appends raw tool events (cmd/exit/file) to `events.jsonl` |
+| `prompt-reminder.sh` | UserPromptSubmit | Escalating context degradation suggestions |
 
-This means every fresh session automatically sees the handoff resume point — even without running `/handoff:run start`. The full START is still available for deep hydration (tasks, git activity, drift check).
+> [!TIP]
+> Every fresh session automatically sees the handoff resume point — even without running `/handoff:start`. The full START is still available for deep hydration (tasks, git activity, drift check).
 
-## CLAUDE.md Integration
+</details>
 
-On INIT and END, the plugin syncs the resume point to CLAUDE.md's Compact Instructions section. This ensures:
-- Fresh sessions see the resume point before any skill runs
-- Compacted sessions retain it through auto-compaction
-- Full state lives in `.handoff/` — CLAUDE.md just has the pointer
+<details>
+<summary>Task Integration</summary>
 
-## Task Integration
-
-END creates Tasks with metadata (`handoff: true`, `resume: true`, `blocker: true`) visible via `Ctrl+T`. START hydrates blockers and resume points from HANDOFF.md into Tasks with `addBlockedBy` dependencies. For cross-session task sharing:
+END creates Tasks with metadata (`handoff: true`, `resume: true`, `blocker: true`) visible via `Ctrl+T`. START hydrates blockers and resume points from `state.json` into Tasks with `addBlockedBy` dependencies. For cross-session task sharing:
 
 ```bash
 CLAUDE_CODE_TASK_LIST_ID=my-project claude
 ```
 
-## Requirements
+</details>
 
-- `git`
-- Optional: `gh` (GitHub CLI)
+---
 
-## Version
+> [!IMPORTANT]
+> **Install at User scope.** The plugin writes per-session state to `.handoff/state.json`. Project scope causes multi-user collision — last writer wins. `.handoff/CONTEXT.md` can be committed for team context sharing; transient state is auto-gitignored.
 
-1.0.0
+> [!IMPORTANT]
+> Requires `git` and `jq`. Optional: `gh` (GitHub CLI).
+
+> [!TIP]
+> **Headless / CI**: Set `HANDOFF_DISABLED=1` to skip all hooks.
+> ```bash
+> HANDOFF_DISABLED=1 claude -p "explain this function"
+> ```
+
+[^version]: 1.0.0

@@ -18,17 +18,21 @@ Finds bugs, architectural rot, and dead weight.
 Launches 4 parallel agents, each focused on a different audit dimension:
 
 | Agent | Model | Focus |
-|-------|-------|-------|
+|:---|:---|:---|
 | Architecture, Design & Clarity | opus | Coupling, dead code, god files, nested ternaries, naming, readability |
 | Bugs & Logic Errors | opus | Null access, race conditions, type safety, edge cases |
 | Security, Dependencies & Performance | sonnet | Injection, auth, bloated deps, N+1 queries, memory leaks |
 | Convention Compliance | sonnet | CLAUDE.md rule violations, inconsistent patterns |
 
+> [!TIP]
+> Use `--dry-run` to preview findings before any modifications are applied.
+
 After all agents report, a validation pass confirms CRITICAL and HIGH findings (removes false positives). Findings are ranked and applied unless `--dry-run` is set.
 
-## Output
+<details>
+<summary>Output</summary>
 
-```
+```markdown
 ## Audit Report
 
 **Codebase:** my-app
@@ -48,10 +52,11 @@ After all agents report, a validation pass confirms CRITICAL and HIGH findings (
 - ...
 ```
 
-## Requirements
+</details>
 
-- `git`
+---
 
-## Version
+> [!IMPORTANT]
+> Requires `git`.
 
-1.0.0
+[^version]: 1.0.0
