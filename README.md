@@ -21,17 +21,37 @@ Add the marketplace:
 
 | Plugin | Install | Description | Requires |
 |:---|:---|:---|:---|
+| [**handoff**](./plugins/handoff) | `/plugin install handoff@skills` | Session continuity. Structured handoffs preserve context between sessions. | `git` |
+| [**qmd**](./plugins/qmd) | `/plugin install qmd@skills` | Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid — all on-device. | `qmd`, `git` |
 | [**commit**](./plugins/commit) | `/plugin install commit@skills` | Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. | `git`, `gh` |
 | [**simplify**](./plugins/simplify) | `/plugin install simplify@skills` | Analyze and simplify entire codebases using parallel background agents | `git` |
 | [**audit**](./plugins/audit) | `/plugin install audit@skills` | Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight. | `git` |
 | [**gif**](./plugins/gif) | `/plugin install gif@skills` | Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method | `ffmpeg` |
 | [**frames**](./plugins/frames) | `/plugin install frames@skills` | Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos | `ffmpeg` |
-| [**handoff**](./plugins/handoff) | `/plugin install handoff@skills` | Session continuity. Structured handoffs preserve context between sessions. | `git` |
-| [**qmd**](./plugins/qmd) | `/plugin install qmd@skills` | Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid — all on-device. | `qmd`, `git` |
 
 ## Usage
 
 After installing a plugin, invoke its skill:
+
+**handoff**
+```bash
+/handoff:init
+/handoff:start
+/handoff:end
+```
+
+**qmd**
+```bash
+/qmd:add vercel/next.js --dry-run
+/qmd:add https://github.com/tobi/qmd
+/qmd:add vercel/next.js --mask "**/*.{md,mdx}"
+/qmd:add rust-lang/rust --full
+/qmd:add lib1 lib2 lib3 --defer-embed
+/qmd:update
+/qmd:remove old-repo
+/qmd:cleanup
+/qmd:status
+```
 
 **commit**
 ```bash
@@ -60,26 +80,6 @@ After installing a plugin, invoke its skill:
 **frames**
 ```bash
 /frames:run ~/Desktop/recording.mov
-```
-
-**handoff**
-```bash
-/handoff:init
-/handoff:start
-/handoff:end
-```
-
-**qmd**
-```bash
-/qmd:add vercel/next.js --dry-run
-/qmd:add https://github.com/tobi/qmd
-/qmd:add vercel/next.js --mask "**/*.{md,mdx}"
-/qmd:add rust-lang/rust --full
-/qmd:add lib1 lib2 lib3 --defer-embed
-/qmd:update
-/qmd:remove old-repo
-/qmd:cleanup
-/qmd:status
 ```
 
 See each plugin's README for full documentation.
