@@ -33,19 +33,44 @@ Add the marketplace:
 
 After installing a plugin, invoke its skill:
 
+**commit**
 ```bash
 /commit:run
 /commit:run --pr
+```
+
+**simplify**
+```bash
 /simplify:run --dry-run
-/gif:run ~/Desktop/recording.mov
-/gif:run ~/Desktop/recording.mov --width 480
-/frames:run ~/Desktop/recording.mov
+```
+
+**audit**
+```bash
 /audit:run --dry-run
 /audit:run --recent
 /audit:run src/
+```
+
+**gif**
+```bash
+/gif:run ~/Desktop/recording.mov
+/gif:run ~/Desktop/recording.mov --width 480
+```
+
+**frames**
+```bash
+/frames:run ~/Desktop/recording.mov
+```
+
+**handoff**
+```bash
 /handoff:init
 /handoff:start
 /handoff:end
+```
+
+**qmd**
+```bash
 /qmd:add vercel/next.js --dry-run
 /qmd:add https://github.com/tobi/qmd
 /qmd:add vercel/next.js --mask "**/*.{md,mdx}"

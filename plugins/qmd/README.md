@@ -6,13 +6,13 @@ Repos persist in `~/Developer/refs/`. Incremental updates only re-embed what cha
 
 ## Architecture
 
-**Reads** go through MCP — the plugin declares a `.mcp.json` that exposes `qmd_search`, `qmd_vsearch`, `qmd_query`, `qmd_get`, `qmd_multi_get`, and `qmd_status` as native Claude tools. No bash spawning. A companion **search guide skill** loads automatically when Claude is about to search, teaching it which modality to use (keyword, semantic, or hybrid).
+Reads go through MCP. The plugin declares a `.mcp.json` that exposes `qmd_search`, `qmd_vsearch`, `qmd_query`, `qmd_get`, `qmd_multi_get`, and `qmd_status` as native Claude tools. No bash spawning. A search guide skill loads automatically before searches so the model knows when to use keyword vs semantic vs hybrid.
 
-**Writes** go through skills and commands:
+Writes go through skills and commands:
 
 | Command | What it does |
 |---------|-------------|
-| `/qmd:add <url>` | Clone + auto-detect + index + embed (8-step orchestration, runs in isolated fork) |
+| `/qmd:add <url>` | Clone + auto-detect + index + embed (runs in isolated fork) |
 | `/qmd:update` | Pull all repos, re-index, re-embed |
 | `/qmd:remove <name>` | Remove collection from index (keeps repo) |
 | `/qmd:cleanup` | Clear caches, vacuum database |
@@ -71,17 +71,17 @@ qmd search "auth pattern" | claude -p "summarize these results"
 7. Runs incremental embed (skipped with `--defer-embed`)
 8. Verifies with `qmd status`
 
-The add skill runs with `context: fork` — it executes in an isolated context and returns a summary. Your main conversation stays clean.
+The add skill runs with `context: fork`, so it executes in isolation and returns a summary without polluting your conversation.
 
 The skill is idempotent. If it fails partway, re-run with the same arguments — it pulls instead of re-cloning and removes/re-adds existing collections.
 
 ## Context Cost
 
-**MCP tools:** With tool search enabled (the default), Claude defers MCP tool definitions until needed rather than loading all 6 into every request. The qmd MCP server process still runs, but context cost is low until you actually search.
+With tool search enabled (the default), Claude defers MCP tool definitions until needed rather than loading all 6 into every request. The qmd MCP server process still runs, but context cost is low until you actually search.
 
-**Skills:** The add, update, remove, cleanup, and status commands use `disable-model-invocation: true` — zero context cost until you invoke them. The search guide skill is model-invocable (Claude sees its one-line description each request) so it can auto-load when relevant.
+The add, update, remove, cleanup, and status commands use `disable-model-invocation: true`, so they cost zero context until invoked. The search guide skill is model-invocable (one-line description per request) so it can auto-load when relevant.
 
-**MCP recovery:** MCP connections can fail silently mid-session. If search tools stop responding, run `/qmd:status` (Bash fallback) or `/mcp` to check the server connection.
+MCP connections can fail silently mid-session. If search tools stop responding, run `/qmd:status` (Bash fallback) or `/mcp` to check the server connection.
 
 ## Installation
 
