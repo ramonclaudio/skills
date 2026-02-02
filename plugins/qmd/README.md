@@ -15,6 +15,9 @@ Writes go through skills and commands:
 | `/qmd:add <url>` | Clone + auto-detect + index + embed (runs in isolated fork) |
 | `/qmd:update` | Pull all repos, re-index, re-embed |
 | `/qmd:remove <name>` | Remove collection from index (keeps repo) |
+| `/qmd:rename <old> <new>` | Rename a collection |
+| `/qmd:list [collection]` | List collections or files within a collection |
+| `/qmd:context <sub>` | Manage contexts (list, add, rm, check) |
 | `/qmd:cleanup` | Clear caches, vacuum database |
 | `/qmd:status` | Show index status via Bash (fallback when MCP is down) |
 
@@ -27,6 +30,12 @@ Writes go through skills and commands:
 /qmd:add rust-lang/rust --full                   # Full clone (default is shallow)
 /qmd:update                                      # Pull all repos, re-embed
 /qmd:remove old-repo                             # Remove from index
+/qmd:rename old-name new-name                    # Rename a collection
+/qmd:list                                        # List all collections
+/qmd:list next.js/packages                       # List files under a path
+/qmd:context list                                # Show all configured contexts
+/qmd:context check                               # Find collections missing context
+/qmd:context rm qmd://old-repo                   # Remove a stale context
 /qmd:cleanup                                     # Clear caches, vacuum DB
 /qmd:status                                      # Index status (Bash, no MCP needed)
 ```
@@ -92,6 +101,44 @@ Install at **user scope** (recommended — this is a personal reference library)
 ```
 
 Project scope would push it to all collaborators and add MCP context cost to their sessions.
+
+## How Update Works
+
+The add skill sets `update: "git pull --ff-only"` in each collection's config (`~/.config/qmd/index.yml`). When `/qmd:update` runs `qmd update`, it executes each collection's update command before re-indexing. Then `qmd embed` generates embeddings for new/changed content.
+
+To force re-embed everything (e.g., after a model update or corrupted embeddings):
+
+```bash
+qmd embed -f
+```
+
+## Named Indexes
+
+QMD supports separate indexes via `--index <name>`. Config lives at `~/.config/qmd/<name>.yml`, database at `~/.cache/qmd/<name>.sqlite`. Useful for keeping work/personal refs isolated:
+
+```bash
+qmd --index work collection add ~/work/docs --name internal-docs
+qmd --index work search "deployment process"
+```
+
+## MCP Resources and Prompts
+
+Beyond the 6 search/retrieval tools, the MCP server also exposes:
+
+- **Resource template** `qmd://{+path}` — MCP clients can read documents directly via URI without using the `get` tool.
+- **Prompt** `query` — A search strategy guide that MCP clients supporting prompts receive automatically.
+
+## GGUF Models
+
+QMD uses three local GGUF models (auto-downloaded on first use via node-llama-cpp):
+
+| Model | Purpose | Size |
+|-------|---------|------|
+| `embeddinggemma-300M-Q8_0` | Vector embeddings (768 dimensions) | ~300MB |
+| `qwen3-reranker-0.6b-q8_0` | Cross-encoder re-ranking | ~640MB |
+| `qmd-query-expansion-1.7B-q4_k_m` | Query expansion (fine-tuned) | ~1.1GB |
+
+Models are cached in `~/.cache/qmd/models/`. The index database lives at `~/.cache/qmd/index.sqlite`, config at `~/.config/qmd/index.yml`.
 
 ## Requirements
 
