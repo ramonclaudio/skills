@@ -1,0 +1,45 @@
+# QMD Collections Configuration
+# Location: ~/.config/qmd/index.yml
+#
+# This file defines all collections and their contexts.
+# You can manually edit this file — changes take effect immediately.
+
+# Global context applied to all collections
+# Use this for universal search instructions or patterns
+global_context: "If you see a relevant [[WikiWord]], you can search for that WikiWord to get more context."
+
+# Collection definitions
+collections:
+  # Reference repos cloned via /qmd:add
+  next.js:
+    path: ~/Developer/refs/next.js
+    pattern: "**/*.{md,mdx,txt,ts,tsx,js,jsx,json,yaml,yml,css}"
+    update: "git pull --ff-only"
+    context:
+      "/": "Next.js framework source code and documentation"
+      "/docs": "Official Next.js documentation"
+      "/packages/next/src": "Core Next.js runtime source"
+
+  react:
+    path: ~/Developer/refs/react
+    pattern: "**/*.{md,txt,ts,tsx,js,jsx,json,yaml,yml}"
+    update: "git pull --ff-only"
+    context:
+      "/": "React library source code"
+
+  qmd:
+    path: ~/Developer/refs/qmd
+    pattern: "**/*.{md,txt,ts,tsx,js,jsx,json,yaml,yml}"
+    update: "git pull --ff-only"
+    context:
+      "/": "QMD search engine — on-device BM25, vector, and hybrid search"
+      "/src": "QMD core source code"
+
+  # Local notes (not managed by /qmd:add)
+  notes:
+    path: ~/Documents/Notes
+    pattern: "**/*.md"
+    context:
+      "/": "Personal notes and ideas"
+      "/journal/2024": "Daily notes from 2024"
+      "/journal/2025": "Daily notes from 2025"
