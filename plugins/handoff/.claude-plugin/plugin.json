@@ -11,5 +11,6 @@
   "repository": "https://github.com/ramonclaudio/skills",
   "license": "MIT",
   "keywords": ["session", "continuity", "handoff", "context", "sbar"],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
 }
