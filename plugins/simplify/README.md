@@ -5,8 +5,8 @@ Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Clean
 ## Usage
 
 ```bash
-/simplify:run             # Analyze and apply simplifications
-/simplify:run --dry-run   # Report only, no modifications
+/simplify:simplify             # Analyze and apply simplifications
+/simplify:simplify --dry-run   # Report only, no modifications
 ```
 
 ## How It Works
@@ -38,5 +38,3 @@ Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Clean
 
 > [!IMPORTANT]
 > Requires `git`.
-
-[^version]: 1.0.0

@@ -50,54 +50,62 @@ After installing a plugin, invoke its skill:
 /qmd:add lib1 lib2 lib3 --defer-embed
 /qmd:update
 /qmd:remove old-repo
+/qmd:rename old-name new-name
+/qmd:list
+/qmd:list next.js/packages
+/qmd:context list
+/qmd:context add qmd://next.js "Next.js framework docs"
+/qmd:context check
 /qmd:cleanup
 /qmd:status
 ```
 
 **commit**
 ```bash
-/commit:run
-/commit:run --pr
+/commit:commit
+/commit:commit --pr
 ```
 
 **simplify**
 ```bash
-/simplify:run --dry-run
+/simplify:simplify --dry-run
 ```
 
 **audit**
 ```bash
-/audit:run --dry-run
-/audit:run --recent
-/audit:run src/
+/audit:audit --dry-run
+/audit:audit --recent
+/audit:audit src/
 ```
 
 **techdebt**
 ```bash
-/techdebt:run --dry-run
-/techdebt:run src/
+/techdebt:techdebt --dry-run
+/techdebt:techdebt src/
 ```
 
 **gif**
 ```bash
-/gif:run ~/Desktop/recording.mov
-/gif:run ~/Desktop/recording.mov --width 480
+/gif:gif ~/Desktop/recording.mov
+/gif:gif ~/Desktop/recording.mov --width 480
 ```
 
 **frames**
 ```bash
-/frames:run ~/Desktop/recording.mov
+/frames:frames ~/Desktop/recording.mov
 ```
 
 See each plugin's README for full documentation.
 
 ---
 
-> [!TIP]
-> **Version Pinning** — The marketplace tracks the latest `main` branch. To pin to a specific version:
-> ```bash
-> /plugin marketplace add ramonclaudio/skills#v1.0.0
-> ```
+## Version Pinning
+
+The marketplace tracks the latest `main` branch. To pin to a specific version:
+
+```bash
+/plugin marketplace add ramonclaudio/skills#v1.0.0
+```
 
 ## License
 

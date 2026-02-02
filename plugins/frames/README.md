@@ -5,8 +5,8 @@ Claude can't watch videos. But it can look at images. This extracts frames from 
 ## Usage
 
 ```bash
-/frames:run ~/Desktop/recording.mov
-/frames:run ~/Videos/demo.mp4
+/frames:frames ~/Desktop/recording.mov
+/frames:frames ~/Videos/demo.mp4
 ```
 
 ## How It Works
@@ -37,5 +37,3 @@ macOS screen recordings have filenames like `Screen Recording 2026-01-10 at 11.3
 
 > [!IMPORTANT]
 > Requires `ffmpeg` (`brew install ffmpeg` on macOS, `apt install ffmpeg` on Linux).
-
-[^version]: 1.0.0

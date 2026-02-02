@@ -5,10 +5,10 @@ I share screen recordings in PRs and docs constantly. Converting .mov to .gif by
 ## Usage
 
 ```bash
-/gif:run ~/Desktop/recording.mov
-/gif:run ~/Desktop/recording.mov --width 480
-/gif:run ~/Desktop/recording.mov --fps 5
-/gif:run ~/Desktop/recording.mov --full
+/gif:gif ~/Desktop/recording.mov
+/gif:gif ~/Desktop/recording.mov --width 480
+/gif:gif ~/Desktop/recording.mov --fps 5
+/gif:gif ~/Desktop/recording.mov --full
 ```
 
 ## How It Works
@@ -47,5 +47,3 @@ macOS screen recordings have filenames like `Screen Recording 2026-01-10 at 11.3
 
 > [!IMPORTANT]
 > Requires `ffmpeg` (`brew install ffmpeg` on macOS, `apt install ffmpeg` on Linux).
-
-[^version]: 1.0.0

@@ -7,9 +7,9 @@ Fast and targeted — not a full audit. Uses sonnet for speed.
 ## Usage
 
 ```bash
-/techdebt:run                # Full sweep with fixes applied
-/techdebt:run --dry-run      # Report only, no modifications
-/techdebt:run src/           # Scope to specific path
+/techdebt:techdebt                # Full sweep with fixes applied
+/techdebt:techdebt --dry-run      # Report only, no modifications
+/techdebt:techdebt src/           # Scope to specific path
 ```
 
 ## What It Finds
@@ -47,6 +47,4 @@ Fast and targeted — not a full audit. Uses sonnet for speed.
 ---
 
 > [!TIP]
-> Pair with `/audit:run` for deep analysis. Use `/techdebt:run` for quick daily hygiene.
-
-[^version]: 1.0.0
+> Pair with `/audit:audit` for deep analysis. Use `/techdebt:techdebt` for quick daily hygiene.

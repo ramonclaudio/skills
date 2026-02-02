@@ -9,10 +9,10 @@ GPG signs when available.
 ## Usage
 
 ```bash
-/commit:run               # Analyze, commit, verify
-/commit:run --analyze     # Analysis only, no commits
-/commit:run --pr          # Commit + push + create PR
-/commit:run --merge 42    # Merge PR #42 and cleanup
+/commit:commit               # Analyze, commit, verify
+/commit:commit --analyze     # Analysis only, no commits
+/commit:commit --pr          # Commit + push + create PR
+/commit:commit --merge 42    # Merge PR #42 and cleanup
 ```
 
 ## How It Works
@@ -76,5 +76,3 @@ git config --global commit.gpgsign true
 
 > [!IMPORTANT]
 > Requires `git` and `gh` (GitHub CLI, for `--pr` and `--merge`). Optional: `gpg` for signed commits.
-
-[^version]: 1.0.0

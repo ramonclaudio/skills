@@ -57,7 +57,7 @@ Once MCP is active, Claude uses `qmd_search`, `qmd_query`, `qmd_get` etc. direct
 
 After MCP search returns a path, use `@` references to pull the full file into context:
 
-```
+```text
 > search for "middleware" in the next.js collection
 # Claude uses qmd_query, returns paths
 > explain @~/Developer/refs/next.js/packages/next/src/server/router.ts
