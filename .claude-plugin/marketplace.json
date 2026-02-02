@@ -121,22 +121,6 @@
       "tags": ["search", "reference", "knowledge-base", "mcp"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
-    },
-    {
-      "name": "techdebt",
-      "source": "./plugins/techdebt",
-      "description": "Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files.",
-      "version": "1.0.0",
-      "author": {
-        "name": "ramonclaudio",
-        "email": "hello@ramonclaudio.com"
-      },
-      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/techdebt",
-      "category": "development",
-      "keywords": ["techdebt", "duplicates", "dead-code", "unused-deps", "todos", "cleanup"],
-      "tags": ["code-quality", "cleanup", "tech-debt"],
-      "license": "MIT",
-      "repository": "https://github.com/ramonclaudio/skills"
     }
   ]
 }
