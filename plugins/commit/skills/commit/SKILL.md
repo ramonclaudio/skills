@@ -1,5 +1,5 @@
 ---
-name: run
+name: commit
 description: Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. Supports --pr for pull requests and --merge for merging.
 argument-hint: [--analyze] [--pr] [--merge PR#]
 disable-model-invocation: true

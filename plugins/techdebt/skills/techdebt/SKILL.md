@@ -1,5 +1,5 @@
 ---
-name: run
+name: techdebt
 description: Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files. Fast and targeted.
 argument-hint: [--dry-run] [path/to/scope]
 disable-model-invocation: true
