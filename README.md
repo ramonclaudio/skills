@@ -26,6 +26,7 @@ Add the marketplace:
 | [**commit**](./plugins/commit) | `/plugin install commit@skills` | Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. | `git`, `gh` |
 | [**simplify**](./plugins/simplify) | `/plugin install simplify@skills` | Analyze and simplify entire codebases using parallel background agents | `git` |
 | [**audit**](./plugins/audit) | `/plugin install audit@skills` | Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight. | `git` |
+| [**techdebt**](./plugins/techdebt) | `/plugin install techdebt@skills` | Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files. | `git` |
 | [**gif**](./plugins/gif) | `/plugin install gif@skills` | Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method | `ffmpeg` |
 | [**frames**](./plugins/frames) | `/plugin install frames@skills` | Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos | `ffmpeg` |
 
@@ -69,6 +70,12 @@ After installing a plugin, invoke its skill:
 /audit:run --dry-run
 /audit:run --recent
 /audit:run src/
+```
+
+**techdebt**
+```bash
+/techdebt:run --dry-run
+/techdebt:run src/
 ```
 
 **gif**

@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "commit",
-      "source": "./commit",
+      "source": "./plugins/commit",
       "description": "Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.",
       "version": "1.0.0",
       "author": {
@@ -28,7 +28,7 @@
     },
     {
       "name": "simplify",
-      "source": "./simplify",
+      "source": "./plugins/simplify",
       "description": "Analyze and simplify entire codebases using parallel background agents",
       "version": "1.0.0",
       "author": {
@@ -44,7 +44,7 @@
     },
     {
       "name": "audit",
-      "source": "./audit",
+      "source": "./plugins/audit",
       "description": "Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight.",
       "version": "1.0.0",
       "author": {
@@ -60,7 +60,7 @@
     },
     {
       "name": "gif",
-      "source": "./gif",
+      "source": "./plugins/gif",
       "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method",
       "version": "1.0.0",
       "author": {
@@ -76,7 +76,7 @@
     },
     {
       "name": "frames",
-      "source": "./frames",
+      "source": "./plugins/frames",
       "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos",
       "version": "1.0.0",
       "author": {
@@ -92,7 +92,7 @@
     },
     {
       "name": "handoff",
-      "source": "./handoff",
+      "source": "./plugins/handoff",
       "description": "Session continuity for Claude Code. Structured handoffs preserve context across sessions, machines, and compactions.",
       "version": "1.0.0",
       "author": {
@@ -108,7 +108,7 @@
     },
     {
       "name": "qmd",
-      "source": "./qmd",
+      "source": "./plugins/qmd",
       "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid — all on-device.",
       "version": "1.0.0",
       "author": {
@@ -119,6 +119,22 @@
       "category": "development",
       "keywords": ["qmd", "search", "embeddings", "vector", "semantic", "reference", "mcp"],
       "tags": ["search", "reference", "knowledge-base", "mcp"],
+      "license": "MIT",
+      "repository": "https://github.com/ramonclaudio/skills"
+    },
+    {
+      "name": "techdebt",
+      "source": "./plugins/techdebt",
+      "description": "Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files.",
+      "version": "1.0.0",
+      "author": {
+        "name": "ramonclaudio",
+        "email": "hello@ramonclaudio.com"
+      },
+      "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/techdebt",
+      "category": "development",
+      "keywords": ["techdebt", "duplicates", "dead-code", "unused-deps", "todos", "cleanup"],
+      "tags": ["code-quality", "cleanup", "tech-debt"],
       "license": "MIT",
       "repository": "https://github.com/ramonclaudio/skills"
     }
