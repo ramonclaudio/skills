@@ -7,10 +7,10 @@ Finds bugs, architectural rot, and dead weight.
 ## Usage
 
 ```bash
-/audit:run                # Full audit with fixes applied
-/audit:run --dry-run      # Report only, no modifications
-/audit:run --recent       # Scope to files changed in last 20 commits
-/audit:run src/           # Scope to specific path
+/audit:audit                # Full audit with fixes applied
+/audit:audit --dry-run      # Report only, no modifications
+/audit:audit --recent       # Scope to files changed in last 20 commits
+/audit:audit src/           # Scope to specific path
 ```
 
 ## How It Works
@@ -58,5 +58,3 @@ After all agents report, a validation pass confirms CRITICAL and HIGH findings (
 
 > [!IMPORTANT]
 > Requires `git`.
-
-[^version]: 1.0.0

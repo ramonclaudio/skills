@@ -97,14 +97,11 @@ CLAUDE_CODE_TASK_LIST_ID=my-project claude
 
 > [!IMPORTANT]
 > **Install at User scope.** The plugin writes per-session state to `.handoff/state.json`. Project scope causes multi-user collision — last writer wins. `.handoff/CONTEXT.md` can be committed for team context sharing; transient state is auto-gitignored.
-
-> [!IMPORTANT]
+>
 > Requires `git` and `jq`. Optional: `gh` (GitHub CLI).
 
-> [!TIP]
-> **Headless / CI**: Set `HANDOFF_DISABLED=1` to skip all hooks.
-> ```bash
-> HANDOFF_DISABLED=1 claude -p "explain this function"
-> ```
+**Headless / CI** — Set `HANDOFF_DISABLED=1` to skip all hooks:
 
-[^version]: 1.0.0
+```bash
+HANDOFF_DISABLED=1 claude -p "explain this function"
+```
