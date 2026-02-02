@@ -1,5 +1,5 @@
 ---
-name: run
+name: frames
 description: Extract frames from video files to view them as images. Use when the user asks to watch, view, or analyze a video file (.mov, .mp4, .webm, .avi, etc.) since Claude cannot directly view videos but can view images.
 argument-hint: <video-path>
 disable-model-invocation: true

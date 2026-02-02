@@ -1,5 +1,5 @@
 ---
-name: run
+name: simplify
 description: Analyze entire codebase and simplify files using parallel background agents. Reduces complexity, removes redundancy, improves clarity.
 argument-hint: [--dry-run]
 disable-model-invocation: true

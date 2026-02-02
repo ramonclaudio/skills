@@ -1,5 +1,5 @@
 ---
-name: run
+name: gif
 description: Convert screen recordings to compressed GIFs using ffmpeg two-pass palette. Handles macOS filenames with spaces and HDR recordings.
 argument-hint: <video-path> [--speed N] [--width N] [--fps N] [--crop]
 disable-model-invocation: true

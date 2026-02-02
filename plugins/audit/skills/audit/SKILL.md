@@ -1,5 +1,5 @@
 ---
-name: run
+name: audit
 description: Brutally honest codebase audit. Parallel agents find bugs, architectural rot, dead weight, and security holes. Proposes concrete fixes with no sugar-coating.
 argument-hint: [--dry-run] [--recent] [path/to/scope]
 disable-model-invocation: true
