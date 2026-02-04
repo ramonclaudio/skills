@@ -73,9 +73,14 @@ echo "test" | gpg --clear-sign >/dev/null 2>&1 && echo "GPG_AVAILABLE" || echo "
 - `GPG_AVAILABLE`: Use `git commit -S -m` for all commits
 - `GPG_UNAVAILABLE`: Use `git commit -m` (no `-S` flag). Log once: "GPG not configured, commits will not be signed."
 
-Create branch `type/description-in-kebab-case` if:
-- Using `--pr` flag AND
-- Currently on main/master
+**Branch creation (with `--pr` flag):**
+```bash
+BASE_BRANCH=$(git branch --show-current)
+git checkout -b type/description-in-kebab-case
+```
+Store `BASE_BRANCH` for use in Phase 4. This ensures:
+- Commits go to feature branch, not the working branch
+- PR targets the correct base branch (not always main)
 
 For each commit group (TaskUpdate status: `in_progress` -> `completed`):
 ```bash
@@ -101,10 +106,10 @@ git reset --soft HEAD~1
 
 ### Phase 4 - Pull Request (with `--pr`)
 
-Push branch and create PR:
+Push branch and create PR targeting `BASE_BRANCH` from Phase 2:
 ```bash
 git push -u origin HEAD
-gh pr create --title "type(scope): description" --body "$(cat <<'EOF'
+gh pr create --base "$BASE_BRANCH" --title "type(scope): description" --body "$(cat <<'EOF'
 ## Summary
 - {bullet points summarizing the changes}
 
@@ -123,17 +128,19 @@ EOF
 
 ```bash
 BRANCH=$(gh pr view [PR#] --json headRefName -q .headRefName)
+BASE=$(gh pr view [PR#] --json baseRefName -q .baseRefName)
 gh pr merge [PR#] --merge --delete-branch
-git checkout main
+git checkout "$BASE"
 git pull
 git branch -d "$BRANCH"
 git fetch --prune
 ```
 
 Notes:
-- Capture branch name before merge (PR metadata disappears after)
+- Capture branch names before merge (PR metadata disappears after)
 - `--merge` preserves all atomic commits (no squashing)
 - `--delete-branch` auto-removes remote branch
+- Checkout the PR's base branch (not always main)
 - `git branch -d` deletes local branch (safe, verifies merged)
 - `git fetch --prune` removes stale remote-tracking branches
 
