@@ -25,9 +25,18 @@ All teammates inherit the lead's permission settings at spawn. Pre-approve commo
 - Git operations (status, diff, add, commit, push)
 - Build and test commands (npm, bun, cargo, go, etc.)
 
-Per-teammate permissions can only be changed after spawning, not at spawn time.
+Per-teammate permissions can only be changed after spawning, not at spawn time. This is a known limitation of agent teams.
 
 **Warning:** If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting. Be deliberate about the lead's permission mode before spawning.
+
+## Display Mode
+
+Split-pane mode requires either tmux or iTerm2 with the `it2` CLI:
+
+- **tmux**: install through your system's package manager. See the tmux wiki for platform-specific instructions. `tmux -CC` in iTerm2 is the suggested entrypoint into tmux. tmux has known limitations on certain operating systems and traditionally works best on macOS.
+- **iTerm2**: install the `it2` CLI, then enable the Python API in iTerm2 → Settings → General → Magic → Enable Python API.
+
+Split-pane mode is not supported in VS Code's integrated terminal, Windows Terminal, or Ghostty.
 
 ## Task States
 
@@ -90,11 +99,15 @@ Teammates can read the team config to discover other team members.
 
 ## Communication Protocol
 
-Two messaging primitives:
-- **`message`** — send to one specific teammate. Standard communication.
-- **`broadcast`** — send to all teammates simultaneously. Token cost scales with team size. Use sparingly.
+Use the `SendMessage` tool. Two message types:
+- **`message`** (`SendMessage` with `type: "message"`, `recipient: "name"`, `content: "..."`, `summary: "5-10 word preview"`) — send to one specific teammate. Standard communication.
+- **`broadcast`** (`SendMessage` with `type: "broadcast"`, `content: "..."`, `summary: "5-10 word preview"`) — send to all teammates simultaneously. Token cost scales with team size. Use sparingly.
+
+The `summary` field is **required** for both `message` and `broadcast` — it's shown as a UI preview.
 
 Messages are delivered automatically. The lead does not need to poll.
+
+**Idle state:** Teammates go idle after every turn — this is normal, not an error. Sending a message to an idle teammate wakes them up. When a teammate DMs another teammate, a brief summary appears in the idle notification so the lead has visibility into peer collaboration.
 
 ### Teammate → Lead
 
@@ -112,7 +125,8 @@ Messages are delivered automatically. The lead does not need to poll.
 | Teammate stuck | Provide guidance or reassign |
 | Scope drift | Redirect with specific file paths |
 | New task discovered | Create task, assign to appropriate teammate |
-| Work complete | Send shutdown request |
+| Plan submitted | `SendMessage` with `type: "plan_approval_response"`, `request_id`, `approve`, and optional `content` for feedback |
+| Work complete | Send shutdown request via `SendMessage` with `type: "shutdown_request"` |
 
 ### Teammate → Teammate
 
@@ -143,11 +157,11 @@ Broadcasts cost tokens proportional to team size. Use sparingly.
 
 1. All tasks marked completed in the shared task list
 2. Lead verifies deliverables (for review teams: synthesize findings)
-3. Lead sends shutdown request to each teammate. Teammates can **approve** (exit) or **reject** with an explanation. If rejected, wait and retry.
+3. Lead sends shutdown request via `SendMessage` with `type: "shutdown_request"`, `recipient: "name"`. Teammates respond with `type: "shutdown_response"`, `request_id` (from the request), and `approve: true` (exit) or `approve: false` with `content` explaining why. If rejected, wait and retry.
 4. Teammates finish in-flight operations before exiting — this can be slow.
 5. Wait for all teammates to stop. Cleanup fails if any teammate is still running.
-5. Lead runs team cleanup (only the lead should do this — teammates' team context may not resolve correctly)
-6. Lead reports summary to user
+6. Lead runs `TeamDelete` to clean up (only the lead should do this — teammates' team context may not resolve correctly).
+7. Lead reports summary to user.
 
 ## Failure Modes
 
