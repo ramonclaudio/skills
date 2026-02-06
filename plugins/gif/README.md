@@ -14,10 +14,11 @@ I share screen recordings in PRs and docs constantly. Converting .mov to .gif by
 ## How It Works
 
 1. Copies the video to `/tmp/video.mov` using glob patterns (handles spaces and special characters in filenames)
-2. Probes video metadata (frame rate, duration, dimensions)
-3. Generates an optimized palette from the video
-4. Converts to GIF using the palette for maximum compression
-5. Reports output path and file size
+2. Probes video metadata (frame rate, duration, dimensions, color transfer)
+3. Detects HDR (smpte2084/PQ) recordings and converts to SDR via macOS-native `avconvert` before processing
+4. Generates an optimized palette from the video
+5. Converts to GIF using the palette for maximum compression
+6. Reports output path and file size
 
 ## Defaults
 
@@ -34,7 +35,9 @@ I share screen recordings in PRs and docs constantly. Converting .mov to .gif by
 |:---|:---|
 | `--width N` | Change output width (default: 640) |
 | `--fps N` | Change frame rate (default: 10) |
+| `--speed N` | Playback speed multiplier (default: 1) |
 | `--full` | No scaling, keep original resolution |
+| `--crop` | Crop to content area (removes macOS recording overlay) |
 
 <details>
 <summary>Why the Copy Pattern?</summary>
