@@ -2,18 +2,16 @@
 name: frames
 description: Extract frames from video files to view them as images. Use when the user asks to watch, view, or analyze a video file (.mov, .mp4, .webm, .avi, etc.) since Claude cannot directly view videos but can view images.
 argument-hint: <video-path>
-disable-model-invocation: true
 allowed-tools:
   - Bash(ffmpeg *)
   - Bash(ffprobe *)
-  - Bash(for *)
   - Bash(/bin/cp *)
   - Bash(/bin/ls *)
-  - Bash(mkdir *)
-  - Bash(rm *)
+  - Bash(mkdir -p /tmp/video-frames)
+  - Bash(rm -rf /tmp/video-frames)
   - Bash(wc *)
   - Read
-model: sonnet
+model: sonnet[1m]
 ---
 
 # Video to Frames
@@ -37,7 +35,7 @@ apt install ffmpeg   # Linux
 Extract a unique identifier from the user's path (like a timestamp) and use glob:
 
 ```bash
-for f in /path/to/dir/*UNIQUE_PART*; do /bin/cp -f "$f" /tmp/video.mov; done && \
+/bin/cp -f /path/to/dir/*UNIQUE_PART* /tmp/video.mov && \
 rm -rf /tmp/video-frames && mkdir -p /tmp/video-frames; \
 ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,duration -of csv=p=0 /tmp/video.mov && \
 ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
@@ -46,7 +44,7 @@ ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 
 **Example for** `Screen Recording 2026-01-10 at 11.33.27 AM.mov`:
 ```bash
-for f in ~/Desktop/Screen*11.33.27*; do /bin/cp -f "$f" /tmp/video.mov; done && \
+/bin/cp -f ~/Desktop/Screen*11.33.27* /tmp/video.mov && \
 rm -rf /tmp/video-frames && mkdir -p /tmp/video-frames; \
 ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,duration -of csv=p=0 /tmp/video.mov && \
 ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
@@ -73,7 +71,7 @@ Then read frames with the Read tool:
 
 | Problem | Solution |
 |---------|----------|
-| Spaces in filenames | Glob pattern + for loop handles any filename |
+| Spaces in filenames | `/bin/cp -f` with glob pattern handles any filename |
 | Quoted paths fail | `/bin/cp -f` with glob avoids quoting issues |
 | `cd` fails (zoxide) | Never use `cd`, use absolute paths |
 | `rm *.png` fails in zsh | `rm -rf dir && mkdir -p dir` avoids glob entirely |
