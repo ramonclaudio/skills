@@ -10,6 +10,5 @@
   "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/commit",
   "repository": "https://github.com/ramonclaudio/skills",
   "license": "MIT",
-  "keywords": ["git", "commit", "conventional-commits", "gpg"],
-  "skills": "./skills/"
+  "keywords": ["git", "commit", "conventional-commits", "gpg"]
 }
