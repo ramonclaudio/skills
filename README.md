@@ -28,6 +28,7 @@ Add the marketplace:
 | [**audit**](./plugins/audit) | `/plugin install audit@skills` | Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight. | `git` |
 | [**techdebt**](./plugins/techdebt) | `/plugin install techdebt@skills` | Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files. | `git` |
 | [**gif**](./plugins/gif) | `/plugin install gif@skills` | Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method | `ffmpeg` |
+| [**teams**](./plugins/teams) | `/plugin install teams@skills` | Orchestrate teams of Claude Code sessions working in parallel with shared task lists and direct messaging | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` |
 | [**frames**](./plugins/frames) | `/plugin install frames@skills` | Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos | `ffmpeg` |
 
 ## Usage
@@ -82,6 +83,15 @@ After installing a plugin, invoke its skill:
 ```bash
 /techdebt:techdebt --dry-run
 /techdebt:techdebt src/
+```
+
+**teams**
+```bash
+/teams:teams Refactor the auth module into separate concerns
+/teams:teams --dry-run Build a notification system
+/teams:teams --plan-approval Migrate the database schema
+/teams:teams --delegate Review PR #42 from three angles
+/teams:teams --roles 3 Add caching to all API endpoints
 ```
 
 **gif**

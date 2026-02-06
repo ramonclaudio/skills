@@ -6,6 +6,33 @@ Unlike subagents, which run within a single session and can only report back to 
 
 Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` enabled in settings.
 
+## Display mode
+
+The `teammateMode` setting controls how teammates are displayed:
+
+| Mode | Behavior |
+|:-----|:---------|
+| `"auto"` (default) | Split panes if inside tmux, in-process otherwise |
+| `"tmux"` | Force split panes (auto-detects tmux vs iTerm2) |
+| `"in-process"` | All teammates run inside the main terminal |
+
+Set in `settings.json`:
+
+```json
+{ "teammateMode": "in-process" }
+```
+
+Or override per-session:
+
+```bash
+claude --teammate-mode in-process
+```
+
+Split-pane mode requires tmux or iTerm2 with the `it2` CLI. Not supported in VS Code terminal, Windows Terminal, or Ghostty.
+
+> [!NOTE]
+> `tmux -CC` in iTerm2 is the suggested entrypoint into tmux. tmux has known limitations on certain operating systems and traditionally works best on macOS.
+
 ## Usage
 
 This skill provides flags for controlling team behavior. These flags are skill-specific — they are not built-in Claude Code CLI flags.
@@ -99,6 +126,25 @@ Lead tracks progress, unblocks stuck teammates, redirects scope drift, and synth
 > [!TIP]
 > Use `--delegate` to prevent the lead from implementing tasks itself.
 
+## Interacting with teammates
+
+### In-process mode
+
+| Key | Action |
+|:----|:-------|
+| `Shift+Up/Down` | Navigate between teammates |
+| `Enter` | View a teammate's session |
+| `Escape` | Interrupt a teammate's current turn |
+| `Ctrl+T` | Toggle the shared task list |
+| `Shift+Tab` | Cycle into delegate mode (lead only) |
+
+### Split-pane mode
+
+Click into a teammate's pane to interact with their session directly.
+
+> [!TIP]
+> The lead sometimes implements tasks itself instead of waiting for teammates. If this happens, tell it to wait, or use `--delegate` to restrict the lead to coordination-only tools.
+
 ## Token cost
 
 Agent teams use significantly more tokens than a single session. Each teammate has its own context window, and token usage scales with the number of active teammates. For research, review, and new feature work, the extra tokens are usually worthwhile. For routine tasks, a single session is more cost-effective.
@@ -113,10 +159,22 @@ Agent teams are experimental:
 - One team per session — clean up before starting a new one
 - No nested teams — teammates cannot spawn their own teams or teammates
 - Lead is fixed — the session that creates the team leads it for its lifetime
-- Permissions set at spawn — all teammates start with the lead's permission mode; changeable individually after spawning
+- Permissions set at spawn — all teammates start with the lead's permission mode; changeable individually after spawning. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting.
 - Split panes require tmux or iTerm2 (not supported in VS Code terminal, Windows Terminal, or Ghostty)
 
 Teammates read `CLAUDE.md` from their working directory — use this to provide project-specific guidance to all teammates.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|:--------|:----|
+| Teammates not appearing | Task may be too simple for a team. In in-process mode, press `Shift+Down` to cycle through active teammates. For split panes, verify tmux is installed (`which tmux`). |
+| Too many permission prompts | Pre-approve common operations (file reads/writes, git, build/test commands) in permission settings before spawning. |
+| Teammate stops on errors | Message them with instructions, or spawn a replacement teammate to continue the work. |
+| Lead implements instead of delegating | Use `--delegate`, or tell the lead to wait for teammates to finish. |
+| Lead shuts down before work is done | The lead may decide the team is finished before all tasks are complete. Tell it to keep going, or tell it to wait for teammates to finish before proceeding. |
+| Task appears stuck | Check if the work is actually done — teammates sometimes forget to mark tasks completed. Update manually or nudge the teammate. |
+| Orphaned tmux sessions | `tmux ls` then `tmux kill-session -t <session-name>` |
 
 ---
 
