@@ -2,7 +2,6 @@
 name: techdebt
 description: Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files. Fast and targeted.
 argument-hint: [--dry-run] [path/to/scope]
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 allowed-tools:
@@ -12,12 +11,13 @@ allowed-tools:
   - Grep
   - Bash(git *)
   - Bash(wc *)
+  - Write
   - Task
-  - TaskOutput
+  - TaskGet
   - TaskCreate
   - TaskUpdate
   - TaskList
-model: sonnet
+model: sonnet[1m]
 ---
 
 # Tech Debt Sweep
@@ -65,8 +65,7 @@ Launch **3 background agents** simultaneously. Each gets the file list.
 
 ```
 Task(
-  subagent_type="general-purpose",
-  model="sonnet",
+  subagent_type="Explore",
   run_in_background=true,
   prompt="Tech debt scan: duplicates and dead code.
 
@@ -89,8 +88,7 @@ Task(
 
 ```
 Task(
-  subagent_type="general-purpose",
-  model="sonnet",
+  subagent_type="Explore",
   run_in_background=true,
   prompt="Tech debt scan: dependencies, TODOs, and file size.
 
@@ -114,8 +112,7 @@ Task(
 
 ```
 Task(
-  subagent_type="general-purpose",
-  model="sonnet",
+  subagent_type="Explore",
   run_in_background=true,
   prompt="Tech debt scan: naming and consistency.
 
@@ -188,7 +185,7 @@ If NOT `--dry-run`: for each HIGH finding, launch a background agent to apply th
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet",
+  model="sonnet[1m]",
   run_in_background=true,
   prompt="Apply this fix. Use the Edit tool.
 
