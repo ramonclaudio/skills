@@ -5,9 +5,20 @@ Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Clean
 ## Usage
 
 ```bash
-/simplify:simplify             # Analyze and apply simplifications
-/simplify:simplify --dry-run   # Report only, no modifications
+/simplify             # Analyze and apply simplifications
+/simplify --dry-run   # Report only, no modifications
 ```
+
+<details>
+<summary>Fully-qualified syntax</summary>
+
+If another plugin has a conflicting skill name, use the full `plugin:skill` form:
+
+```bash
+/simplify:simplify [--dry-run]
+```
+
+</details>
 
 ## How It Works
 

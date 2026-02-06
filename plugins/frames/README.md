@@ -5,9 +5,20 @@ Claude can't watch videos. But it can look at images. This extracts frames from 
 ## Usage
 
 ```bash
-/frames:frames ~/Desktop/recording.mov
-/frames:frames ~/Videos/demo.mp4
+/frames ~/Desktop/recording.mov
+/frames ~/Videos/demo.mp4
 ```
+
+<details>
+<summary>Fully-qualified syntax</summary>
+
+If another plugin has a conflicting skill name, use the full `plugin:skill` form:
+
+```bash
+/frames:frames <video-path>
+```
+
+</details>
 
 ## How It Works
 

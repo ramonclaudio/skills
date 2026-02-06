@@ -5,11 +5,22 @@ I share screen recordings in PRs and docs constantly. Converting .mov to .gif by
 ## Usage
 
 ```bash
-/gif:gif ~/Desktop/recording.mov
-/gif:gif ~/Desktop/recording.mov --width 480
-/gif:gif ~/Desktop/recording.mov --fps 5
-/gif:gif ~/Desktop/recording.mov --full
+/gif ~/Desktop/recording.mov
+/gif ~/Desktop/recording.mov --width 480
+/gif ~/Desktop/recording.mov --fps 5
+/gif ~/Desktop/recording.mov --full
 ```
+
+<details>
+<summary>Fully-qualified syntax</summary>
+
+If another plugin has a conflicting skill name, use the full `plugin:skill` form:
+
+```bash
+/gif:gif <video-path> [--width N] [--fps N] [--speed N] [--crop] [--full]
+```
+
+</details>
 
 ## How It Works
 

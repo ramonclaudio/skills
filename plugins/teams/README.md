@@ -38,12 +38,23 @@ Split-pane mode requires tmux or iTerm2 with the `it2` CLI. Not supported in VS 
 This skill provides flags for controlling team behavior. These flags are skill-specific — they are not built-in Claude Code CLI flags.
 
 ```bash
-/teams:teams Refactor the auth module into separate concerns    # Spawn and execute
-/teams:teams --dry-run Build a notification system                # Plan only
-/teams:teams --plan-approval Migrate the database schema          # Teammates plan before implementing
-/teams:teams --delegate Review PR #42 from three angles           # Lead never implements
-/teams:teams --roles 3 Add caching to all API endpoints           # Force 3 teammates
+/teams Refactor the auth module into separate concerns    # Spawn and execute
+/teams --dry-run Build a notification system                # Plan only
+/teams --plan-approval Migrate the database schema          # Teammates plan before implementing
+/teams --delegate Review PR #42 from three angles           # Lead never implements
+/teams --roles 3 Add caching to all API endpoints           # Force 3 teammates
 ```
+
+<details>
+<summary>Fully-qualified syntax</summary>
+
+If another plugin has a conflicting skill name, use the full `plugin:skill` form:
+
+```bash
+/teams:teams <task> [--dry-run] [--plan-approval] [--delegate] [--roles N]
+```
+
+</details>
 
 ## When to use
 

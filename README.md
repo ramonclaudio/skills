@@ -190,7 +190,7 @@ Atomic commits with conventional format, grouped by architectural layer. GPG sig
 
 Analyze and simplify codebases using parallel background agents.
 
-**Skill:** `/simplify:simplify [--dry-run]`
+**Skill:** `/simplify [--dry-run]`
 
 5-phase: discovery (glob all source), deep analysis (0-10 scoring), queue creation, parallel simplification (up to 5 agents), verification. Uses `opus` model.
 
@@ -198,7 +198,7 @@ Analyze and simplify codebases using parallel background agents.
 
 Codebase audit with 4 parallel agents. Finds bugs, architectural rot, and dead weight.
 
-**Skill:** `/audit:audit [--dry-run] [--recent] [path]`
+**Skill:** `/audit [--dry-run] [--recent] [path]`
 
 4 agents run in parallel: Architecture/Design, Bugs/Logic, Security/Dependencies/Performance, Convention Compliance. Uses `opus` model.
 
@@ -206,7 +206,7 @@ Codebase audit with 4 parallel agents. Finds bugs, architectural rot, and dead w
 
 End-of-session tech debt sweep.
 
-**Skill:** `/techdebt:techdebt [--dry-run] [path]`
+**Skill:** `/techdebt [--dry-run] [path]`
 
 3 parallel agents scan for: duplicated code (>10 lines), dead exports, unused deps, stale TODOs, bloated files (>300 lines), naming inconsistencies.
 
@@ -214,7 +214,7 @@ End-of-session tech debt sweep.
 
 Convert screen recordings to compressed GIFs with ffmpeg two-pass palette.
 
-**Skill:** `/gif:gif <video-path> [--width N] [--fps N] [--speed N] [--crop] [--full]`
+**Skill:** `/gif <video-path> [--width N] [--fps N] [--speed N] [--crop] [--full]`
 
 Handles HDR-to-SDR conversion. Defaults: 10fps, 640px width, bayer dither.
 
@@ -222,7 +222,7 @@ Handles HDR-to-SDR conversion. Defaults: 10fps, 640px width, bayer dither.
 
 Extract video frames as images so Claude can analyze screen recordings, bug repros, and demos.
 
-**Skill:** `/frames:frames <video-path>`
+**Skill:** `/frames <video-path>`
 
 Smart sampling: 3-15 frames based on video length.
 
@@ -230,7 +230,7 @@ Smart sampling: 3-15 frames based on video length.
 
 Orchestrate teams of Claude Code sessions working in parallel.
 
-**Skill:** `/teams:teams <task> [--dry-run] [--plan-approval] [--delegate] [--roles N]`
+**Skill:** `/teams <task> [--dry-run] [--plan-approval] [--delegate] [--roles N]`
 
 6-phase: recon, decomposition, team design, task graph, spawn & brief, coordination. File ownership prevents conflicts. Uses `opus` model.
 

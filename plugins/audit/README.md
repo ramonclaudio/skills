@@ -7,11 +7,22 @@ Finds bugs, architectural rot, and dead weight.
 ## Usage
 
 ```bash
-/audit:audit                # Full audit with fixes applied
-/audit:audit --dry-run      # Report only, no modifications
-/audit:audit --recent       # Scope to files changed in last 20 commits
-/audit:audit src/           # Scope to specific path
+/audit                # Full audit with fixes applied
+/audit --dry-run      # Report only, no modifications
+/audit --recent       # Scope to files changed in last 20 commits
+/audit src/           # Scope to specific path
 ```
+
+<details>
+<summary>Fully-qualified syntax</summary>
+
+If another plugin has a conflicting skill name, use the full `plugin:skill` form:
+
+```bash
+/audit:audit [--dry-run] [--recent] [path]
+```
+
+</details>
 
 ## How It Works
 

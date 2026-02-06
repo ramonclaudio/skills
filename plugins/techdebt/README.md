@@ -7,10 +7,21 @@ Fast and targeted — not a full audit. Uses sonnet for speed.
 ## Usage
 
 ```bash
-/techdebt:techdebt                # Full sweep with fixes applied
-/techdebt:techdebt --dry-run      # Report only, no modifications
-/techdebt:techdebt src/           # Scope to specific path
+/techdebt                # Full sweep with fixes applied
+/techdebt --dry-run      # Report only, no modifications
+/techdebt src/           # Scope to specific path
 ```
+
+<details>
+<summary>Fully-qualified syntax</summary>
+
+If another plugin has a conflicting skill name, use the full `plugin:skill` form:
+
+```bash
+/techdebt:techdebt [--dry-run] [path]
+```
+
+</details>
 
 ## What It Finds
 
@@ -47,4 +58,4 @@ Fast and targeted — not a full audit. Uses sonnet for speed.
 ---
 
 > [!TIP]
-> Pair with `/audit:audit` for deep analysis. Use `/techdebt:techdebt` for quick daily hygiene.
+> Pair with `/audit` for deep analysis. Use `/techdebt` for quick daily hygiene.
