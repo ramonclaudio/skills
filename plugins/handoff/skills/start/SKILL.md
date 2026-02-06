@@ -14,7 +14,7 @@ allowed-tools:
   - TaskUpdate
   - TaskGet
   - TaskList
-model: sonnet
+model: sonnet[1m]
 ---
 
 # Handoff Start

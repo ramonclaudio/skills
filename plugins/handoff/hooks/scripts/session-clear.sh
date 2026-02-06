@@ -29,7 +29,7 @@ if json_exists; then
     .session_memory.key_references = [] |
     .session_memory.last_updated = null |
     .session_memory.last_event_index = 0
-  ' "$JSON_FILE" > "$TMP" 2>/dev/null && command mv -f "$TMP" "$JSON_FILE" || rm -f "$TMP"
+  ' "$JSON_FILE" > "$TMP" 2>/dev/null && command mv -f "$TMP" "$JSON_FILE" || trash "$TMP" 2>/dev/null
 fi
 
 # Archive events instead of truncating

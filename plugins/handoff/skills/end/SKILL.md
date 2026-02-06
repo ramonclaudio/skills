@@ -1,7 +1,6 @@
 ---
 name: end
 description: Archive session state to .handoff/. Runs health checks, captures severity, resume point, and done/failed/blockers.
-disable-model-invocation: true
 allowed-tools:
   - Bash(git *)
   - Bash(gh *)
@@ -17,6 +16,8 @@ allowed-tools:
   - Bash(test *)
   - Bash(wc *)
   - Bash(touch *)
+  - Bash(jq *)
+  - Bash(hostname *)
   - Bash(trash *)
   - Read
   - Write
@@ -27,7 +28,7 @@ allowed-tools:
   - TaskUpdate
   - TaskGet
   - TaskList
-model: sonnet
+model: sonnet[1m]
 ---
 
 # Handoff End
