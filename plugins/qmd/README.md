@@ -88,7 +88,7 @@ The skill is idempotent. If it fails partway, re-run with the same arguments —
 
 With tool search enabled (the default), Claude defers MCP tool definitions until needed rather than loading all 6 into every request. The qmd MCP server process still runs, but context cost is low until you actually search.
 
-The add, update, remove, cleanup, and status commands use `disable-model-invocation: true`, so they cost zero context until invoked. The search guide skill is model-invocable (one-line description per request) so it can auto-load when relevant.
+All commands and skills are model-invocable — Claude can invoke them autonomously when relevant. The search guide skill auto-loads when Claude needs to search indexed references.
 
 MCP connections can fail silently mid-session. If search tools stop responding, run `/qmd:status` (Bash fallback) or `/mcp` to check the server connection.
 

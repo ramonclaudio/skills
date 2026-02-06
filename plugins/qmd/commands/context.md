@@ -1,6 +1,7 @@
 ---
 description: Manage QMD collection contexts (list, add, remove, check)
-disable-model-invocation: true
+allowed-tools: Bash(qmd context*)
+argument-hint: <subcommand> [args]
 ---
 
 Route based on the first argument:

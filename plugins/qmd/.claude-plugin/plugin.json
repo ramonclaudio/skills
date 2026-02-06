@@ -1,7 +1,7 @@
 {
   "name": "qmd",
   "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid — all on-device.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com",

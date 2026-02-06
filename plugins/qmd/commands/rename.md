@@ -1,6 +1,7 @@
 ---
 description: Rename a QMD collection
-disable-model-invocation: true
+allowed-tools: Bash(qmd collection rename*)
+argument-hint: <old-name> <new-name>
 ---
 
 Run `qmd collection rename $ARGUMENTS`. Expects two arguments: `<old-name> <new-name>`.

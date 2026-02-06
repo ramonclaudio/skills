@@ -2,7 +2,6 @@
 name: add
 description: Clone a GitHub repo to ~/Developer/refs/, auto-detect file types, index with QMD, embed for search.
 argument-hint: <url-or-owner/repo> [--name N] [--mask P] [--full] [--defer-embed] [--dry-run]
-disable-model-invocation: true
 context: fork
 allowed-tools:
   - Bash(qmd *)
@@ -12,7 +11,7 @@ allowed-tools:
   - Bash(trash *)
   - Read
   - Edit
-model: sonnet
+model: sonnet[1m]
 ---
 
 # QMD Add — Clone + Index a GitHub Repo

@@ -1,6 +1,7 @@
 ---
 description: List QMD collections or files within a collection
-disable-model-invocation: true
+allowed-tools: Bash(qmd *)
+argument-hint: [collection/path]
 ---
 
 Run `qmd ls $ARGUMENTS`.
