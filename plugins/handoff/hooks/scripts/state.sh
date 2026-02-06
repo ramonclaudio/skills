@@ -51,7 +51,7 @@ rt_write() {
   local key="$1" val="$2"
   handoff_active && json_exists || return 0
   local tmp="${JSON_FILE}.tmp.$$"
-  jq "._runtime.${key} = ${val}" "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || rm -f "$tmp"
+  jq "._runtime.${key} = ${val}" "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || trash "$tmp" 2>/dev/null
 }
 
 rt_write_str() {
@@ -65,7 +65,7 @@ rt_increment() {
   local old new tmp="${JSON_FILE}.tmp.$$"
   old=$(jq -r "._runtime.${key} // 0" "$JSON_FILE" 2>/dev/null)
   new=$(( ${old:-0} + 1 ))
-  jq "._runtime.${key} = ${new}" "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || rm -f "$tmp"
+  jq "._runtime.${key} = ${new}" "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || trash "$tmp" 2>/dev/null
   echo "$new"
 }
 
@@ -78,7 +78,7 @@ rt_reset() {
     ._version = 1 |
     .session_id = $sid |
     ._runtime = { compaction_count:0, last_compaction:null, handoff_end_completed:false, session_start_ts:$ts, session_start_hash:$hash, hostname:$host, context_pct:0 }
-  ' "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || rm -f "$tmp"
+  ' "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || trash "$tmp" 2>/dev/null
   [ -f "$EVENTS_FILE" ] && [ -s "$EVENTS_FILE" ] && \
     command mv -f "$EVENTS_FILE" "${STATE_DIR}/sessions/events-${CLAUDE_SESSION_ID:-$(date +%s)}.jsonl" 2>/dev/null
   touch "$EVENTS_FILE"
@@ -98,7 +98,7 @@ json_set() {
   local path="$1" val="$2"
   handoff_active && json_exists || return 0
   local tmp="${JSON_FILE}.tmp.$$"
-  jq "${path} = ${val}" "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || rm -f "$tmp"
+  jq "${path} = ${val}" "$JSON_FILE" > "$tmp" 2>/dev/null && command mv -f "$tmp" "$JSON_FILE" || trash "$tmp" 2>/dev/null
 }
 
 json_set_str() {
@@ -120,7 +120,7 @@ json_commit() {
     (.blockers | type == "array") and
     (.resume.files | type == "array")
   ' "$tmp" >/dev/null 2>&1 || {
-    rm -f "$tmp"
+    trash "$tmp" 2>/dev/null
     return 1
   }
   command mv -f "$tmp" "$JSON_FILE"

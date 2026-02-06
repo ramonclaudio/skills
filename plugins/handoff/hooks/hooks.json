@@ -57,6 +57,7 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/event-capture.sh",
             "timeout": 3,
+            "async": true,
             "statusMessage": ""
           }
         ]
@@ -70,6 +71,7 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/event-capture.sh",
             "timeout": 3,
+            "async": true,
             "statusMessage": ""
           }
         ]
