@@ -1,6 +1,7 @@
 ---
 description: Pull all indexed repos, re-index, re-embed
-disable-model-invocation: true
+allowed-tools: Bash(qmd *)
+argument-hint: [collection-name]
 ---
 
 Run `qmd update && qmd embed`. Report any collections whose update command failed.
