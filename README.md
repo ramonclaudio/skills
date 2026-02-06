@@ -138,7 +138,7 @@ Each plugin is a self-contained directory with a manifest, one or more skills, a
 | :--- | :--- | :--- | :--- |
 | [handoff](./plugins/handoff) | 2 skills, 6 hooks | `git` | 1.1.0 |
 | [qmd](./plugins/qmd) | 2 skills, 7 commands, 1 MCP server | `qmd`, `git` | 1.1.0 |
-| [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.1.0 |
+| [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.2.0 |
 | [simplify](./plugins/simplify) | 1 skill | `git` | 1.1.0 |
 | [audit](./plugins/audit) | 1 skill | `git` | 1.1.0 |
 | [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.1.0 |
@@ -182,9 +182,9 @@ Reference repo manager. Clone GitHub repos, index them, search with BM25/vector/
 
 Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.
 
-**Skill:** `/commit:commit [--analyze] [--pr] [--merge PR#]`
+**Skill:** `/commit [--analyze] [--push] [--pr] [--merge PR#]`
 
-5-phase workflow: analysis, execution, verification, PR creation, merge.
+5-phase workflow: analysis, execution, verification, push/PR creation, merge.
 
 ### simplify
 

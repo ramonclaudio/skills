@@ -9,11 +9,23 @@ GPG signs when available.
 ## Usage
 
 ```bash
-/commit:commit               # Analyze, commit, verify
-/commit:commit --analyze     # Analysis only, no commits
-/commit:commit --pr          # Commit + push + create PR
-/commit:commit --merge 42    # Merge PR #42 and cleanup
+/commit               # Analyze, commit, verify
+/commit --analyze     # Analysis only, no commits
+/commit --push        # Commit + push to current branch
+/commit --pr          # Commit + push + create PR
+/commit --merge 42    # Merge PR #42 and cleanup
 ```
+
+<details>
+<summary>Fully-qualified syntax</summary>
+
+If another plugin has a conflicting skill name, use the full `plugin:skill` form:
+
+```bash
+/commit:commit [--analyze] [--push] [--pr] [--merge PR#]
+```
+
+</details>
 
 ## How It Works
 
@@ -32,6 +44,10 @@ git commit [-S] -m "type(scope): description"
 ### Phase 3 - Verification
 
 Checks each commit for format, atomicity, clarity, and signing. Resets and recommits if verification fails.
+
+### Phase 3.5 - Push (`--push`)
+
+Pushes commits directly to the current branch. No branch creation, no PR.
 
 ### Phase 4 - Pull Request (`--pr`)
 
