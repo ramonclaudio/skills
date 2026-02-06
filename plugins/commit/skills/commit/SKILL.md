@@ -1,7 +1,7 @@
 ---
 name: commit
-description: Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. Supports --pr for pull requests and --merge for merging.
-argument-hint: [--analyze] [--pr] [--merge PR#]
+description: Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. Supports --push, --pr, and --merge.
+argument-hint: [--analyze] [--push] [--pr] [--merge PR#]
 allowed-tools:
   - Bash(git *)
   - Bash(gh *)
@@ -46,6 +46,7 @@ Production platform where git history is critical infrastructure for:
 ## Arguments
 
 - `$ARGUMENTS` containing `--analyze`: Only run Phase 1 analysis, output groupings without committing
+- `$ARGUMENTS` containing `--push`: Run Phases 1-3 on current branch, then push directly (no branch, no PR)
 - `$ARGUMENTS` containing `--pr`: Continue through Phase 4 (push and create PR)
 - `$ARGUMENTS` containing `--merge`: Run Phase 5 only (merge specified PR and cleanup) - expects PR# as next arg
 - No arguments: Run Phases 1-3 (analyze, commit, verify)
@@ -102,6 +103,21 @@ If verification fails:
 git reset --soft HEAD~1
 # Fix and recommit
 ```
+
+### Phase 3.5 - Push (with `--push`)
+
+Push all commits directly to the current branch. No branch creation, no PR.
+
+```bash
+git push
+```
+
+If the branch has no upstream, set it:
+```bash
+git push -u origin HEAD
+```
+
+After push, output summary and stop. Do NOT continue to Phase 4.
 
 ### Phase 4 - Pull Request (with `--pr`)
 
