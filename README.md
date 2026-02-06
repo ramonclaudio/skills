@@ -1,159 +1,185 @@
 # Skills
 
-I use Claude Code all day. After hitting the same gaps over and over, I built these skills to fix them.
+Plugin marketplace for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). 9 plugins, install what you need.
 
-Custom [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills, installable individually as plugins.
+I use Claude Code for everything. Session context would vanish between runs, commits needed too many steps, codebases had no good way to audit themselves. So I built the tools I wanted and open sourced them. If they saved you time, [let me know](https://x.com/ramonclaudio).
 
-[Setup](#setup) / [Skills](#available-skills) / [Usage](#usage) / [Version Pinning](#version-pinning)
-
-## Setup
+## Install
 
 > [!NOTE]
 > Requires [Claude Code](https://docs.anthropic.com/en/docs/claude-code) v1.0.33+.
 
 Add the marketplace:
 
-```bash
+```
 /plugin marketplace add ramonclaudio/skills
 ```
 
-## Available Skills
+Install any plugin:
 
-| Plugin | Install | Description | Requires |
-| :--- | :--- | :--- | :--- |
-| [**handoff**](./plugins/handoff) | `/plugin install handoff@skills` | Session continuity. Structured handoffs preserve context between sessions. | `git` |
-| [**qmd**](./plugins/qmd) | `/plugin install qmd@skills` | Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid — all on-device. | `qmd`, `git` |
-| [**commit**](./plugins/commit) | `/plugin install commit@skills` | Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. | `git`, `gh` |
-| [**simplify**](./plugins/simplify) | `/plugin install simplify@skills` | Analyze and simplify entire codebases using parallel background agents. | `git` |
-| [**audit**](./plugins/audit) | `/plugin install audit@skills` | Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight. | `git` |
-| [**techdebt**](./plugins/techdebt) | `/plugin install techdebt@skills` | Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files. | `git` |
-| [**gif**](./plugins/gif) | `/plugin install gif@skills` | Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method. | `ffmpeg` |
-| [**teams**](./plugins/teams) | `/plugin install teams@skills` | Orchestrate teams of Claude Code sessions working in parallel with shared task lists and direct messaging. | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` |
-| [**frames**](./plugins/frames) | `/plugin install frames@skills` | Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos. | `ffmpeg` |
-
-## Usage
-
-After installing a plugin, invoke its skill:
-
-<details>
-<summary><strong>handoff</strong></summary>
-
-Hooks handle everything automatically — auto-init on first run, context injection on startup, auto-save before compaction. The only user-invocable command is `/handoff:end` for session archival:
-
-```bash
-/handoff:end
+```
+/plugin install handoff@skills
 ```
 
-</details>
+The skill shows up as a `/command` you can run immediately.
 
-<details>
-<summary><strong>qmd</strong></summary>
+## Plugins
 
-```bash
-/qmd:add vercel/next.js --dry-run
-/qmd:add https://github.com/tobi/qmd
-/qmd:add vercel/next.js --mask "**/*.{md,mdx}"
-/qmd:add rust-lang/rust --full
-/qmd:add lib1 lib2 lib3 --defer-embed
-/qmd:update
-/qmd:remove old-repo
-/qmd:rename old-name new-name
-/qmd:list
-/qmd:list next.js/packages
-/qmd:context list
-/qmd:context add qmd://next.js "Next.js framework docs"
-/qmd:context check
-/qmd:cleanup
-/qmd:status
+Each plugin is a self-contained directory with a manifest, one or more skills, and optionally hooks, MCP servers, or reference docs.
+
+| Plugin | What it ships | Requires |
+| :--- | :--- | :--- |
+| [handoff](./plugins/handoff) | 2 skills, 6 hooks | `git` |
+| [qmd](./plugins/qmd) | 2 skills, 7 commands, 1 MCP server | `qmd`, `git` |
+| [commit](./plugins/commit) | 1 skill | `git`, `gh` |
+| [simplify](./plugins/simplify) | 1 skill | `git` |
+| [audit](./plugins/audit) | 1 skill | `git` |
+| [techdebt](./plugins/techdebt) | 1 skill | `git` |
+| [gif](./plugins/gif) | 1 skill | `ffmpeg` |
+| [frames](./plugins/frames) | 1 skill | `ffmpeg` |
+| [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var |
+
+## What's in each plugin
+
+### handoff
+
+Session continuity. Preserves context across sessions, machines, and compactions.
+
+**Skills:**
+- `/handoff:end` - archive session state with health checks (build/test/lint), severity, done/failed/blockers
+- `/handoff:start` - auto-triggered on critical context loss. Deep rehydration with drift detection.
+
+**Hooks (6):**
+- `session-start.sh` - auto-init on startup/resume, context injection on compact
+- `compact-reinject.sh` - re-inject context after compaction
+- `session-clear.sh` - reset counters, archive events
+- `pre-compact.sh` - auto-save before compaction
+- `event-capture.sh` - capture tool events (async)
+- `prompt-reminder.sh` - context degradation escalation
+
+Hooks handle everything automatically. The only command you run is `/handoff:end` when you're done for the day.
+
+### qmd
+
+Reference repo manager. Clone GitHub repos, index them, search with BM25/vector/hybrid. All on-device.
+
+**Skills:**
+- `/qmd:add <url>` - clone + auto-detect file types + index + embed
+- `qmd:search` - non-invocable guide teaching Claude when to use `qmd_query` vs `qmd_search` vs `qmd_vsearch`
+
+**Commands (7):** `/qmd:update`, `/qmd:remove`, `/qmd:rename`, `/qmd:list`, `/qmd:context`, `/qmd:cleanup`, `/qmd:status`
+
+**MCP server:** Exposes `qmd_search` (BM25), `qmd_vsearch` (vector), `qmd_query` (hybrid + LLM reranking), `qmd_get`, `qmd_multi_get`, `qmd_status`
+
+### commit
+
+Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.
+
+**Skill:** `/commit:commit [--analyze] [--pr] [--merge PR#]`
+
+5-phase workflow: analysis, execution, verification, PR creation, merge.
+
+### simplify
+
+Analyze and simplify codebases using parallel background agents.
+
+**Skill:** `/simplify:simplify [--dry-run]`
+
+5-phase: discovery (glob all source), deep analysis (0-10 scoring), queue creation, parallel simplification (up to 5 agents), verification. Uses `opus` model.
+
+### audit
+
+Codebase audit with 4 parallel agents. Finds bugs, architectural rot, and dead weight.
+
+**Skill:** `/audit:audit [--dry-run] [--recent] [path]`
+
+4 agents run in parallel: Architecture/Design, Bugs/Logic, Security/Dependencies/Performance, Convention Compliance. Uses `opus` model.
+
+### techdebt
+
+End-of-session tech debt sweep.
+
+**Skill:** `/techdebt:techdebt [--dry-run] [path]`
+
+3 parallel agents scan for: duplicated code (>10 lines), dead exports, unused deps, stale TODOs, bloated files (>300 lines), naming inconsistencies.
+
+### gif
+
+Convert screen recordings to compressed GIFs with ffmpeg two-pass palette.
+
+**Skill:** `/gif:gif <video-path> [--width N] [--fps N] [--speed N] [--crop] [--full]`
+
+Handles HDR-to-SDR conversion. Defaults: 10fps, 640px width, bayer dither.
+
+### frames
+
+Extract video frames as images so Claude can analyze screen recordings, bug repros, and demos.
+
+**Skill:** `/frames:frames <video-path>`
+
+Smart sampling: 3-15 frames based on video length.
+
+### teams
+
+Orchestrate teams of Claude Code sessions working in parallel.
+
+**Skill:** `/teams:teams <task> [--dry-run] [--plan-approval] [--delegate] [--roles N]`
+
+6-phase: recon, decomposition, team design, task graph, spawn & brief, coordination. File ownership prevents conflicts. Uses `opus` model.
+
+> [!IMPORTANT]
+> Requires the `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` environment variable.
+
+## Plugin structure
+
+Every plugin follows this layout:
+
+```
+plugins/{name}/
+  .claude-plugin/plugin.json    manifest (name, version, description)
+  skills/{skill-name}/SKILL.md  skill instructions
+  hooks/hooks.json              event hooks (handoff only)
+  hooks/scripts/*.sh            hook scripts (handoff only)
+  commands/*.md                 extra commands (qmd only)
+  .mcp.json                     MCP server config (qmd only)
+  README.md                     plugin docs
 ```
 
-</details>
+## Version pinning
 
-<details>
-<summary><strong>commit</strong></summary>
+The marketplace tracks `main`. Pin to a specific version:
 
-```bash
-/commit:commit
-/commit:commit --analyze
-/commit:commit --pr
-/commit:commit --merge 42
 ```
-
-</details>
-
-<details>
-<summary><strong>simplify</strong></summary>
-
-```bash
-/simplify:simplify --dry-run
-```
-
-</details>
-
-<details>
-<summary><strong>audit</strong></summary>
-
-```bash
-/audit:audit --dry-run
-/audit:audit --recent
-/audit:audit src/
-```
-
-</details>
-
-<details>
-<summary><strong>techdebt</strong></summary>
-
-```bash
-/techdebt:techdebt --dry-run
-/techdebt:techdebt src/
-```
-
-</details>
-
-<details>
-<summary><strong>teams</strong></summary>
-
-```bash
-/teams:teams Refactor the auth module into separate concerns
-/teams:teams --dry-run Build a notification system
-/teams:teams --plan-approval Migrate the database schema
-/teams:teams --delegate Review PR #42 from three angles
-/teams:teams --roles 3 Add caching to all API endpoints
-```
-
-</details>
-
-<details>
-<summary><strong>gif</strong></summary>
-
-```bash
-/gif:gif ~/Desktop/recording.mov
-/gif:gif ~/Desktop/recording.mov --width 480
-/gif:gif ~/Desktop/recording.mov --speed 3
-/gif:gif ~/Desktop/recording.mov --crop
-```
-
-</details>
-
-<details>
-<summary><strong>frames</strong></summary>
-
-```bash
-/frames:frames ~/Desktop/recording.mov
-```
-
-</details>
-
-See each plugin's README for full documentation.
-
-## Version Pinning
-
-The marketplace tracks the latest `main` branch. To pin to a specific version:
-
-```bash
 /plugin marketplace add ramonclaudio/skills#v1.1.0
 ```
+
+## Updating
+
+```
+/plugin marketplace update skills
+```
+
+Or update a single plugin:
+
+```
+/plugin update handoff@skills
+```
+
+## Uninstall
+
+```
+/plugin uninstall handoff@skills
+```
+
+Remove the marketplace entirely:
+
+```
+/plugin marketplace remove skills
+```
+
+## Contributing
+
+Ping me if there are any bugs or feature requests - [open an issue](https://github.com/ramonclaudio/skills/issues) or PR directly.
 
 ## License
 
