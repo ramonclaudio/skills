@@ -2,7 +2,6 @@
 name: teams
 description: Orchestrate a team of Claude Code sessions. Analyzes work, designs team composition, decomposes tasks, spawns teammates with precise context, and coordinates execution.
 argument-hint: <task> [--dry-run] [--plan-approval] [--delegate] [--roles N]
-disable-model-invocation: true
 model: opus
 allowed-tools:
   - Read
