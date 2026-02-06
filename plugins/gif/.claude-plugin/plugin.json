@@ -10,6 +10,5 @@
   "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/gif",
   "repository": "https://github.com/ramonclaudio/skills",
   "license": "MIT",
-  "keywords": ["video", "ffmpeg", "gif", "conversion", "screen-recording"],
-  "skills": "./skills/"
+  "keywords": ["video", "ffmpeg", "gif", "conversion", "screen-recording"]
 }

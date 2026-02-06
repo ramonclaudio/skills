@@ -6,8 +6,7 @@
   },
   "metadata": {
     "description": "Custom Claude Code skills by @ramonclaudio",
-    "version": "1.0.0",
-    "pluginRoot": "./plugins"
+    "version": "1.0.0"
   },
   "plugins": [
     {
