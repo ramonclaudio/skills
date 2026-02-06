@@ -2,7 +2,6 @@
 name: commit
 description: Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. Supports --pr for pull requests and --merge for merging.
 argument-hint: [--analyze] [--pr] [--merge PR#]
-disable-model-invocation: true
 allowed-tools:
   - Bash(git *)
   - Bash(gh *)
@@ -12,7 +11,7 @@ allowed-tools:
   - TaskCreate
   - TaskUpdate
   - TaskList
-model: sonnet
+model: sonnet[1m]
 ---
 
 # Git Workflow - Atomic Commits
@@ -66,12 +65,12 @@ Output analysis in `<analysis>` tags.
 
 ### Phase 2 - Execution
 
-**GPG detection:** Before the first commit, test signing:
+**GPG detection:** Before the first commit, check git config:
 ```bash
-echo "test" | gpg --clear-sign >/dev/null 2>&1 && echo "GPG_AVAILABLE" || echo "GPG_UNAVAILABLE"
+git config --get commit.gpgsign
 ```
-- `GPG_AVAILABLE`: Use `git commit -S -m` for all commits
-- `GPG_UNAVAILABLE`: Use `git commit -m` (no `-S` flag). Log once: "GPG not configured, commits will not be signed."
+- `true`: Use `git commit -S -m` for all commits
+- Empty/unset: Use `git commit -m` (no `-S` flag). Log once: "GPG not configured, commits will not be signed."
 
 **Branch creation (with `--pr` flag):**
 ```bash
