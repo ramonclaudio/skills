@@ -2,16 +2,15 @@
 name: simplify
 description: Analyze entire codebase and simplify files using parallel background agents. Reduces complexity, removes redundancy, improves clarity.
 argument-hint: [--dry-run]
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 allowed-tools:
   - Read
-  - Edit
   - Glob
   - Grep
   - Bash(git *)
   - Bash(wc *)
+  - Edit
   - Task
   - TaskOutput
   - TaskCreate
@@ -86,9 +85,11 @@ For EACH file in the queue, launch a background agent:
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet",
+  model="sonnet[1m]",
   run_in_background=true,
   prompt="Simplify the file at {filepath}.
+
+  Use only Read, Edit, Glob, and Grep tools. Do NOT use Bash or spawn sub-agents.
 
   Read the file first, then apply these refinements:
   - Reduce nesting and complexity
