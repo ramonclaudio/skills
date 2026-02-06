@@ -1,6 +1,6 @@
 # Team Composition Patterns
 
-Pick the pattern that matches the work. Adapt as needed — these are starting points, not liturgy.
+Pick the pattern that matches the work. Adapt as needed — these are starting points, not prescriptions.
 
 **Cost:** Agent teams use significantly more tokens than a single session. Each teammate has its own context window, and total usage scales with the number of active teammates. The overhead is justified when parallelism provides a clear benefit. For routine tasks, a single session is cheaper and faster.
 
@@ -19,10 +19,10 @@ Use a single session or subagents instead when:
 | **Context** | Own window; results return to caller | Own window; fully independent |
 | **Communication** | Report back to main agent only | Message each other directly |
 | **Coordination** | Main agent manages all work | Shared task list, self-coordination |
-| **Best for** | Focused tasks where only the result matters | Complex work requiring discussion between workers |
+| **Best for** | Focused tasks where only the result matters | Complex work requiring discussion and collaboration |
 | **Cost** | Lower — results summarized to main context | Higher — each teammate is a separate instance |
 
-Use subagents when you need quick, focused workers that report back. Use teams when workers need to share findings, challenge each other, and coordinate independently.
+Use subagents (`Task` without `team_name`) when you need quick, focused workers that report back. Use teams (`TeamCreate` + `Task` with `team_name`) when workers need to share findings, challenge each other, and coordinate independently via `SendMessage`.
 
 ---
 
@@ -53,12 +53,14 @@ Create a team to build the notification system.
 
 **When:** Code review, security audit, PR review.
 
+A single reviewer gravitates toward one type of issue at a time. Splitting review criteria into independent domains means security, performance, and test coverage all get thorough attention simultaneously. Each reviewer applies a distinct lens so they don't overlap.
+
 | Role | Model | Does |
 |------|-------|------|
 | Lead | opus | Synthesize findings |
 | reviewer-{lens} | opus/sonnet | Review through one lens |
 
-**Task flow:** All reviewers work in parallel (no dependencies). Lead collects and synthesizes.
+**Task flow:** All reviewers work in parallel (no dependencies). Each works from the same code but applies a different filter. Lead collects and synthesizes across all reviewers.
 
 **Example:**
 ```
