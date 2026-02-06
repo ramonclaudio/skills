@@ -1,7 +1,7 @@
 {
   "name": "techdebt",
   "description": "Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com",
