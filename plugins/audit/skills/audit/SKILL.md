@@ -2,7 +2,6 @@
 name: audit
 description: Brutally honest codebase audit. Parallel agents find bugs, architectural rot, dead weight, and security holes. Proposes concrete fixes with no sugar-coating.
 argument-hint: [--dry-run] [--recent] [path/to/scope]
-disable-model-invocation: true
 context: fork
 agent: general-purpose
 allowed-tools:
@@ -13,10 +12,11 @@ allowed-tools:
   - Bash(git *)
   - Bash(wc *)
   - Task
-  - TaskOutput
+  - TaskGet
   - TaskCreate
   - TaskUpdate
   - TaskList
+  - Write
 model: opus
 ---
 
@@ -77,17 +77,25 @@ Read [references/checklists.md](references/checklists.md) and [references/rules.
 
 Prompt includes the "Architecture, Design & Clarity" checklist. Reads all source files. Uses Finding Format.
 
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
+
 ### Agent 2: Bugs & Logic Errors (opus)
 
 Prompt includes the "Bugs & Logic Errors" checklist. Reads all source files. Uses Finding Format. Does NOT flag style issues.
+
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
 
 ### Agent 3: Security, Dependencies & Performance (sonnet)
 
 Prompt includes the "Security, Dependencies & Performance" checklist plus config files. Uses Finding Format. No theoretical risks or micro-optimizations.
 
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
+
 ### Agent 4: Convention Compliance (sonnet)
 
 Prompt includes the "Convention Compliance" checklist plus all CLAUDE.md files. Uses Finding Format. Quotes exact rules violated.
+
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
 
 ## Phase 3: Collect & Validate
 
@@ -98,7 +106,7 @@ For each CRITICAL or HIGH finding, launch a **validation agent** (parallel, sonn
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet",
+  model="sonnet[1m]",
   run_in_background=true,
   prompt="Validate this audit finding. Read the file(s) and confirm.
 
@@ -136,7 +144,7 @@ If NOT `--dry-run`: launch background agents (up to 5 concurrent) to apply each 
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet",
+  model="sonnet[1m]",
   run_in_background=true,
   prompt="Apply this fix. Use the Edit tool.
 
