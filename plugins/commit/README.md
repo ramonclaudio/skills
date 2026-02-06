@@ -23,7 +23,7 @@ Groups changes by architectural layer (data, backend, UI, config, docs) and comm
 
 ### Phase 2 - Execution
 
-Tests GPG availability. If configured, signs with `-S`. If not, commits unsigned. Creates a feature branch when using `--pr` from main.
+Tests GPG availability. If configured, signs with `-S`. If not, commits unsigned. Creates a feature branch when using `--pr` from the current branch.
 
 ```bash
 git commit [-S] -m "type(scope): description"
