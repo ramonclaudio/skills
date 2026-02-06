@@ -2,7 +2,6 @@
 name: gif
 description: Convert screen recordings to compressed GIFs using ffmpeg two-pass palette. Handles macOS filenames with spaces and HDR recordings.
 argument-hint: <video-path> [--speed N] [--width N] [--fps N] [--crop]
-disable-model-invocation: true
 allowed-tools:
   - Bash(ffmpeg *)
   - Bash(ffprobe *)
@@ -11,12 +10,11 @@ allowed-tools:
   - Bash(/bin/cp *)
   - Bash(/bin/ls *)
   - Bash(mkdir *)
-  - Bash(rm *)
   - Bash(wc *)
   - Bash(du *)
   - Bash(open *)
   - Read
-model: sonnet
+model: sonnet[1m]
 ---
 
 # Video to GIF
@@ -103,7 +101,7 @@ Filter chain order: `setpts → crop → fps → scale → palettegen/paletteuse
 
 **With defaults (fps=10, width=640, speed=1):**
 ```bash
-rm -rf /tmp/gif-output && mkdir -p /tmp/gif-output; \
+mkdir -p /tmp/gif-output && \
 ffmpeg -y -v warning -i INPUT \
   -vf "fps=10,scale=640:-1:flags=lanczos,palettegen=stats_mode=diff" \
   -update 1 /tmp/gif-output/palette.png && \
@@ -115,7 +113,7 @@ du -h /tmp/gif-output/output.gif
 
 **With `--speed 3` (3x speedup):**
 ```bash
-rm -rf /tmp/gif-output && mkdir -p /tmp/gif-output; \
+mkdir -p /tmp/gif-output && \
 ffmpeg -y -v warning -i INPUT \
   -vf "setpts=PTS/3,fps=10,scale=640:-1:flags=lanczos,palettegen=stats_mode=diff" \
   -update 1 /tmp/gif-output/palette.png && \
@@ -127,7 +125,7 @@ du -h /tmp/gif-output/output.gif
 
 **With `--full` (no scaling):**
 ```bash
-rm -rf /tmp/gif-output && mkdir -p /tmp/gif-output; \
+mkdir -p /tmp/gif-output && \
 ffmpeg -y -v warning -i INPUT \
   -vf "fps=10,palettegen=stats_mode=diff" \
   -update 1 /tmp/gif-output/palette.png && \
