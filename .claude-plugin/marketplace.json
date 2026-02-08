@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Custom Claude Code skills by @ramonclaudio",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "plugins": [
     {
       "name": "commit",
       "source": "./plugins/commit",
       "description": "Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
@@ -29,7 +29,7 @@
       "name": "simplify",
       "source": "./plugins/simplify",
       "description": "Analyze and simplify entire codebases using parallel background agents",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
@@ -45,7 +45,7 @@
       "name": "audit",
       "source": "./plugins/audit",
       "description": "Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
@@ -61,7 +61,7 @@
       "name": "gif",
       "source": "./plugins/gif",
       "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
@@ -77,7 +77,7 @@
       "name": "frames",
       "source": "./plugins/frames",
       "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
@@ -93,7 +93,7 @@
       "name": "handoff",
       "source": "./plugins/handoff",
       "description": "Session continuity for Claude Code. Structured handoffs preserve context across sessions, machines, and compactions.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
@@ -109,7 +109,7 @@
       "name": "qmd",
       "source": "./plugins/qmd",
       "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid — all on-device.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
@@ -125,7 +125,7 @@
       "name": "techdebt",
       "source": "./plugins/techdebt",
       "description": "Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
