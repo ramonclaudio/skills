@@ -11,7 +11,7 @@ allowed-tools:
   - TaskCreate
   - TaskUpdate
   - TaskList
-model: sonnet[1m]
+model: opus
 ---
 
 # Git Workflow - Atomic Commits
