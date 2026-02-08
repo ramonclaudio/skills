@@ -106,7 +106,7 @@ For each CRITICAL or HIGH finding, launch a **validation agent** (parallel, sonn
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet[1m]",
+  model="sonnet",
   run_in_background=true,
   prompt="Validate this audit finding. Read the file(s) and confirm.
 
@@ -144,7 +144,7 @@ If NOT `--dry-run`: launch background agents (up to 5 concurrent) to apply each 
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet[1m]",
+  model="sonnet",
   run_in_background=true,
   prompt="Apply this fix. Use the Edit tool.
 
