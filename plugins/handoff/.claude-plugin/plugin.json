@@ -1,7 +1,7 @@
 {
   "name": "handoff",
   "description": "Session continuity for Claude Code. Structured handoffs preserve context across sessions, machines, and compactions.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com",
