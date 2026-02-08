@@ -11,7 +11,7 @@ allowed-tools:
   - Bash(trash *)
   - Read
   - Edit
-model: sonnet[1m]
+model: opus
 ---
 
 # QMD Add — Clone + Index a GitHub Repo
