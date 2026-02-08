@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- Upgrade to `opus` model for skill execution
+- Drop `sonnet[1m]` for fix agents, use `sonnet` (1M context unavailable on subscription plans)
+
 ## 1.1.0
 
 - Use `sonnet[1m]` (1M context) for skill and fix agents
