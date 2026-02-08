@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0
+
+- Upgrade to `opus` model for skill execution
+
 ## 1.1.0
 
 - Use `sonnet[1m]` (1M context) for skill execution

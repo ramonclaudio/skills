@@ -14,7 +14,7 @@ allowed-tools:
   - Bash(du *)
   - Bash(open *)
   - Read
-model: sonnet[1m]
+model: opus
 ---
 
 # Video to GIF
