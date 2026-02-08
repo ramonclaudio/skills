@@ -17,7 +17,7 @@ allowed-tools:
   - TaskCreate
   - TaskUpdate
   - TaskList
-model: sonnet[1m]
+model: opus
 ---
 
 # Tech Debt Sweep
@@ -185,7 +185,7 @@ If NOT `--dry-run`: for each HIGH finding, launch a background agent to apply th
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet[1m]",
+  model="sonnet",
   run_in_background=true,
   prompt="Apply this fix. Use the Edit tool.
 
