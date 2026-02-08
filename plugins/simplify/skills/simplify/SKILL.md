@@ -85,7 +85,7 @@ For EACH file in the queue, launch a background agent:
 ```
 Task(
   subagent_type="general-purpose",
-  model="sonnet[1m]",
+  model="sonnet",
   run_in_background=true,
   prompt="Simplify the file at {filepath}.
 
