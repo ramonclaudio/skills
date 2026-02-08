@@ -11,7 +11,7 @@ allowed-tools:
   - Bash(rm -rf /tmp/video-frames)
   - Bash(wc *)
   - Read
-model: sonnet[1m]
+model: opus
 ---
 
 # Video to Frames
