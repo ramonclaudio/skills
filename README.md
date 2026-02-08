@@ -136,14 +136,14 @@ Each plugin is a self-contained directory with a manifest, one or more skills, a
 
 | Plugin | What it ships | Requires | Version |
 | :--- | :--- | :--- | :--- |
-| [handoff](./plugins/handoff) | 2 skills, 6 hooks | `git` | 1.1.0 |
-| [qmd](./plugins/qmd) | 2 skills, 7 commands, 1 MCP server | `qmd`, `git` | 1.1.0 |
-| [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.2.0 |
-| [simplify](./plugins/simplify) | 1 skill | `git` | 1.1.0 |
-| [audit](./plugins/audit) | 1 skill | `git` | 1.1.0 |
-| [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.1.0 |
-| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.1.0 |
-| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.1.0 |
+| [handoff](./plugins/handoff) | 2 skills, 6 hooks | `git` | 1.2.0 |
+| [qmd](./plugins/qmd) | 2 skills, 7 commands, 1 MCP server | `qmd`, `git` | 1.2.0 |
+| [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.3.0 |
+| [simplify](./plugins/simplify) | 1 skill | `git` | 1.2.0 |
+| [audit](./plugins/audit) | 1 skill | `git` | 1.2.0 |
+| [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.2.0 |
+| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.2.0 |
+| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.2.0 |
 | [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var | 1.1.0 |
 
 ## What's in each plugin
