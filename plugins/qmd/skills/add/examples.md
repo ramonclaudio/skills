@@ -25,6 +25,12 @@
 /qmd:add https://github.com/some-org/very-long-repo-name --name short
 ```
 
+## Custom destination
+
+```bash
+/qmd:add vercel/next.js --dest ~/work/refs
+```
+
 ## Full clone (with history)
 
 ```bash
