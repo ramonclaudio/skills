@@ -6,7 +6,7 @@ Detailed instructions for configuring QMD as an MCP (Model Context Protocol) ser
 
 1. Install qmd globally:
    ```sh
-   bun install -g https://github.com/tobi/qmd
+   npm install -g @tobilu/qmd
    ```
 
 2. Verify installation:
@@ -50,11 +50,25 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
+## MCP Resources
+
+The server registers documents as MCP Resources via `qmd://{+path}` URI template. MCP clients can read documents directly by URI without a tool call:
+
+```
+qmd://collection/path/to/file.md
+```
+
+**URI encoding:** Path segments are individually URL-encoded (preserves `/` separators, encodes special chars via `encodeURIComponent`).
+
+**Resolution:** Exact match on `(collection, path)` first. If no match, falls back to suffix match (`LIKE %path`) — useful for partial paths.
+
+**Response:** Markdown content with line numbers and context headers (if configured). Documents are discovered via search tools, then retrieved by URI.
+
 ## Available MCP Tools
 
 Once configured, these tools become available:
 
-### qmd_search
+### search
 Fast BM25 keyword search.
 
 **Parameters:**
@@ -63,8 +77,8 @@ Fast BM25 keyword search.
 - `limit` (optional): Maximum number of results (default: 10)
 - `minScore` (optional): Minimum relevance score 0-1 (default: 0)
 
-### qmd_vsearch
-Semantic vector search for conceptual similarity.
+### vector_search
+Semantic vector search for conceptual similarity. Finds relevant documents even when they use different words than the query.
 
 **Parameters:**
 - `query` (required): Natural language query — describe what you're looking for
@@ -72,8 +86,8 @@ Semantic vector search for conceptual similarity.
 - `limit` (optional): Maximum number of results (default: 10)
 - `minScore` (optional): Minimum relevance score 0-1 (default: 0.3)
 
-### qmd_query
-Hybrid search combining BM25, vector search, query expansion, and LLM re-ranking.
+### deep_search
+Deep search with query expansion and LLM reranking. Auto-expands the query into variations, searches each by keyword and meaning, and reranks for top hits.
 
 **Parameters:**
 - `query` (required): Natural language query — describe what you're looking for
@@ -81,8 +95,8 @@ Hybrid search combining BM25, vector search, query expansion, and LLM re-ranking
 - `limit` (optional): Maximum number of results (default: 10)
 - `minScore` (optional): Minimum relevance score 0-1 (default: 0)
 
-### qmd_get
-Retrieve the full content of a document by file path or docid.
+### get
+Retrieve the full content of a document by file path or docid. Suggests similar files if not found.
 
 **Parameters:**
 - `file` (required): File path or docid from search results (e.g., `pages/meeting.md`, `#abc123`, or `pages/meeting.md:100` to start at line 100)
@@ -90,8 +104,8 @@ Retrieve the full content of a document by file path or docid.
 - `maxLines` (optional): Maximum number of lines to return
 - `lineNumbers` (optional): Add line numbers to output (default: false)
 
-### qmd_multi_get
-Retrieve multiple documents by glob pattern or comma-separated list.
+### multi_get
+Retrieve multiple documents by glob pattern or comma-separated list. Skips files larger than maxBytes.
 
 **Parameters:**
 - `pattern` (required): Glob pattern or comma-separated list of file paths
@@ -99,7 +113,7 @@ Retrieve multiple documents by glob pattern or comma-separated list.
 - `maxBytes` (optional): Skip files larger than this (default: 10240 = 10KB)
 - `lineNumbers` (optional): Add line numbers to output (default: false)
 
-### qmd_status
+### status
 Show the status of the QMD index: collections, document counts, and health information.
 
 **Parameters:** None
@@ -109,7 +123,7 @@ Show the status of the QMD index: collections, document counts, and health infor
 ### MCP server not starting
 - Ensure qmd is in your PATH: `which qmd`
 - Try running `qmd mcp` manually to see errors
-- Check that Bun is installed: `bun --version`
+- Check that Node.js 22+ or Bun is installed: `node --version` / `bun --version`
 
 ### No results returned
 - Verify collections exist: `qmd collection list`
@@ -117,15 +131,76 @@ Show the status of the QMD index: collections, document counts, and health infor
 - Ensure embeddings are generated: `qmd embed`
 
 ### Slow searches
-- For faster results, use `qmd_search` instead of `qmd_query`
-- The first search may be slow while models load (~3GB)
+- For faster results, use `search` instead of `deep_search`
+- The first search may be slow while models load (~2GB)
 - Subsequent searches are much faster
+
+## HTTP Transport
+
+For a shared, long-lived server that avoids repeated model loading:
+
+```sh
+# Foreground
+qmd mcp --http                    # localhost:8181
+qmd mcp --http --port 8080        # custom port
+
+# Background daemon
+qmd mcp --http --daemon           # start, writes PID to ~/.cache/qmd/mcp.pid
+qmd mcp stop                      # stop via PID file
+```
+
+The HTTP server exposes:
+- `POST /mcp` — MCP Streamable HTTP (JSON mode, no SSE streaming)
+- `GET /health` — liveness check with uptime
+
+**Response formats:**
+
+```bash
+# Health check
+curl http://localhost:8181/health
+# → {"status":"ok","uptime":3600}
+
+# MCP requests (JSON-RPC)
+curl -X POST http://localhost:8181/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"search","arguments":{"query":"auth"}},"id":1}'
+```
+
+Point any MCP client at `http://localhost:8181/mcp` to connect. Models stay loaded in VRAM between requests.
+
+## Named Indexes
+
+Run a separate MCP server for a different index:
+
+```sh
+qmd --index work mcp          # stdio, "work" index
+qmd --index work mcp --http   # HTTP, "work" index
+```
+
+Config: `~/.config/qmd/work.yml`, DB: `~/.cache/qmd/work.sqlite`.
+
+## Dynamic Server Instructions
+
+The MCP server generates instructions at startup from actual index state. Injected into the LLM's system prompt via the MCP `initialize` response — gives immediate context without a tool call. LLMs automatically receive:
+
+- Total document count across all collections
+- Global context (if configured)
+- Per-collection names, document counts, and root context descriptions
+- Capability gaps (e.g., "no embeddings — run `qmd embed`")
+- Search tool escalation ladder with latency estimates:
+  - `search` (~30ms) — keyword and exact phrase matching
+  - `vector_search` (~2s) — meaning-based, finds adjacent concepts
+  - `deep_search` (~10s) — auto-expands query, searches by keyword + meaning, reranks
+- Retrieval workflow guidance (get, multi_get)
+- Score interpretation tips (e.g., `minScore: 0.5` to filter low-confidence)
+
+These instructions update every time the MCP server restarts.
 
 ## Choosing Between CLI and MCP
 
 | Scenario | Recommendation |
 |----------|---------------|
-| MCP configured | Use `qmd_*` tools directly |
+| MCP configured | Use MCP tools directly (`search`, `vector_search`, `deep_search`, `get`, `multi_get`, `status`) |
 | No MCP | Use Bash with `qmd` commands |
 | Complex pipelines | Bash may be more flexible |
 | Simple lookups | MCP tools are cleaner |
