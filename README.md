@@ -55,10 +55,12 @@ After installing, authenticate with `gh auth login`.
 <summary><strong>QMD</strong> (required by <code>qmd</code>)</summary>
 
 ```sh
-bun install -g github:tobi/qmd
+npm install -g @tobilu/qmd
+# or
+bun install -g @tobilu/qmd
 ```
 
-Requires [Bun](https://bun.sh) >= 1.0.0. On macOS also install Homebrew SQLite: `brew install sqlite`.
+Requires Node.js >= 22 or [Bun](https://bun.sh) >= 1.0.0. On macOS also install Homebrew SQLite: `brew install sqlite`.
 
 </details>
 
@@ -137,7 +139,7 @@ Each plugin is a self-contained directory with a manifest, one or more skills, a
 | Plugin | What it ships | Requires | Version |
 | :--- | :--- | :--- | :--- |
 | [handoff](./plugins/handoff) | 2 skills, 6 hooks | `git` | 1.2.0 |
-| [qmd](./plugins/qmd) | 2 skills, 7 commands, 1 MCP server | `qmd`, `git` | 1.2.0 |
+| [qmd](./plugins/qmd) | 2 skills, 17 commands, 1 MCP server | `qmd`, `git` | 1.3.0 |
 | [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.3.0 |
 | [simplify](./plugins/simplify) | 1 skill | `git` | 1.2.0 |
 | [audit](./plugins/audit) | 1 skill | `git` | 1.2.0 |
@@ -172,11 +174,11 @@ Reference repo manager. Clone GitHub repos, index them, search with BM25/vector/
 
 **Skills:**
 - `/qmd:add <url>` - clone + auto-detect file types + index + embed
-- `qmd:search` - non-invocable guide teaching Claude when to use `qmd_query` vs `qmd_search` vs `qmd_vsearch`
+- `qmd:search` - non-invocable guide teaching Claude when to use `deep_search` vs `search` vs `vector_search`
 
-**Commands (7):** `/qmd:update`, `/qmd:remove`, `/qmd:rename`, `/qmd:list`, `/qmd:context`, `/qmd:cleanup`, `/qmd:status`
+**Commands (17):** `/qmd:update`, `/qmd:remove`, `/qmd:rename`, `/qmd:list`, `/qmd:context`, `/qmd:cleanup`, `/qmd:status`, `/qmd:embed`, `/qmd:pull`, `/qmd:get`, `/qmd:multi-get`, `/qmd:search`, `/qmd:vsearch`, `/qmd:query`, `/qmd:mcp`, `/qmd:collection-add`, `/qmd:collection-list`
 
-**MCP server:** Exposes `qmd_search` (BM25), `qmd_vsearch` (vector), `qmd_query` (hybrid + LLM reranking), `qmd_get`, `qmd_multi_get`, `qmd_status`
+**MCP server:** Exposes `search` (BM25), `vector_search` (semantic), `deep_search` (hybrid + LLM reranking), `get`, `multi_get`, `status`
 
 ### commit
 

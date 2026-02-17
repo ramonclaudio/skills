@@ -2,11 +2,11 @@
 
 Reference repo manager. Clone GitHub repos, index with [QMD](https://github.com/tobi/qmd), search with BM25/vector/hybrid — all on-device.
 
-Repos persist in `~/Developer/refs/`. Incremental updates only re-embed what changed.
+Cloned repos default to `~/Developer/refs/` but any path works — QMD indexes whatever directory you point it at. Incremental updates only re-embed what changed.
 
 ## Architecture
 
-Reads go through MCP. The plugin declares a `.mcp.json` that exposes `qmd_search`, `qmd_vsearch`, `qmd_query`, `qmd_get`, `qmd_multi_get`, and `qmd_status` as native Claude tools. No bash spawning. A search guide skill loads automatically before searches so the model knows when to use keyword vs semantic vs hybrid.
+Reads go through MCP. The plugin declares a `.mcp.json` that exposes `search`, `vector_search`, `deep_search`, `get`, `multi_get`, and `status` as native Claude tools. No bash spawning. A search guide skill loads automatically before searches so the model knows when to use keyword vs semantic vs hybrid.
 
 Writes go through skills and commands:
 
@@ -20,6 +20,16 @@ Writes go through skills and commands:
 | `/qmd:context <sub>` | Manage contexts (list, add, rm, check) |
 | `/qmd:cleanup` | Clear caches, vacuum database |
 | `/qmd:status` | Show index status via Bash (fallback when MCP is down) |
+| `/qmd:embed` | Generate or refresh vector embeddings |
+| `/qmd:pull` | Download or verify GGUF models from HuggingFace |
+| `/qmd:get` | Retrieve document by path or docid (CLI fallback) |
+| `/qmd:multi-get` | Retrieve multiple documents by glob or list (CLI fallback) |
+| `/qmd:search` | BM25 keyword search (CLI fallback) |
+| `/qmd:vsearch` | Vector/semantic search (CLI fallback) |
+| `/qmd:query` | Hybrid deep search with reranking (CLI fallback) |
+| `/qmd:collection-add <path>` | Add a local directory as a collection |
+| `/qmd:collection-list` | List all collections with metadata |
+| `/qmd:mcp` | Start, stop, or manage MCP server daemon |
 
 ## Usage
 
@@ -38,6 +48,14 @@ Writes go through skills and commands:
 /qmd:context rm qmd://old-repo                   # Remove a stale context
 /qmd:cleanup                                     # Clear caches, vacuum DB
 /qmd:status                                      # Index status (Bash, no MCP needed)
+/qmd:embed                                       # Embed documents needing vectors
+/qmd:embed -f                                    # Force re-embed everything
+/qmd:pull                                        # Download/verify all 3 models
+/qmd:pull --refresh                              # Re-download even if cached
+/qmd:get #abc123                                 # Get document by docid
+/qmd:get next.js/README.md                       # Get by collection path
+/qmd:mcp start                                   # Start MCP daemon (HTTP background)
+/qmd:mcp stop                                    # Stop MCP daemon
 ```
 
 ### Batch workflow
@@ -51,7 +69,7 @@ Use `--defer-embed` to add multiple repos without embedding after each one, then
 /qmd:update
 ```
 
-Once MCP is active, Claude uses `qmd_search`, `qmd_query`, `qmd_get` etc. directly as tools — no slash command needed for reads.
+Once MCP is active, Claude uses `search`, `deep_search`, `get` etc. directly as tools — no slash command needed for reads.
 
 ### Composability
 
@@ -59,7 +77,7 @@ After MCP search returns a path, use `@` references to pull the full file into c
 
 ```text
 > search for "middleware" in the next.js collection
-# Claude uses qmd_query, returns paths
+# Claude uses deep_search, returns paths
 > explain @~/Developer/refs/next.js/packages/next/src/server/router.ts
 ```
 
@@ -72,7 +90,7 @@ qmd search "auth pattern" | claude -p "summarize these results"
 ## How Add Works
 
 1. Parses URL or `owner/repo` shorthand
-2. Shallow clones to `~/Developer/refs/<name>` (or pulls if exists). Use `--full` for complete history.
+2. Shallow clones to `$REFS/<name>` (default `~/Developer/refs/`, override with `--dest`; pulls if exists). Use `--full` for complete history.
 3. Auto-detects file types (TypeScript, Rust, Go, Python, Swift) to build glob mask. Merges masks for polyglot repos. Fails explicitly if no type detected — use `--mask` to override. *(`--dry-run` stops here — prints the plan and exits)*
 4. Adds QMD collection with detected mask
 5. Sets `update: "git pull --ff-only"` via CLI (falls back to config edit)
@@ -104,7 +122,9 @@ Project scope would push it to all collaborators and add MCP context cost to the
 
 ## How Update Works
 
-The add skill sets `update: "git pull --ff-only"` in each collection's config (`~/.config/qmd/index.yml`). When `/qmd:update` runs `qmd update`, it executes each collection's update command before re-indexing. Then `qmd embed` generates embeddings for new/changed content.
+The add skill sets `update: "git -C <path> pull --ff-only"` in each collection's config (`${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`). When `/qmd:update` runs `qmd update`, it clears the LLM cache, then executes each collection's update command before re-indexing. Then `qmd embed` generates embeddings for new/changed content.
+
+`qmd update` always processes ALL collections — there is no single-collection argument. If any collection's update command fails, the process exits immediately (remaining collections are skipped).
 
 To force re-embed everything (e.g., after a model update or corrupted embeddings):
 
@@ -114,38 +134,82 @@ qmd embed -f
 
 ## Named Indexes
 
-QMD supports separate indexes via `--index <name>`. Config lives at `~/.config/qmd/<name>.yml`, database at `~/.cache/qmd/<name>.sqlite`. Useful for keeping work/personal refs isolated:
+QMD supports separate indexes via `--index <name>`. Config lives at `${XDG_CONFIG_HOME:-~/.config}/qmd/<name>.yml`, database at `${XDG_CACHE_HOME:-~/.cache}/qmd/<name>.sqlite`. Useful for keeping work/personal refs isolated:
 
 ```bash
 qmd --index work collection add ~/work/docs --name internal-docs
 qmd --index work search "deployment process"
 ```
 
-## MCP Resources and Prompts
+## MCP Resources
+
+The MCP server generates dynamic instructions at startup from actual index state — LLMs see collection names, document counts, and content descriptions without a tool call.
 
 Beyond the 6 search/retrieval tools, the MCP server also exposes:
 
 - **Resource template** `qmd://{+path}` — MCP clients can read documents directly via URI without using the `get` tool.
-- **Prompt** `query` — A search strategy guide that MCP clients supporting prompts receive automatically.
 
 ## GGUF Models
 
-QMD uses three local GGUF models (auto-downloaded on first use via node-llama-cpp):
+QMD uses three local GGUF models (auto-downloaded on first use via node-llama-cpp, or manually via `qmd pull`):
 
 | Model | Purpose | Size |
 |-------|---------|------|
-| `embeddinggemma-300M-Q8_0` | Vector embeddings (768 dimensions) | ~300MB |
-| `qwen3-reranker-0.6b-q8_0` | Cross-encoder re-ranking | ~640MB |
-| `qmd-query-expansion-1.7B-q4_k_m` | Query expansion (fine-tuned) | ~1.1GB |
+| `embeddinggemma-300M` (Q8_0) | Vector embeddings | ~300MB |
+| `qwen3-reranker-0.6b` (Q8_0) | Cross-encoder re-ranking | ~640MB |
+| `qmd-query-expansion-1.7B` (Q4_K_M, GRPO fine-tuned) | Query expansion (lex/vec/hyde) | ~1.1GB |
 
-Models are cached in `~/.cache/qmd/models/`. The index database lives at `~/.cache/qmd/index.sqlite`, config at `~/.config/qmd/index.yml`.
+Models are cached in `~/.cache/qmd/models/`. The index database lives at `${XDG_CACHE_HOME:-~/.cache}/qmd/index.sqlite`, config at `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`.
+
+GPU acceleration is auto-detected (Metal on macOS, CUDA on Linux/Windows, Vulkan as fallback). Parallel GPU contexts enable up to 2.7x faster reranking on multi-core machines.
+
+Documents are chunked using scored markdown breakpoints — the chunker prefers splitting at headers, then code blocks, then paragraph boundaries, then list items, rather than mid-sentence. Code fences are never split. 900 tokens per chunk with 15% overlap.
+
+## MCP HTTP Transport
+
+For a shared, long-lived server that keeps models warm in VRAM between queries:
+
+```bash
+qmd mcp --http --daemon           # Start background daemon on port 8181
+qmd mcp stop                      # Stop the daemon
+qmd status                        # Shows "MCP: running (PID ...)" when active
+```
+
+The HTTP server exposes `POST /mcp` (Streamable HTTP) and `GET /health` (liveness). Point any MCP client at `http://localhost:8181/mcp`.
+
+## Reference Documentation
+
+Deep reference materials for the AI — loaded automatically when relevant:
+
+| Reference | Content |
+|-----------|---------|
+| `references/cli-reference.md` | Complete CLI reference — every command, flag, and option |
+| `references/architecture.md` | SQLite schema, content-addressable storage, hybrid search pipeline |
+| `references/models.md` | 3 GGUF models: embedding, reranking, query expansion |
+| `references/MCP-SETUP.md` | MCP server configuration for Claude Code and Claude Desktop |
+| `references/example-index.yml` | Example collection configuration with contexts |
+| `skills/search/references/pipeline.md` | Hybrid search pipeline internals (RRF, blending, chunking) |
+
+## CLI Extras
+
+- `qmd --version` / `qmd -v` — show version with git commit hash (e.g. `1.0.6 (abc1234)`)
+- `qmd --help` — full command reference (note: `--pull` appears here but is a dead flag)
+- `qmd deep-search` — alias for `qmd query`
+- `qmd vector-search` — alias for `qmd vsearch`
+- `qmd collection rm` — alias for `qmd collection remove`
+- `qmd collection mv` — alias for `qmd collection rename`
+- `qmd context remove` — alias for `qmd context rm`
+- Multiple collection filters: `qmd search "query" -c react -c next.js`
+- `--line-numbers` — add line numbers to search/get output
+- Output formats: `--files`, `--json`, `--csv`, `--md`, `--xml`
 
 ## Requirements
 
-- `qmd` ([github.com/tobi/qmd](https://github.com/tobi/qmd)) installed globally
+- `qmd` ([github.com/tobi/qmd](https://github.com/tobi/qmd)) — `npm install -g @tobilu/qmd` or `bun install -g @tobilu/qmd`
+- Node.js 22+ or Bun runtime
 - `git`
-- ~2GB disk for GGUF models (auto-downloaded on first embed)
+- ~2GB disk for GGUF models (auto-downloaded on first embed, or `qmd pull`)
 
 ## Version
 
-1.0.0
+1.3.0

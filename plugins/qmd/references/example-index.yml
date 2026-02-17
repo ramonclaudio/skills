@@ -1,8 +1,12 @@
 # QMD Collections Configuration
-# Location: ~/.config/qmd/index.yml
+# Location: ${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml
+#
+# Custom example for the qmd plugin — shows reference repos + local notes pattern.
+# Upstream qmd uses personal notes only (Meetings, journals, codex).
 #
 # This file defines all collections and their contexts.
 # You can manually edit this file — changes take effect immediately.
+# Collection paths can point to any directory — ~/Developer/refs/ is just a convention.
 
 # Global context applied to all collections
 # Use this for universal search instructions or patterns
@@ -14,7 +18,7 @@ collections:
   next.js:
     path: ~/Developer/refs/next.js
     pattern: "**/*.{md,mdx,txt,ts,tsx,js,jsx,json,yaml,yml,css}"
-    update: "git pull --ff-only"
+    update: "git -C ~/Developer/refs/next.js pull --ff-only"
     context:
       "/": "Next.js framework source code and documentation"
       "/docs": "Official Next.js documentation"
@@ -23,14 +27,14 @@ collections:
   react:
     path: ~/Developer/refs/react
     pattern: "**/*.{md,txt,ts,tsx,js,jsx,json,yaml,yml}"
-    update: "git pull --ff-only"
+    update: "git -C ~/Developer/refs/react pull --ff-only"
     context:
       "/": "React library source code"
 
   qmd:
     path: ~/Developer/refs/qmd
     pattern: "**/*.{md,txt,ts,tsx,js,jsx,json,yaml,yml}"
-    update: "git pull --ff-only"
+    update: "git -C ~/Developer/refs/qmd pull --ff-only"
     context:
       "/": "QMD search engine — on-device BM25, vector, and hybrid search"
       "/src": "QMD core source code"
@@ -43,3 +47,4 @@ collections:
       "/": "Personal notes and ideas"
       "/journal/2024": "Daily notes from 2024"
       "/journal/2025": "Daily notes from 2025"
+      "/journal/2026": "Daily notes from 2026"

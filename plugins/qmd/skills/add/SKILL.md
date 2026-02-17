@@ -1,8 +1,9 @@
 ---
 name: add
-description: Clone a GitHub repo to ~/Developer/refs/, auto-detect file types, index with QMD, embed for search.
-argument-hint: <url-or-owner/repo> [--name N] [--mask P] [--full] [--defer-embed] [--dry-run]
+description: Clone a GitHub repo, auto-detect file types, index with QMD, embed for search.
+argument-hint: <url-or-owner/repo> [--name N] [--mask P] [--dest D] [--full] [--defer-embed] [--dry-run]
 context: fork
+agent: general-purpose
 allowed-tools:
   - Bash(qmd *)
   - Bash(git *)
@@ -16,19 +17,37 @@ model: opus
 
 # QMD Add — Clone + Index a GitHub Repo
 
+ultrathink
+
+<role>
+You are a reference library curator. Your job is to clone external repos, detect their structure, index them for search, and verify they're ready for retrieval. You care about file type detection, mask correctness, and index health. You execute every step and verify its output before proceeding.
+</role>
+
 ## Current State
 !`qmd status 2>/dev/null || echo "No QMD index yet"`
 
 ## Current Config
-!`cat ~/.config/qmd/index.yml 2>/dev/null || echo "No config yet"`
+!`cat "${XDG_CONFIG_HOME:-$HOME/.config}/qmd/index.yml" 2>/dev/null || echo "No config yet"`
 
-## Conventions
+## Arguments
 
-- Refs directory: `~/Developer/refs/` — all steps below reference this as `REFS`
-- QMD config: `~/.config/qmd/index.yml`
-- Never delete anything — use `trash`, never `rm`
-- Execute commands, not suggestions
-- If any step fails, stop and diagnose. Do not continue with broken state.
+- `$ARGUMENTS` first token is URL or `owner/repo` shorthand (required)
+- `$ARGUMENTS` containing `--name`: Override collection name (must be `[a-zA-Z0-9_-]` only)
+- `$ARGUMENTS` containing `--mask`: Skip auto-detection, use provided glob pattern
+- `$ARGUMENTS` containing `--dest`: Override clone destination (default: `~/Developer/refs/`)
+- `$ARGUMENTS` containing `--full`: Clone with full history (not shallow)
+- `$ARGUMENTS` containing `--defer-embed`: Skip embedding step, run `/qmd:update` later
+- `$ARGUMENTS` containing `--dry-run`: Preview only — run Steps 1-3, print plan, exit
+
+## Constraints
+
+- Execute commands, not suggestions — no dry-run prose
+- Stop immediately on any step failure — do not continue with broken state
+- Never delete anything — use `trash` (if available), never `rm`
+- Refs directory: `--dest` value if provided, otherwise `~/Developer/refs/` — all steps below reference this as `REFS`
+- QMD config: `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`
+- If `--dry-run`: exit after Step 3 — no cloning, no indexing, no embedding
+- If embed fails: report error, print retry command (`qmd embed`), exit
 
 ---
 
@@ -37,6 +56,7 @@ model: opus
 - Full URL: `https://github.com/owner/repo` → name = `repo`
 - Shorthand: `owner/repo` → URL = `https://github.com/owner/repo`, name = `repo`
 - `--name` overrides (must be `[a-zA-Z0-9_-]` only)
+- `--dest`: override clone destination directory (default: `~/Developer/refs/`)
 - `--full`: clone with complete history (default is shallow `--depth 1`)
 - `--defer-embed`: skip embedding, run `/qmd:update` later to embed in batch
 - `--mask`: skip auto-detection, use provided glob pattern
@@ -45,21 +65,21 @@ model: opus
 ## Step 2: Clone or pull
 
 ```bash
-mkdir -p ~/Developer/refs
+mkdir -p $REFS
 ```
 
-If `REFS/<name>` already exists:
+If `$REFS/<name>` already exists:
 ```bash
-git -C ~/Developer/refs/<name> pull --ff-only
+git -C $REFS/<name> pull --ff-only
 ```
 
 If pull fails with `fatal: Not possible to fast-forward`:
-- Report: "Branch diverged from remote. Re-run with manual resolution or run `git -C ~/Developer/refs/<name> pull --rebase`."
+- Report: "Branch diverged from remote. Re-run with manual resolution or run `git -C $REFS/<name> pull --rebase`."
 - Stop. Do not continue.
 
 Otherwise, shallow clone (default):
 ```bash
-git clone --depth 1 https://github.com/<owner>/<repo> ~/Developer/refs/<name>
+git clone --depth 1 https://github.com/<owner>/<repo> $REFS/<name>
 ```
 
 If `--full`: omit `--depth 1`.
@@ -112,35 +132,27 @@ If `--dry-run`: print the execution plan (the commands Steps 4-8 would run) and 
 ## Step 4: Add collection
 
 ```bash
-qmd collection add ~/Developer/refs/<name> --name <name> --mask "<mask>"
+qmd collection add $REFS/<name> --name <name> --mask "<mask>"
 ```
 
 If collection already exists (command errors), remove first then re-add:
 ```bash
 qmd collection remove <name>
-qmd collection add ~/Developer/refs/<name> --name <name> --mask "<mask>"
+qmd collection add $REFS/<name> --name <name> --mask "<mask>"
 ```
 
 ## Step 5: Set auto-pull
 
-Try the CLI first:
-```bash
-qmd collection set <name> update "git pull --ff-only"
-```
+Edit `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml` and add `update: "git -C $REFS/<name> pull --ff-only"` under the collection entry.
 
-If `qmd collection set` is not a valid command, fall back to direct config edit:
-- Read `~/.config/qmd/index.yml`
-- Add `update: "git pull --ff-only"` under the collection entry
-- Re-read to confirm the key exists
-
-> **Known coupling:** Direct config editing breaks if qmd changes its YAML schema. Prefer CLI when available.
+> **Known coupling:** Direct config editing breaks if qmd changes its YAML schema. No CLI command exists for setting update commands yet.
 
 ## Step 6: Add context
 
 Read the repo's `README.md`. Extract the first non-empty paragraph after the H1 heading (skip badges, blank lines, shields.io links). Truncate to one sentence.
 
 ```bash
-qmd context add qmd://<name> "<one-sentence description>"
+qmd context add qmd://<name>/ "<one-sentence description>"
 ```
 
 ## Step 7: Embed
@@ -152,7 +164,9 @@ Otherwise:
 qmd embed
 ```
 
-First run downloads models (~2GB). If interrupted, retry.
+First run downloads models (~2GB) automatically, or manually via `qmd pull`. If interrupted, retry.
+
+Embedding uses 900 tokens/chunk with 15% overlap.
 
 ## Step 8: Verify
 
@@ -171,9 +185,27 @@ Zero results after successful embedding means the mask missed the important file
 
 Report: collection name, document count, mask used, clone type (shallow/full).
 
+## Known Limitations
+
+- **Direct config editing** — No CLI command exists for setting update commands. The skill directly edits `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`, which breaks if the schema changes.
+- **Embedding interruption** — first run downloads ~2GB of GGUF models (embeddinggemma-300M, qwen3-reranker-0.6b, qmd-expand GRPO). If interrupted mid-download, retry `qmd embed` or `qmd pull` manually.
+- **Shallow clones** — `--depth 1` saves disk but loses git history. Use `--full` if you need blame or log.
+- **Private repos** — `git clone` will fail without SSH keys or tokens configured. The skill does not handle authentication — that's an environment concern.
+- **No branch/tag support** — always clones the default branch. To index a specific release, clone manually and use `/qmd:add` with `--mask`.
+- **Node.js/Bun runtime** — requires Node.js 22+ or Bun to run `qmd` CLI.
+
 ## Recovery
 
 This skill is idempotent. If it fails partway through, re-run `/qmd:add` with the same arguments — Step 2 pulls instead of re-cloning, Step 4 removes and re-adds the collection.
+
+| Situation | Recovery |
+|-----------|----------|
+| Clone failed (network) | Re-run — Step 2 retries the clone |
+| Detection failed | Re-run with `--mask "<glob>"` to skip detection |
+| Collection add failed | Re-run — Step 4 removes then re-adds |
+| Config edit failed | Manually edit `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml` |
+| Embed interrupted | Run `qmd embed` to resume |
+| Wrong mask indexed | Re-run with `--mask` — the skill is idempotent |
 
 ---
 
