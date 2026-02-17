@@ -106,7 +106,7 @@ The skill is idempotent. If it fails partway, re-run with the same arguments —
 
 With tool search enabled (the default), Claude defers MCP tool definitions until needed rather than loading all 6 into every request. The qmd MCP server process still runs, but context cost is low until you actually search.
 
-All commands and skills are model-invocable — Claude can invoke them autonomously when relevant. The search guide skill auto-loads when Claude needs to search indexed references.
+All commands and skills are model-invocable. Claude can invoke them on its own when relevant. The search guide skill auto-loads when Claude needs to search indexed references.
 
 MCP connections can fail silently mid-session. If search tools stop responding, run `/qmd:status` (Bash fallback) or `/mcp` to check the server connection.
 
@@ -143,11 +143,9 @@ qmd --index work search "deployment process"
 
 ## MCP Resources
 
-The MCP server generates dynamic instructions at startup from actual index state — LLMs see collection names, document counts, and content descriptions without a tool call.
+The MCP server generates dynamic instructions at startup from actual index state. LLMs see collection names, document counts, and content descriptions without a tool call.
 
-Beyond the 6 search/retrieval tools, the MCP server also exposes:
-
-- **Resource template** `qmd://{+path}` — MCP clients can read documents directly via URI without using the `get` tool.
+The MCP server also exposes a resource template `qmd://{+path}` so MCP clients can read documents by URI without the `get` tool.
 
 ## GGUF Models
 
@@ -161,9 +159,9 @@ QMD uses three local GGUF models (auto-downloaded on first use via node-llama-cp
 
 Models are cached in `~/.cache/qmd/models/`. The index database lives at `${XDG_CACHE_HOME:-~/.cache}/qmd/index.sqlite`, config at `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`.
 
-GPU acceleration is auto-detected (Metal on macOS, CUDA on Linux/Windows, Vulkan as fallback). Parallel GPU contexts enable up to 2.7x faster reranking on multi-core machines.
+GPU acceleration is auto-detected (Metal on macOS, CUDA on Linux/Windows, Vulkan as fallback). Parallel GPU contexts can do up to 2.7x faster reranking on multi-core machines.
 
-Documents are chunked using scored markdown breakpoints — the chunker prefers splitting at headers, then code blocks, then paragraph boundaries, then list items, rather than mid-sentence. Code fences are never split. 900 tokens per chunk with 15% overlap.
+Documents are chunked at scored markdown breakpoints. The chunker prefers splitting at headers, then code blocks, then paragraph boundaries, then list items, rather than mid-sentence. Code fences are never split. 900 tokens per chunk with 15% overlap.
 
 ## MCP HTTP Transport
 
@@ -179,11 +177,11 @@ The HTTP server exposes `POST /mcp` (Streamable HTTP) and `GET /health` (livenes
 
 ## Reference Documentation
 
-Deep reference materials for the AI — loaded automatically when relevant:
+Reference docs, loaded when relevant:
 
 | Reference | Content |
 |-----------|---------|
-| `references/cli-reference.md` | Complete CLI reference — every command, flag, and option |
+| `references/cli-reference.md` | All commands, flags, and options |
 | `references/architecture.md` | SQLite schema, content-addressable storage, hybrid search pipeline |
 | `references/models.md` | 3 GGUF models: embedding, reranking, query expansion |
 | `references/MCP-SETUP.md` | MCP server configuration for Claude Code and Claude Desktop |
