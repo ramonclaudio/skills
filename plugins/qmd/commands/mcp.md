@@ -19,7 +19,7 @@ Transport modes:
 - HTTP: `POST /mcp` (Streamable HTTP, JSON responses), `GET /health` (liveness with uptime)
 - Daemon: background process, PID at ~/.cache/qmd/mcp.pid, logs at ~/.cache/qmd/mcp.log
 
-Benefits of daemon mode: models stay loaded in VRAM between queries (~16s → ~10s first query).
+Daemon mode keeps models loaded in VRAM between queries (~16s → ~10s first query).
 
 After starting daemon, verify with `qmd status`.
 

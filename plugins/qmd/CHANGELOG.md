@@ -75,10 +75,10 @@ Sync with upstream [tobi/qmd](https://github.com/tobi/qmd) v1.0.6. Full source a
 - Add GPU parallelism note (parallel contexts, flash attention, adaptive parallelism)
 
 #### Commands
-- Enhanced all 7 existing command files with comprehensive detail from official QMD codebase
-- Enhanced search skill with CLI fallback section, named indexes, and additional tips
-- Enhanced pipeline reference with expansion grammar, embedding format, session timeouts
-- Updated MCP-SETUP reference with named indexes, dynamic instructions, HTTP response format examples
+- Rewrite all 7 existing command files with detail from official QMD codebase
+- Expand search skill with CLI fallback section, named indexes, and additional tips
+- Expand pipeline reference with expansion grammar, embedding format, session timeouts
+- Update MCP-SETUP reference with named indexes, dynamic instructions, HTTP response format examples
 - Tighten `allowed-tools` in list command (`Bash(qmd ls*)` instead of `Bash(qmd *)`)
 - Tighten `allowed-tools` in update command (scoped to `qmd update*` and `qmd embed*`)
 - Rewrite status command: GPU info, model URIs, MCP daemon status, vector index details
