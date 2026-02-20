@@ -1,6 +1,6 @@
 ---
 name: teams
-description: Orchestrate a team of Claude Code sessions. Analyzes work, designs team composition, decomposes tasks, spawns teammates with precise context, and coordinates execution.
+description: Use this skill when the user asks to orchestrate a team, use multiple agents, or parallelize work across Claude Code sessions. Decomposes tasks, spawns teammates, and coordinates execution.
 argument-hint: <task> [--dry-run] [--plan-approval] [--delegate] [--roles N]
 model: opus
 allowed-tools:
@@ -14,11 +14,10 @@ allowed-tools:
   - TeamDelete
   - SendMessage
   - Task
-  - TaskOutput
+  - TaskGet
   - TaskCreate
   - TaskUpdate
   - TaskList
-  - TaskGet
   - AskUserQuestion
 ---
 
