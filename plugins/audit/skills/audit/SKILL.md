@@ -1,6 +1,6 @@
 ---
 name: audit
-description: Brutally honest codebase audit. Parallel agents find bugs, architectural rot, dead weight, and security holes. Proposes concrete fixes with no sugar-coating.
+description: Use this skill when the user asks for a codebase audit or code review. Parallel agents find bugs, architectural rot, dead weight, and security holes.
 argument-hint: [--dry-run] [--recent] [path/to/scope]
 context: fork
 agent: general-purpose
