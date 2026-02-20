@@ -1,6 +1,6 @@
 ---
 name: techdebt
-description: Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files. Fast and targeted.
+description: Use this skill when the user asks for a tech debt sweep or end-of-session cleanup. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files.
 argument-hint: [--dry-run] [path/to/scope]
 context: fork
 agent: general-purpose
