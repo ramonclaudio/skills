@@ -1,14 +1,8 @@
 {
   "name": "gif",
   "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method",
-  "version": "1.2.0",
   "author": {
     "name": "ramonclaudio",
-    "email": "hello@ramonclaudio.com",
-    "url": "https://github.com/ramonclaudio"
-  },
-  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/gif",
-  "repository": "https://github.com/ramonclaudio/skills",
-  "license": "MIT",
-  "keywords": ["video", "ffmpeg", "gif", "conversion", "screen-recording"]
+    "email": "hello@ramonclaudio.com"
+  }
 }
