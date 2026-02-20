@@ -23,8 +23,8 @@ Hooks handle everything else automatically — auto-init on first run, context i
 
 | Skill | Model | Side effects | Model-invocable |
 |:---|:---|:---|:---|
-| `/handoff:start` | sonnet | Light (reads + tasks) | Yes (auto for CRITICAL) |
-| `/handoff:end` | sonnet | Heavy (health, writes) | No (user-only) |
+| `/handoff:start` | opus | Light (reads + tasks) | Yes (auto for CRITICAL) |
+| `/handoff:end` | opus | Heavy (health, writes) | No (user-only) |
 
 ### START
 
@@ -76,6 +76,7 @@ The plugin ships with lifecycle hooks that run without manual invocation:
 | `pre-compact.sh` | PreCompact | Triggers auto-save before compaction |
 | `event-capture.sh` | PostToolUse | Appends raw tool events (cmd/exit/file) to `events.jsonl` |
 | `prompt-reminder.sh` | UserPromptSubmit | Escalating context degradation suggestions |
+| `pre-compact.sh` | SessionEnd (logout/exit) | Auto-saves session state before exit |
 
 > [!TIP]
 > Every fresh session automatically sees the handoff resume point — even without running `/handoff:start`. The full START is still available for deep hydration (tasks, git activity, drift check).

@@ -1,14 +1,8 @@
 {
   "name": "handoff",
   "description": "Session continuity for Claude Code. Structured handoffs preserve context across sessions, machines, and compactions.",
-  "version": "1.2.0",
   "author": {
     "name": "ramonclaudio",
-    "email": "hello@ramonclaudio.com",
-    "url": "https://github.com/ramonclaudio"
-  },
-  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/handoff",
-  "repository": "https://github.com/ramonclaudio/skills",
-  "license": "MIT",
-  "keywords": ["session", "continuity", "handoff", "context", "sbar"]
+    "email": "hello@ramonclaudio.com"
+  }
 }
