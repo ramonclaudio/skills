@@ -1,6 +1,6 @@
 ---
 name: end
-description: Archive session state to .handoff/. Runs health checks, captures severity, resume point, and done/failed/blockers.
+description: Use this skill when the user asks to end a session, save state, or create a handoff. Runs health checks, captures severity, resume point, and blockers.
 allowed-tools:
   - Bash(git *)
   - Bash(gh *)
