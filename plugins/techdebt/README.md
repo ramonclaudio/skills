@@ -2,7 +2,7 @@
 
 Lightweight end-of-session sweep. Run it at the end of every session to find and kill accumulated tech debt before it compounds.
 
-Fast and targeted — not a full audit. Uses sonnet for speed.
+Fast and targeted — not a full audit.
 
 ## Usage
 
