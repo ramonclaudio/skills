@@ -1,6 +1,6 @@
 ---
 name: simplify
-description: Analyze entire codebase and simplify files using parallel background agents. Reduces complexity, removes redundancy, improves clarity.
+description: Use this skill when the user asks to simplify code or reduce complexity. Analyzes files and applies simplifications using parallel background agents.
 argument-hint: [--dry-run]
 context: fork
 agent: general-purpose
@@ -12,7 +12,7 @@ allowed-tools:
   - Bash(wc *)
   - Edit
   - Task
-  - TaskOutput
+  - TaskGet
   - TaskCreate
   - TaskUpdate
   - TaskList
@@ -104,7 +104,7 @@ Task(
 )
 ```
 
-**Concurrency**: Launch up to 5 agents simultaneously. Poll with TaskOutput, launch more as slots free up.
+**Concurrency**: Launch up to 5 agents simultaneously. Poll with TaskGet, launch more as slots free up.
 
 ## Phase 5: Verification & Report
 
