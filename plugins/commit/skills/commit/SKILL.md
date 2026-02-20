@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Atomic commits with conventional format, grouped by architectural layer. GPG signs when available. Supports --push, --pr, and --merge.
+description: Use this skill when the user asks to commit, push, create a PR, or merge. Atomic conventional commits grouped by architectural layer with GPG signing.
 argument-hint: [--analyze] [--push] [--pr] [--merge PR#]
 allowed-tools:
   - Bash(git *)
