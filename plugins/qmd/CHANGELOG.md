@@ -1,5 +1,82 @@
 # Changelog
 
+## 1.4.0 — 2026-02-20
+
+Sync with upstream [tobi/qmd](https://github.com/tobi/qmd) v1.0.8. MCP tools consolidated, query document format, lex syntax, new collection management commands.
+
+### Added
+
+#### Commands
+- `/qmd:collection-show` — display collection details (path, pattern, update command, contexts, includeByDefault)
+- `/qmd:collection-update-cmd` — set pre-update shell command for a collection (replaces direct YAML editing)
+- `/qmd:collection-include` — include a collection in default queries
+- `/qmd:collection-exclude` — exclude a collection from default queries (`includeByDefault: false`)
+
+### Changed
+
+#### MCP (breaking)
+- MCP tools `search`, `vector_search`, `deep_search` removed — replaced by single `query` tool
+- MCP `collection` string parameter replaced by `collections` array (multi-collection filter)
+- HTTP endpoint renamed from `/search` to `/query` (`/search` kept as silent alias)
+
+#### Search skill
+- Rewrite for single `query` tool — modality table, tools table, MCP/CLI reference, examples all updated
+- Add "Query Document Format" section — typed sub-queries (`lex:`, `vec:`, `hyde:`, `expand:`), EBNF grammar
+- Add "Lex Syntax" section — quoted phrases (`"exact match"`), negation (`-term`, `-"phrase"`)
+- First sub-query gets 2x fusion weight — documented in modality and pipeline reference
+- `collections` array replaces single `collection` parameter throughout
+
+#### Pipeline reference
+- Add query document format with EBNF grammar and examples
+- Add lex query sub-grammar (phrase, negation, word operators)
+- Add `expand:` type to expansion grammar
+- Note first sub-query gets 2x weight in RRF fusion
+
+#### Add skill
+- Step 5 now uses `qmd collection update-cmd` instead of direct YAML config editing
+- Remove `Read` and `Edit` from allowed-tools (no longer needed)
+- Add `Bash(qmd collection*)` to allowed-tools
+- Remove "Direct config editing" from Known Limitations
+- Update Recovery table: "Config edit failed" → "Update-cmd failed"
+
+#### Commands
+- `query.md` — now primary MCP tool, add query document format and lex syntax notes
+- `search.md` — mark as CLI-only (MCP `search` tool removed), reference `query` with `lex:` prefix
+- `vsearch.md` — mark as CLI-only (MCP `vector_search` tool removed), reference `query` with `vec:` prefix
+- `context.md` — remove `check` subcommand (removed upstream)
+- `status.md` — add actionable tips note, update version to 1.0.8
+- `collection-list.md` — add `[excluded]` tag for collections with `includeByDefault: false`
+
+#### References
+- `cli-reference.md` — add query document format, lex syntax, new collection subcommands (show, update-cmd, include, exclude), remove `context check`, update MCP section, version bump
+- `architecture.md` — add `includeByDefault` field to YAML format, add lex query syntax to FTS5 section, add `collections` array parameter note
+
+#### README
+- Update MCP tool list (`query`, `get`, `multi_get`, `status`)
+- Add 4 new collection commands to command table
+- Remove `context check` from examples
+- Update "How Add Works" step 5 for `collection update-cmd`
+- Version bump to 1.4.0
+
+### Fixed (verified against upstream v1.0.8 source)
+
+- Fix BM25 normalization formula — was incorrectly documented as sigmoid `1/(1+exp(-(|x|-5)/3))` in v1.3.0, actual source uses `|x|/(1+|x|)` (verified: store.ts:2120). Fixed in cli-reference.md (2 locations), pipeline.md, architecture.md
+- Fix GPU priority order — was "Metal > CUDA > Vulkan", actual source is CUDA > Metal > Vulkan (verified: llm.ts:505-506). Fixed in architecture.md and models.md
+- Fix MCP `query` tool parameter — documented as `query` string, actual param is `searches` array of `{type, query}` objects (verified: mcp.ts:243-308). Fixed in SKILL.md
+- Fix `get.md` claiming Levenshtein suggestions in CLI — only MCP `get` does fuzzy matching, CLI prints "Document not found"
+- Fix `collection-show.md` claiming file count/last updated — CLI `show` doesn't display these fields
+- Fix `status.md` referencing `set-update-cmd` — correct command name is `update-cmd`
+- Fix `rename.md` claiming regex validation on new name — not enforced in CLI code
+- Remove `--no-lex` from dead flags — flag was fully removed from parser (not just dead)
+- Rewrite MCP-SETUP.md "Available MCP Tools" section — was documenting removed `search`, `vector_search`, `deep_search` tools. Now documents `query` with `searches` array, `get`, `multi_get`, `status`
+- Fix MCP-SETUP.md curl example — was using `"name":"search"`, now uses `"name":"query"` with `searches` array
+- Fix MCP-SETUP.md troubleshooting — was referencing `search`/`deep_search`, now references `query` sub-query types
+- Fix MCP-SETUP.md dynamic instructions — was listing old tool escalation ladder, now lists `query` sub-query types with latencies
+- Fix MCP-SETUP.md "Choosing" table — was listing old tool names, now lists `query`, `get`, `multi_get`, `status`
+- Fix pipeline.md latency table — was using old MCP tool names as column headers, now shows CLI command + MCP sub-query type
+- Fix pipeline.md chunk breakpoint scores — H4/code block were merged (70-80), H5-H6/HR were merged (50-60). Now separate rows matching source: H4=70, code block=80, H5=60, H6=50, HR=60
+- Fix pipeline.md stale tool references — `vector_search` and `deep_search` replaced with CLI command names
+
 ## 1.3.0 — 2026-02-16
 
 Sync with upstream [tobi/qmd](https://github.com/tobi/qmd) v1.0.6. Full source audit of all 10k+ lines.

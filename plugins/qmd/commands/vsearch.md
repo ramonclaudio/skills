@@ -1,16 +1,16 @@
 ---
-description: Vector/semantic search with query expansion (CLI fallback for vector_search)
+description: Semantic search (CLI only — MCP `vector_search` tool removed in v1.0.8, use `query` with `vec:` prefix instead)
 allowed-tools: Bash(qmd vsearch*)
 argument-hint: <query> [-n N] [-c collection] [--json|--csv|--md|--xml|--files]
 ---
 
 Run `qmd vsearch $ARGUMENTS`.
 
-This is the CLI fallback for `vector_search` MCP tool — use when MCP is down.
-
 Alias: `qmd vector-search`
 
 Semantic search with query expansion + RRF fusion. ~2s latency. No reranking step. Best for concepts, "how does X work" questions, architectural queries.
+
+MCP equivalent: use the `query` tool with `vec:` prefix for semantic search.
 
 Uses query expansion internally (vec/hyde types only, no lex). Default min-score: 0.3.
 
@@ -24,5 +24,3 @@ Flags:
 - Output: `--json`, `--csv`, `--md`, `--xml`, `--files`
 
 Requires embeddings. If `qmd status` shows pending embeddings, run `qmd embed` first.
-
-Prefer MCP `vector_search` tool when available.

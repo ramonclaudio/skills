@@ -1,5 +1,5 @@
 ---
-description: Retrieve a document by path, docid, or virtual path (CLI fallback for get)
+description: Retrieve a document by path or docid
 allowed-tools: Bash(qmd get*)
 argument-hint: <file>[:line] [--from N] [-l N] [--line-numbers]
 ---
@@ -24,6 +24,6 @@ Flags:
 
 Output: optional context header (from hierarchical context config) + document body.
 
-If not found: suggests similar files via Levenshtein distance fuzzy matching (top 5 closest paths).
+If not found: prints "Document not found" error. The MCP `get` tool (not CLI) suggests similar files via Levenshtein distance fuzzy matching.
 
 Prefer MCP `get` tool when available — this command is for when MCP is down or for piping output.

@@ -1,5 +1,5 @@
 ---
-description: Manage QMD collection contexts (list, add, remove, check)
+description: Manage QMD collection contexts (list, add, remove)
 allowed-tools: Bash(qmd context*)
 argument-hint: <subcommand> [args]
 ---
@@ -14,8 +14,7 @@ Route based on the first argument:
   - Absolute filesystem paths
   Path resolution: virtual paths parsed for collection + validated, filesystem paths use longest prefix match to detect collection, relative paths resolved from cwd. Valid collection names match `[a-zA-Z0-9_-]+` regex.
 - `rm <path>` (alias: `remove`) — Run `qmd context rm $ARGUMENTS`. Supports both filesystem paths and `qmd://` URIs.
-- `check` — Run `qmd context check`. Reports collections without ANY context and top-level directories without context. Suggests adding per-directory descriptions.
 
 Context hierarchy: all matching path prefixes are concatenated (global_context → root → specific), joined with `\n\n`. Not just the deepest match.
 
-If no arguments or unrecognized subcommand, print available subcommands: `list`, `add`, `rm`, `check`.
+If no arguments or unrecognized subcommand, print available subcommands: `list`, `add`, `rm`.

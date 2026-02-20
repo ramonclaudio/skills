@@ -1,14 +1,8 @@
 {
   "name": "qmd",
   "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid, manage embeddings and models — all on-device.",
-  "version": "1.3.0",
   "author": {
     "name": "ramonclaudio",
-    "email": "hello@ramonclaudio.com",
-    "url": "https://github.com/ramonclaudio"
-  },
-  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/qmd",
-  "repository": "https://github.com/ramonclaudio/skills",
-  "license": "MIT",
-  "keywords": ["qmd", "search", "embeddings", "vector", "semantic", "reference", "mcp", "reranking", "hybrid-search", "gguf", "llm", "cli"]
+    "email": "hello@ramonclaudio.com"
+  }
 }

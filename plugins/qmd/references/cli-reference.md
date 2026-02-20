@@ -10,9 +10,8 @@ Available on all commands:
 |------|---------|
 | `--index <name>` | Use custom index (DB: `~/.cache/qmd/<name>.sqlite`, config: `~/.config/qmd/<name>.yml`) |
 | `--context <text>` | Dead flag (defined in parser, never read) |
-| `--no-lex` | Dead flag (defined in parser, never read) |
 | `-h`, `--help` | Show command help |
-| `-v`, `--version` | Show version (includes git commit hash when available, e.g. `1.0.6 (abc1234)`) |
+| `-v`, `--version` | Show version (includes git commit hash when available, e.g. `1.0.8 (abc1234)`) |
 
 ## Search Commands
 
@@ -42,7 +41,7 @@ qmd search "function handleAuth" -c next.js -n 10
 qmd search "ECONNREFUSED" --json --min-score 0.5
 ```
 
-**Score normalization:** Sigmoid `1/(1+exp(-(|x|-5)/3))` maps raw BM25 scores to 0-1 range.
+**Score normalization:** `|x| / (1 + |x|)` maps raw BM25 scores to 0-1 range (e.g., strong(-10) → 0.91, medium(-2) → 0.67, weak(-0.5) → 0.33).
 
 ### qmd vsearch
 
@@ -67,6 +66,25 @@ Full hybrid pipeline: BM25 probe → conditional expansion → parallel FTS+vect
 qmd query "how does routing work"
 qmd query "middleware authentication" -c next.js --all
 ```
+
+**Query document format:** Supports typed sub-queries for fine-grained control. Pass multi-line input with explicit query types:
+
+```bash
+# Multi-line query document with typed sub-queries
+qmd query $'lex: "authentication middleware"\nvec: how requests are authenticated\nhyde: The server validates the JWT token in the Authorization header'
+
+# Lex syntax: quoted phrases for exact match, -negation for exclusion
+qmd query $'lex: "rate limit" -redis\nvec: request throttling strategy'
+
+# Single type
+qmd query $'vec: state management patterns in React'
+```
+
+**Sub-query types:**
+- `lex:` — BM25 keyword search. Supports `"phrase"` for exact match (bypasses prefix matching) and `-term` for negation.
+- `vec:` — Vector similarity search.
+- `hyde:` — Hypothetical document embedding (vector search with synthetic answer).
+- `expand:` — Auto-expand into multiple sub-queries.
 
 **Aliases:** `deep-search`
 
@@ -244,6 +262,8 @@ qmd mcp stop                        # Stop daemon via PID file
 - PID file: `~/.cache/qmd/mcp.pid`
 - Keeps models loaded in VRAM between requests (~16s → ~10s latency)
 
+**MCP tools:** MCP exposes a single `query` tool (replacing the previous `search`, `vector_search`, and `deep_search` tools). The HTTP endpoint is `/query` (`/search` is kept as a silent alias for backward compatibility). The `query` tool accepts a `collections` array parameter instead of a single `collection` string.
+
 **MCP subcommand:**
 - `qmd mcp stop` — Stop daemon via PID file
 
@@ -301,6 +321,38 @@ qmd collection mv next.js nextjs    # Alias
 
 Updates YAML config and database records.
 
+### qmd collection show
+
+Display collection details (path, pattern, update command, context entries, includeByDefault).
+
+```bash
+qmd collection show next.js
+```
+
+### qmd collection update-cmd
+
+Set the shell command to run before re-indexing a collection.
+
+```bash
+qmd collection update-cmd next.js 'git -C ~/Developer/refs/next.js pull --ff-only'
+```
+
+### qmd collection include
+
+Include a collection in default queries (sets `includeByDefault: true`).
+
+```bash
+qmd collection include next.js
+```
+
+### qmd collection exclude
+
+Exclude a collection from default queries (sets `includeByDefault: false`). The collection remains indexed but is skipped unless explicitly targeted with `-c`.
+
+```bash
+qmd collection exclude notes
+```
+
 ## Context Management
 
 ### qmd context add
@@ -343,16 +395,6 @@ qmd context remove qmd://next.js/docs    # Alias
 
 **Aliases:** `remove`
 
-### qmd context check
-
-Audit for missing context entries.
-
-```bash
-qmd context check
-```
-
-Reports collections without root context (`qmd://collection/`).
-
 ## Output Formats
 
 | Format | Flag | Example |
@@ -375,7 +417,7 @@ MCP tools return structured content via `structuredContent` field in addition to
 | 0.2 - 0.5 | Somewhat relevant | Only if user wants more |
 | 0.0 - 0.2 | Low relevance | Usually skip |
 
-**BM25 normalization:** Sigmoid `1/(1+exp(-(|x|-5)/3))` maps raw scores to 0-1 range.
+**BM25 normalization:** `|x| / (1 + |x|)` maps raw scores to 0-1 range.
 
 ## Named Indexes
 

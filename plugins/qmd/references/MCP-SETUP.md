@@ -66,34 +66,37 @@ qmd://collection/path/to/file.md
 
 ## Available MCP Tools
 
-Once configured, these tools become available:
+Once configured, 4 tools become available:
 
-### search
-Fast BM25 keyword search.
+### query
+Primary search tool. Accepts a query document — one or more typed sub-queries combined for best recall.
 
 **Parameters:**
-- `query` (required): Search query — keywords or phrases to find
-- `collection` (optional): Filter to a specific collection by name
+- `searches` (required): Array of `{type, query}` objects (min 1, max 10). Types:
+  - `lex` — BM25 keyword search. Supports `"phrase"` for exact match and `-term` for negation.
+  - `vec` — Semantic vector search. Write a natural language question.
+  - `hyde` — Hypothetical document embedding. Write 50-100 words that look like the answer.
+  - `expand` — Auto-expand via local LLM into lex+vec+hyde variants. Max one per query.
+- `collections` (optional): Array of collection names to filter (OR match). Omit for all default collections.
 - `limit` (optional): Maximum number of results (default: 10)
 - `minScore` (optional): Minimum relevance score 0-1 (default: 0)
 
-### vector_search
-Semantic vector search for conceptual similarity. Finds relevant documents even when they use different words than the query.
+First sub-query gets 2x weight in RRF fusion — put your strongest signal first.
 
-**Parameters:**
-- `query` (required): Natural language query — describe what you're looking for
-- `collection` (optional): Filter to a specific collection by name
-- `limit` (optional): Maximum number of results (default: 10)
-- `minScore` (optional): Minimum relevance score 0-1 (default: 0.3)
+**Examples:**
+```json
+// Simple keyword lookup
+{"searches": [{"type": "lex", "query": "handleAuth"}]}
 
-### deep_search
-Deep search with query expansion and LLM reranking. Auto-expands the query into variations, searches each by keyword and meaning, and reranks for top hits.
+// Best recall — keyword + semantic
+{"searches": [
+  {"type": "lex", "query": "\"JWT validation\" middleware -session"},
+  {"type": "vec", "query": "how does the auth middleware verify tokens"}
+]}
 
-**Parameters:**
-- `query` (required): Natural language query — describe what you're looking for
-- `collection` (optional): Filter to a specific collection by name
-- `limit` (optional): Maximum number of results (default: 10)
-- `minScore` (optional): Minimum relevance score 0-1 (default: 0)
+// Unknown vocabulary — let the LLM expand
+{"searches": [{"type": "expand", "query": "auth middleware"}]}
+```
 
 ### get
 Retrieve the full content of a document by file path or docid. Suggests similar files if not found.
@@ -131,7 +134,7 @@ Show the status of the QMD index: collections, document counts, and health infor
 - Ensure embeddings are generated: `qmd embed`
 
 ### Slow searches
-- For faster results, use `search` instead of `deep_search`
+- For faster results, use `query` with `lex:` sub-queries instead of `expand:`
 - The first search may be slow while models load (~2GB)
 - Subsequent searches are much faster
 
@@ -163,7 +166,7 @@ curl http://localhost:8181/health
 # MCP requests (JSON-RPC)
 curl -X POST http://localhost:8181/mcp \
   -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"search","arguments":{"query":"auth"}},"id":1}'
+  -d '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"query","arguments":{"searches":[{"type":"lex","query":"auth"}],"limit":10}},"id":1}'
 ```
 
 Point any MCP client at `http://localhost:8181/mcp` to connect. Models stay loaded in VRAM between requests.
@@ -187,10 +190,10 @@ The MCP server generates instructions at startup from actual index state. Inject
 - Global context (if configured)
 - Per-collection names, document counts, and root context descriptions
 - Capability gaps (e.g., "no embeddings — run `qmd embed`")
-- Search tool escalation ladder with latency estimates:
-  - `search` (~30ms) — keyword and exact phrase matching
-  - `vector_search` (~2s) — meaning-based, finds adjacent concepts
-  - `deep_search` (~10s) — auto-expands query, searches by keyword + meaning, reranks
+- `query` tool usage guidance with sub-query types and latency estimates:
+  - `lex:` (~30ms) — BM25 keyword and exact phrase matching
+  - `vec:`/`hyde:` (~2s) — semantic vector search
+  - `expand:` (~10s) — auto-expands query via local LLM, searches by keyword + meaning, reranks
 - Retrieval workflow guidance (get, multi_get)
 - Score interpretation tips (e.g., `minScore: 0.5` to filter low-confidence)
 
@@ -200,7 +203,7 @@ These instructions update every time the MCP server restarts.
 
 | Scenario | Recommendation |
 |----------|---------------|
-| MCP configured | Use MCP tools directly (`search`, `vector_search`, `deep_search`, `get`, `multi_get`, `status`) |
+| MCP configured | Use MCP tools directly (`query`, `get`, `multi_get`, `status`) |
 | No MCP | Use Bash with `qmd` commands |
 | Complex pipelines | Bash may be more flexible |
 | Simple lookups | MCP tools are cleaner |

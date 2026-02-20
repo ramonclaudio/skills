@@ -6,7 +6,7 @@ Cloned repos default to `~/Developer/refs/` but any path works — QMD indexes w
 
 ## Architecture
 
-Reads go through MCP. The plugin declares a `.mcp.json` that exposes `search`, `vector_search`, `deep_search`, `get`, `multi_get`, and `status` as native Claude tools. No bash spawning. A search guide skill loads automatically before searches so the model knows when to use keyword vs semantic vs hybrid.
+Reads go through MCP. The plugin declares a `.mcp.json` that exposes `query`, `get`, `multi_get`, and `status` as native Claude tools. No bash spawning. The `query` tool accepts query documents — structured multi-line queries with typed sub-queries (`lex:`, `vec:`, `hyde:`, `expand:`). A search guide skill loads automatically before searches so the model knows how to compose effective queries.
 
 Writes go through skills and commands:
 
@@ -17,7 +17,7 @@ Writes go through skills and commands:
 | `/qmd:remove <name>` | Remove collection from index (keeps repo) |
 | `/qmd:rename <old> <new>` | Rename a collection |
 | `/qmd:list [collection]` | List collections or files within a collection |
-| `/qmd:context <sub>` | Manage contexts (list, add, rm, check) |
+| `/qmd:context <sub>` | Manage contexts (list, add, rm) |
 | `/qmd:cleanup` | Clear caches, vacuum database |
 | `/qmd:status` | Show index status via Bash (fallback when MCP is down) |
 | `/qmd:embed` | Generate or refresh vector embeddings |
@@ -29,6 +29,10 @@ Writes go through skills and commands:
 | `/qmd:query` | Hybrid deep search with reranking (CLI fallback) |
 | `/qmd:collection-add <path>` | Add a local directory as a collection |
 | `/qmd:collection-list` | List all collections with metadata |
+| `/qmd:collection-show <name>` | Show collection details |
+| `/qmd:collection-update-cmd <name> '<cmd>'` | Set pre-update shell command |
+| `/qmd:collection-include <name>` | Include collection in default queries |
+| `/qmd:collection-exclude <name>` | Exclude collection from default queries |
 | `/qmd:mcp` | Start, stop, or manage MCP server daemon |
 
 ## Usage
@@ -44,7 +48,6 @@ Writes go through skills and commands:
 /qmd:list                                        # List all collections
 /qmd:list next.js/packages                       # List files under a path
 /qmd:context list                                # Show all configured contexts
-/qmd:context check                               # Find collections missing context
 /qmd:context rm qmd://old-repo                   # Remove a stale context
 /qmd:cleanup                                     # Clear caches, vacuum DB
 /qmd:status                                      # Index status (Bash, no MCP needed)
@@ -69,7 +72,7 @@ Use `--defer-embed` to add multiple repos without embedding after each one, then
 /qmd:update
 ```
 
-Once MCP is active, Claude uses `search`, `deep_search`, `get` etc. directly as tools — no slash command needed for reads.
+Once MCP is active, Claude uses `query`, `get` etc. directly as tools — no slash command needed for reads.
 
 ### Composability
 
@@ -77,7 +80,7 @@ After MCP search returns a path, use `@` references to pull the full file into c
 
 ```text
 > search for "middleware" in the next.js collection
-# Claude uses deep_search, returns paths
+# Claude uses query tool, returns paths
 > explain @~/Developer/refs/next.js/packages/next/src/server/router.ts
 ```
 
@@ -93,7 +96,7 @@ qmd search "auth pattern" | claude -p "summarize these results"
 2. Shallow clones to `$REFS/<name>` (default `~/Developer/refs/`, override with `--dest`; pulls if exists). Use `--full` for complete history.
 3. Auto-detects file types (TypeScript, Rust, Go, Python, Swift) to build glob mask. Merges masks for polyglot repos. Fails explicitly if no type detected — use `--mask` to override. *(`--dry-run` stops here — prints the plan and exits)*
 4. Adds QMD collection with detected mask
-5. Sets `update: "git pull --ff-only"` via CLI (falls back to config edit)
+5. Sets update command via `qmd collection update-cmd`
 6. Extracts collection context from README (first meaningful paragraph)
 7. Runs incremental embed (skipped with `--defer-embed`)
 8. Verifies with `qmd status`
@@ -104,7 +107,7 @@ The skill is idempotent. If it fails partway, re-run with the same arguments —
 
 ## Context Cost
 
-With tool search enabled (the default), Claude defers MCP tool definitions until needed rather than loading all 6 into every request. The qmd MCP server process still runs, but context cost is low until you actually search.
+With tool search enabled (the default), Claude defers MCP tool definitions until needed rather than loading all 4 into every request. The qmd MCP server process still runs, but context cost is low until you actually search.
 
 All commands and skills are model-invocable. Claude can invoke them on its own when relevant. The search guide skill auto-loads when Claude needs to search indexed references.
 
@@ -190,7 +193,7 @@ Reference docs, loaded when relevant:
 
 ## CLI Extras
 
-- `qmd --version` / `qmd -v` — show version with git commit hash (e.g. `1.0.6 (abc1234)`)
+- `qmd --version` / `qmd -v` — show version with git commit hash (e.g. `1.0.8 (abc1234)`)
 - `qmd --help` — full command reference (note: `--pull` appears here but is a dead flag)
 - `qmd deep-search` — alias for `qmd query`
 - `qmd vector-search` — alias for `qmd vsearch`
@@ -210,4 +213,4 @@ Reference docs, loaded when relevant:
 
 ## Version
 
-1.3.0
+1.4.0

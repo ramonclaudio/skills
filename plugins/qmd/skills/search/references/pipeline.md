@@ -14,11 +14,53 @@ Each sub-query is type-routed to the appropriate backend: `lex` queries run BM25
 
 Expansion is conditional — when the BM25 probe returns a strong signal (top score >= 0.85 AND gap to second result >= 0.15), expansion is skipped entirely to save compute.
 
-Note: `vector_search` also uses query expansion internally, filtered to `vec` and `hyde` types only (no `lex`). It's not just `deep_search` that expands queries.
+Note: `qmd vsearch` also uses query expansion internally, filtered to `vec` and `hyde` types only (no `lex`). The full query pipeline (`qmd query` / MCP `expand:`) isn't the only path that expands queries.
+
+### Query Document Format
+
+Queries can be submitted as multi-line **query documents** with typed sub-queries. Each line has an optional type prefix (`lex:`, `vec:`, `hyde:`, `expand:`). Plain text lines (no prefix) are treated as implicit `expand:` — they get auto-expanded by the local LLM.
+
+The first sub-query in the document receives **2x weight** in RRF fusion, so put the most important query first.
+
+Only one `expand:` line is allowed per query document (explicit or implicit).
+
+**Examples:**
+
+Single-line (unchanged behavior — implicit `expand:`):
+```
+auth middleware JWT validation
+```
+
+Multi-line with typed sub-queries:
+```
+lex: "JWT validation" middleware -session
+vec: how does the auth middleware verify tokens
+hyde: The middleware extracts the Bearer token from the Authorization header and verifies it using jsonwebtoken
+```
+
+Mixed — first line is high-priority, rest are supplementary:
+```
+lex: "C++ performance" optimization -sports -athlete
+vec: techniques to optimize C++ code for speed
+expand: C++ profiling and bottleneck detection
+```
+
+### Lex Syntax
+
+`lex:` sub-queries support BM25 operators for precise keyword control:
+
+| Operator | Syntax | Behavior | Example |
+|----------|--------|----------|---------|
+| Phrase | `"exact phrase"` | Verbatim match, no prefix matching | `"JWT validation"` matches "JWT validation" but not "JWT validator" |
+| Negation (word) | `-term` | Exclude documents containing term | `-session` |
+| Negation (phrase) | `-"exact phrase"` | Exclude documents containing phrase | `-"session cookie"` |
+| Word | bare word | Standard BM25 keyword match (with stemming) | `middleware` |
+
+Negations are useful for disambiguation — e.g., `"python" web framework -snake -reptile` to search for the programming language.
 
 ## RRF Fusion
 
-Results from all search backends are fused with Reciprocal Rank Fusion (RRF, k=60). The first two result lists (original BM25 results + original vector results) get 2x weight; expanded query results get 1x weight.
+Results from all search backends are fused with Reciprocal Rank Fusion (RRF, k=60). The first two result lists (original BM25 results + original vector results) get 2x weight; expanded query results get 1x weight. When using query documents, the first sub-query's results also get 2x weight in fusion.
 
 Top-rank bonuses are applied after RRF:
 - Rank 0 (top result): +0.05
@@ -55,8 +97,11 @@ Documents are chunked into 900-token pieces (≈3600 chars) with 15% overlap (13
 | H1 | 100 |
 | H2 | 90 |
 | H3 | 80 |
-| H4 / code block | 70-80 |
-| H5-H6 / horizontal rule | 50-60 |
+| H4 | 70 |
+| Code block | 80 |
+| H5 | 60 |
+| H6 | 50 |
+| Horizontal rule | 60 |
 | Blank line (paragraph boundary) | 20 |
 | Unordered list item (`- `, `* `) | 5 |
 | Ordered list item (`1. `, `2. `) | 5 |
@@ -68,17 +113,17 @@ Search matches point to the chunk, not the exact line. To narrow down after find
 
 ## Latency Expectations
 
-| Tool | Typical Latency | Notes |
-|------|----------------|-------|
-| `search` | ~30ms | BM25 only, no model inference |
-| `vector_search` | ~2s | Embedding + vector lookup + optional expansion |
-| `deep_search` | ~10s | Full pipeline: expansion + BM25 + vector + reranking |
+| Approach | CLI Command | MCP Sub-query | Typical Latency | Notes |
+|----------|-------------|---------------|----------------|-------|
+| BM25 keyword | `qmd search` | `lex:` | ~30ms | No model inference |
+| Vector search | `qmd vsearch` | `vec:`/`hyde:` | ~2s | Embedding + vector lookup + optional expansion |
+| Full hybrid | `qmd query` | `expand:` | ~10s | Expansion + BM25 + vector + reranking |
 
 First query is slower while models load into VRAM. Use MCP HTTP daemon mode (`qmd mcp --http --daemon`) to keep models warm between requests (~16s → ~10s).
 
 ## BM25 Scoring
 
-FTS5 columns: filepath (10x weight), title (1x), body (1x). Uses Porter stemmer + Unicode 6.1 tokenizer. Score normalization: Sigmoid `1/(1+exp(-(|x|-5)/3))` maps raw BM25 scores to 0-1 range.
+FTS5 columns: filepath (10x weight), title (1x), body (1x). Uses Porter stemmer + Unicode 6.1 tokenizer. Score normalization: `|x| / (1 + |x|)` maps raw BM25 scores to 0-1 range (e.g., strong(-10) → 0.91, medium(-2) → 0.67, weak(-0.5) → 0.33).
 
 ## GGUF Models
 
@@ -105,14 +150,29 @@ Note: RRF k=60 is a default parameter in `reciprocalRankFusion(lists, weights, k
 
 ## Query Expansion Grammar
 
-The expansion model is constrained to output in this grammar:
+The expansion model is constrained to output in this grammar (EBNF):
 
 ```
-root ::= line+
-line ::= type ": " content "\n"
-type ::= "lex" | "vec" | "hyde"
-content ::= [^\n]+
+query_document = { line } ;
+line           = [ type ":" ] text newline ;
+type           = "lex" | "vec" | "hyde" | "expand" ;
 ```
+
+Lines without a type prefix are treated as implicit `expand:` (auto-expanded by the local LLM). At most one `expand:` line per query document.
+
+### Lex Query Sub-Grammar
+
+`lex:` lines support structured BM25 operators:
+
+```
+lex_query   = { lex_term } ;
+lex_term    = negation | phrase | word ;
+negation    = "-" ( phrase | word ) ;
+phrase      = '"' { character } '"' ;
+word        = { letter | digit | "'" } ;
+```
+
+Phrases use verbatim matching (no prefix matching or stemming). Bare words use standard BM25 matching with Porter stemming.
 
 Validation: each expanded query must contain at least one term from the original. Fallback on failure: `[{type: 'vec', text: originalQuery}]`.
 

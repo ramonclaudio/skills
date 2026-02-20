@@ -1,5 +1,5 @@
 ---
-description: Retrieve multiple documents by glob or comma list (CLI fallback for multi_get)
+description: Retrieve multiple documents by glob or list
 allowed-tools: Bash(qmd multi-get*)
 argument-hint: <pattern> [-l N] [--max-bytes N] [--json|--csv|--md|--xml|--files]
 ---
