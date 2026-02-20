@@ -1,6 +1,6 @@
 ---
 name: frames
-description: Extract frames from video files to view them as images. Use when the user asks to watch, view, or analyze a video file (.mov, .mp4, .webm, .avi, etc.) since Claude cannot directly view videos but can view images.
+description: Use this skill when the user asks to watch, view, or analyze a video file (.mov, .mp4, .webm, .avi). Extracts frames as images since Claude cannot view videos directly.
 argument-hint: <video-path>
 allowed-tools:
   - Bash(ffmpeg *)
@@ -8,7 +8,6 @@ allowed-tools:
   - Bash(/bin/cp *)
   - Bash(/bin/ls *)
   - Bash(mkdir -p /tmp/video-frames)
-  - Bash(rm -rf /tmp/video-frames)
   - Bash(wc *)
   - Read
 model: opus
@@ -36,7 +35,7 @@ Extract a unique identifier from the user's path (like a timestamp) and use glob
 
 ```bash
 /bin/cp -f /path/to/dir/*UNIQUE_PART* /tmp/video.mov && \
-rm -rf /tmp/video-frames && mkdir -p /tmp/video-frames; \
+mkdir -p /tmp/video-frames; \
 ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,duration -of csv=p=0 /tmp/video.mov && \
 ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 /bin/ls /tmp/video-frames/ | wc -l
@@ -45,7 +44,7 @@ ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 **Example for** `Screen Recording 2026-01-10 at 11.33.27 AM.mov`:
 ```bash
 /bin/cp -f ~/Desktop/Screen*11.33.27* /tmp/video.mov && \
-rm -rf /tmp/video-frames && mkdir -p /tmp/video-frames; \
+mkdir -p /tmp/video-frames; \
 ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,duration -of csv=p=0 /tmp/video.mov && \
 ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 /bin/ls /tmp/video-frames/ | wc -l
@@ -74,7 +73,6 @@ Then read frames with the Read tool:
 | Spaces in filenames | `/bin/cp -f` with glob pattern handles any filename |
 | Quoted paths fail | `/bin/cp -f` with glob avoids quoting issues |
 | `cd` fails (zoxide) | Never use `cd`, use absolute paths |
-| `rm *.png` fails in zsh | `rm -rf dir && mkdir -p dir` avoids glob entirely |
 | Overwrite prompts | `/bin/cp -f` forces overwrite |
 | Shell aliases interfere | Use `/bin/cp`, `/bin/ls` for reliability |
 
