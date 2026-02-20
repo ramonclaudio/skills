@@ -209,6 +209,7 @@ Reference docs, loaded when relevant:
 - `qmd` ([github.com/tobi/qmd](https://github.com/tobi/qmd)) — `npm install -g @tobilu/qmd` or `bun install -g @tobilu/qmd`
 - Node.js 22+ or Bun runtime
 - `git`
+- macOS: Homebrew SQLite (`brew install sqlite`) for extension support
 - ~2GB disk for GGUF models (auto-downloaded on first embed, or `qmd pull`)
 
 ## Version
