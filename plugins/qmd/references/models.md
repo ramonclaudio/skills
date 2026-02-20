@@ -154,8 +154,8 @@ Document: {chunk}
 - Aggressive: `disposeModelsOnInactivity=true` unloads models from VRAM too
 
 **GPU auto-detection:**
-1. Metal (Apple Silicon M1/M2/M3)
-2. CUDA (NVIDIA GPUs)
+1. CUDA (NVIDIA GPUs)
+2. Metal (Apple Silicon M1/M2/M3)
 3. Vulkan (cross-platform GPU, AMD/Intel)
 4. CPU fallback (no GPU detected)
 

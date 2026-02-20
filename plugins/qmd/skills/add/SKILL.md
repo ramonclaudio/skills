@@ -1,17 +1,16 @@
 ---
 name: add
-description: Clone a GitHub repo, auto-detect file types, index with QMD, embed for search.
+description: Use this skill when the user asks to add a reference repo or index a GitHub repository for search. Clones, auto-detects file types, indexes with QMD, and embeds.
 argument-hint: <url-or-owner/repo> [--name N] [--mask P] [--dest D] [--full] [--defer-embed] [--dry-run]
 context: fork
 agent: general-purpose
 allowed-tools:
   - Bash(qmd *)
+  - Bash(qmd collection*)
   - Bash(git *)
   - Bash(mkdir *)
   - Bash(ls *)
   - Bash(trash *)
-  - Read
-  - Edit
 model: opus
 ---
 
@@ -143,9 +142,9 @@ qmd collection add $REFS/<name> --name <name> --mask "<mask>"
 
 ## Step 5: Set auto-pull
 
-Edit `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml` and add `update: "git -C $REFS/<name> pull --ff-only"` under the collection entry.
-
-> **Known coupling:** Direct config editing breaks if qmd changes its YAML schema. No CLI command exists for setting update commands yet.
+```bash
+qmd collection update-cmd <name> "git -C $REFS/<name> pull --ff-only"
+```
 
 ## Step 6: Add context
 
@@ -187,7 +186,6 @@ Report: collection name, document count, mask used, clone type (shallow/full).
 
 ## Known Limitations
 
-- **Direct config editing** — No CLI command exists for setting update commands. The skill directly edits `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`, which breaks if the schema changes.
 - **Embedding interruption** — first run downloads ~2GB of GGUF models (embeddinggemma-300M, qwen3-reranker-0.6b, qmd-expand GRPO). If interrupted mid-download, retry `qmd embed` or `qmd pull` manually.
 - **Shallow clones** — `--depth 1` saves disk but loses git history. Use `--full` if you need blame or log.
 - **Private repos** — `git clone` will fail without SSH keys or tokens configured. The skill does not handle authentication — that's an environment concern.
@@ -203,7 +201,7 @@ This skill is idempotent. If it fails partway through, re-run `/qmd:add` with th
 | Clone failed (network) | Re-run — Step 2 retries the clone |
 | Detection failed | Re-run with `--mask "<glob>"` to skip detection |
 | Collection add failed | Re-run — Step 4 removes then re-adds |
-| Config edit failed | Manually edit `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml` |
+| Update-cmd failed | Re-run `qmd collection update-cmd <name> "<cmd>"` |
 | Embed interrupted | Run `qmd embed` to resume |
 | Wrong mask indexed | Re-run with `--mask` — the skill is idempotent |
 

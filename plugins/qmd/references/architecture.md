@@ -169,12 +169,16 @@ PRAGMA foreign_keys = ON;        -- Enforce FK constraints
 
 Example: Searching for "middleware" matches `next.js/middleware.ts` with 10x weight vs. "middleware" in document body.
 
-**BM25 scoring:** Built-in FTS5 BM25 with fixed k1=1.2, b=0.75 (SQLite hardcoded, not configurable). Raw scores normalized via sigmoid to map to 0-1 range.
+**Lex query syntax (query documents):** When using `lex:` type in query documents, two special syntaxes apply:
+- **Quoted phrases** (`"rate limit"`) bypass prefix matching and perform exact phrase search against FTS5.
+- **Negation** (`-term`) excludes documents containing the term (maps to FTS5 `NOT`).
 
-**Normalization formula (sigmoid):**
+**BM25 scoring:** Built-in FTS5 BM25 with fixed k1=1.2, b=0.75 (SQLite hardcoded, not configurable). Raw scores normalized to 0-1 range.
+
+**Normalization formula:**
 ```
-normalized_score = 1 / (1 + exp(-(|raw_score| - 5) / 3))
-// Maps typical BM25 range (~2-15) to ~0.1-0.95
+normalized_score = |raw_score| / (1 + |raw_score|)
+// strong(-10) → 0.91, medium(-2) → 0.67, weak(-0.5) → 0.33, none(0) → 0
 ```
 
 ## Vector Storage
@@ -231,7 +235,8 @@ SELECT * FROM documents WHERE hash IN (hashes);
 | H3 (`### ...`) | 80 |
 | H4 (`#### ...`) | 70 |
 | Code block start/end | 80 |
-| H5-H6 | 50-60 |
+| H5 (`##### ...`) | 60 |
+| H6 (`###### ...`) | 50 |
 | Horizontal rule (`---`) | 60 |
 | Blank line (paragraph boundary) | 20 |
 | Unordered list item (`- `, `* `) | 5 |
@@ -254,6 +259,8 @@ final_score = base_score * (1 - (distance / window_size)^2 * 0.7)
 ## Hybrid Search Pipeline
 
 8-step pipeline combining keyword, semantic, and LLM signals.
+
+**MCP `collections` parameter:** The MCP `query` tool accepts a `collections` array (e.g., `["next.js", "react"]`) instead of a single `collection` string. Collections with `includeByDefault: false` are excluded unless explicitly listed in the array.
 
 ### 1. BM25 Probe
 
@@ -413,6 +420,7 @@ collections:
   notes:
     path: ~/Documents/Notes
     pattern: "**/*.md"
+    includeByDefault: false
     context:
       "/": "Personal notes and ideas"
       "/journal/2024": "Daily notes from 2024"
@@ -422,6 +430,7 @@ collections:
 - `path`: Absolute path to collection directory (tilde-expanded)
 - `pattern`: Glob pattern for file inclusion (e.g., `**/*.md`)
 - `update`: Shell command to run before re-indexing (e.g., `git pull`)
+- `includeByDefault`: Boolean (default: `true`). When `false`, the collection is excluded from queries unless explicitly targeted with `-c`. Set via `qmd collection exclude`/`include`.
 - `context`: Hierarchical path → description map (all matching prefixes concatenated)
 
 **Context resolution (all matching prefixes concatenated):**
@@ -465,7 +474,7 @@ Use docids for stable references, collection-prefixed paths for clarity.
 
 ## GPU Auto-Detection
 
-**Priority:** Metal > CUDA > Vulkan > CPU fallback
+**Priority:** CUDA > Metal > Vulkan > CPU fallback
 
 **Parallel contexts:** 1-8 LlamaContext instances based on VRAM availability (25% free VRAM reserved per context).
 
