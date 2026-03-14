@@ -1,117 +1,28 @@
 {
-  "description": "Session continuity hooks. Auto-inits projects, reinjects context after compaction, captures tool events, auto-saves before compaction and on exit, and escalates context degradation.",
+  "description": "Session continuity hooks. Injects resume context on startup and after compaction.",
   "hooks": {
-    "SubagentStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh",
-            "timeout": 10,
-            "statusMessage": "Loading handoff context..."
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "matcher": "startup|resume",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh",
-            "timeout": 10,
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/resume-inject.sh",
+            "timeout": 5,
             "statusMessage": "Loading handoff context..."
           }
         ]
-      },
+      }
+    ],
+    "PostCompact": [
       {
-        "matcher": "compact",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/compact-reinject.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/resume-inject.sh",
             "timeout": 5,
             "statusMessage": "Re-injecting handoff context..."
-          }
-        ]
-      },
-      {
-        "matcher": "clear",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-clear.sh",
-            "timeout": 3,
-            "statusMessage": "Resetting context state..."
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-compact.sh",
-            "timeout": 15,
-            "statusMessage": "Auto-saving session state..."
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Bash|Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/event-capture.sh",
-            "timeout": 3,
-            "async": true,
-            "statusMessage": ""
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "Bash|Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/event-capture.sh",
-            "timeout": 3,
-            "async": true,
-            "statusMessage": ""
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/prompt-reminder.sh",
-            "timeout": 3,
-            "statusMessage": ""
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "matcher": "logout|prompt_input_exit|other",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-compact.sh",
-            "timeout": 10,
-            "statusMessage": "Auto-saving session state..."
           }
         ]
       }

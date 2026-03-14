@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.5.0
+
+BREAKING: full rewrite.
+
+- Rewrite as lean session quality gate (health checks + resume points + cross-machine state)
+- Replace 8 hooks with 2: SessionStart and PostCompact (new v2.1.76 hook)
+- Replace 9 bash scripts (~820 lines) with single `resume-inject.sh` (~28 lines)
+- Drop event capture system (git tracks changes natively)
+- Drop compaction monitoring and escalation (1M context makes this rare, PostCompact handles reinjection)
+- Drop auto-init bootstrapping (skill creates `.handoff/` on first run)
+- Drop session memory persistence (auto memory handles this natively)
+- Drop `CONTEXT.md` regeneration (use `CLAUDE.md` instead)
+- Drop `SubagentStart` context injection (subagents read `CLAUDE.md`)
+- Simplify `state.json` schema: remove `_version`, `_runtime`, `source`, `failed`, `session_memory`
+- Total: ~1000 lines reduced to ~130 lines
+
 ## 1.3.0
 
 - Make `/handoff:start` user-invocable (remove `user-invocable: false`)
@@ -29,7 +45,7 @@
 - SBAR-style session continuity with structured state
 - `.handoff/state.json` single source of truth
 - `.handoff/CONTEXT.md` with auto-regenerated and curated sections
-- `.handoff/events.jsonl` append-only tool event log
+- `.handoff/events.jsonl` append-only raw event log (bash cmd/exit, file writes/edits)
 - 9 hook scripts: auto-init, session-start, compact-reinject, session-clear, pre-compact, auto-save, event-capture, prompt-reminder, state library
 - `/handoff:end` for session archival with health checks
 - `/handoff:start` for deep context hydration
