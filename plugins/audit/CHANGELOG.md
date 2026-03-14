@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0
+
+- Rename `Task` to `Agent` in allowed-tools and code examples
+- Use `${CLAUDE_SKILL_DIR}` for reference file paths (checklists.md, rules.md)
+- Add version field to plugin.json
+- Add per-file sweep format for systematic Phase 2 audits
+
 ## 1.2.0
 
 - Drop `sonnet[1m]` for subagents, use `sonnet` (1M context unavailable on subscription plans)
