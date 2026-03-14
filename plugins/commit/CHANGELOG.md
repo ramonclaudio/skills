@@ -2,7 +2,6 @@
 
 ## 1.4.0
 
-- Add `disable-model-invocation: true` per official docs best practice for side-effect workflows
 - Add `version` to `plugin.json` for standalone update detection
 - Add explicit `--no-verify` and `--no-gpg-sign` prohibitions to constraints
 - Strip `<task>`, `<commit_types>`, `<architectural_layers>`, `<examples>` XML wrappers from skill content

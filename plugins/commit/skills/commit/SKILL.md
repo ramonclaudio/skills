@@ -2,7 +2,6 @@
 name: commit
 description: Atomic conventional commits grouped by architectural layer with GPG signing. Supports --analyze, --push, --pr, --merge.
 argument-hint: [--analyze] [--push] [--pr] [--merge PR#]
-disable-model-invocation: true
 allowed-tools:
   - Bash(git *)
   - Bash(gh *)
