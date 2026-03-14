@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.4.0
+
+- Add pre-loaded ffmpeg availability check via shell interpolation for fail-fast behavior
+- Add `ultrathink` for better frame sampling decisions
+- Add negative trigger to description ("Do NOT use for GIF conversion")
+- Add `.mkv` and more trigger words ("look at", "review", "screen recording") to description
+- Add FPS-by-duration table: <5s native, 5-30s 2fps, 30s-2min 1fps, >2min 0.5fps
+- Add default 640px width scaling to save context tokens on retina recordings
+- Increase frame sampling limits (up to 50-60 frames) for 600-image-per-request support
+- Consolidate separate Long Videos, Resize, Time Range sections into main workflow
+- Use `frame_%04d.png` naming (supports >999 frames)
+- Add `version`, `repository`, `license`, `keywords` to `plugin.json`
+- Remove Prerequisites section (replaced by pre-loaded environment check)
+
 ## 1.3.0
 
 - Add `Bash(trash *)` to allowed-tools
