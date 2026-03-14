@@ -35,7 +35,7 @@ Split-pane mode requires tmux or iTerm2 with the `it2` CLI. Not supported in VS 
 
 ## Usage
 
-This skill provides flags for controlling team behavior. These flags are skill-specific — they are not built-in Claude Code CLI flags.
+This skill provides flags for controlling team behavior. These flags are skill-specific. They are not built-in Claude Code CLI flags.
 
 ```bash
 /teams Refactor the auth module into separate concerns    # Spawn and execute
@@ -60,20 +60,20 @@ If another plugin has a conflicting skill name, use the full `plugin:skill` form
 
 Agent teams are most effective for tasks where parallel exploration adds real value:
 
-- **Research and review** — multiple teammates investigate different aspects simultaneously, then share and challenge each other's findings
-- **New modules or features** — teammates each own a separate piece without stepping on each other
-- **Debugging with competing hypotheses** — teammates test different theories in parallel and converge on the answer faster
-- **Cross-layer coordination** — changes that span frontend, backend, and tests, each owned by a different teammate
+- **Research and review**: multiple teammates investigate different aspects simultaneously, then share and challenge each other's findings
+- **New modules or features**: teammates each own a separate piece without stepping on each other
+- **Debugging with competing hypotheses**: teammates test different theories in parallel and converge on the answer faster
+- **Cross-layer coordination**: changes that span frontend, backend, and tests, each owned by a different teammate
 
 If you're new to agent teams, start with tasks that have clear boundaries and don't require writing code: reviewing a PR, researching a library, or investigating a bug.
 
 ## When NOT to use
 
 Don't create a team for:
-- **Trivial work** — fewer than 3 files, obvious change
-- **Sequential tasks** — steps must happen in order, no parallelism
-- **Same-file edits** — two teammates editing one file causes overwrites
-- **High dependency** — most tasks block on each other
+- **Trivial work**: fewer than 3 files, obvious change
+- **Sequential tasks**: steps must happen in order, no parallelism
+- **Same-file edits**: two teammates editing one file causes overwrites
+- **High dependency**: most tasks block on each other
 
 For these cases, a single session or subagents are more effective.
 
@@ -90,15 +90,15 @@ An agent team consists of:
 
 ## How It Works
 
-### Phase 1 — Reconnaissance
+### Phase 1: Reconnaissance
 
 Reads `CLAUDE.md`, maps the codebase structure, identifies which files and modules the task touches, detects constraints (shared state, sequential dependencies).
 
-### Phase 2 — Decomposition
+### Phase 2: Decomposition
 
 Breaks work into independent units. Each unit touches a disjoint set of files, has a clear deliverable, and can be completed in isolation.
 
-### Phase 3 — Team Design
+### Phase 3: Team Design
 
 Selects team composition from reference patterns:
 
@@ -110,15 +110,15 @@ Selects team composition from reference patterns:
 | Adversarial Debug | Unknown root cause, competing hypotheses |
 | Cross-Layer | Changes spanning frontend, backend, database |
 
-### Phase 4 — Task Graph
+### Phase 4: Task Graph
 
 Creates dependency-ordered tasks. Producers before consumers. Schemas before implementations. Interfaces before concrete types.
 
-### Phase 5 — Spawn & Brief
+### Phase 5: Spawn & Brief
 
-Each teammate gets a spawn prompt with: role, owned files, context files, exclusions, task IDs, and communication rules. Teammates auto-load CLAUDE.md and MCP servers independently — the spawn prompt focuses on task-specific context.
+Each teammate gets a spawn prompt with: role, owned files, context files, exclusions, task IDs, and communication rules. Teammates auto-load CLAUDE.md and MCP servers independently. The spawn prompt focuses on task-specific context.
 
-### Phase 6 — Coordinate
+### Phase 6: Coordinate
 
 Lead tracks progress, unblocks stuck teammates, redirects scope drift, and synthesizes results. Never implements.
 
@@ -128,7 +128,7 @@ Lead tracks progress, unblocks stuck teammates, redirects scope drift, and synth
 |:-----|:-------|
 | `--dry-run` | Design team and task graph without spawning |
 | `--plan-approval` | Require teammates to plan before implementing. Use for schema changes, API modifications, and critical code paths. Lead approves or rejects each plan with feedback. |
-| `--delegate` | Restrict lead to coordination-only tools — no code editing |
+| `--delegate` | Restrict lead to coordination-only tools, no code editing |
 | `--roles N` | Force specific teammate count (max 5) |
 
 > [!TIP]
@@ -156,24 +156,36 @@ Click into a teammate's pane to interact with their session directly.
 > [!TIP]
 > The lead sometimes implements tasks itself instead of waiting for teammates. If this happens, tell it to wait, or use `--delegate` to restrict the lead to coordination-only tools.
 
+## Teammate configuration
+
+Beyond name, role, model, and file ownership, teammates support:
+
+| Field | Effect |
+|:------|:-------|
+| `permissionMode` | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` |
+| `isolation` | `worktree` gives the teammate its own git worktree |
+| `maxTurns` | Cap the number of agentic turns |
+| `memory` | `user`, `project`, or `local` for persistent cross-session memory |
+| `mcpServers` | Scope specific MCP servers to this teammate |
+
 ## Token cost
 
-Agent teams use significantly more tokens than a single session. Each teammate has its own context window, and token usage scales with the number of active teammates. For research, review, and new feature work, the extra tokens are usually worthwhile. For routine tasks, a single session is more cost-effective.
+Agent teams use 3-10x more tokens than a single session (roughly 7x in plan mode). Each teammate has its own context window, and token usage scales with the number of active teammates. Use Sonnet for teammates when possible. Start with 3-5 teammates, target 5-6 tasks per teammate. For routine tasks, a single session is more cost-effective.
 
 ## Limitations
 
 Agent teams are experimental:
 
-- `/resume` and `/rewind` do not restore teammates — spawn new ones after resuming
-- Task status can lag — teammates sometimes forget to mark tasks completed
-- Shutdown can be slow — teammates finish their current request or tool call before stopping
-- One team per session — clean up before starting a new one
-- No nested teams — teammates cannot spawn their own teams or teammates
-- Lead is fixed — the session that creates the team leads it for its lifetime
-- Permissions set at spawn — all teammates start with the lead's permission mode; changeable individually after spawning. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting.
+- `/resume` and `/rewind` do not restore teammates. Spawn new ones after resuming.
+- Task status can lag. Teammates sometimes forget to mark tasks completed.
+- Shutdown can be slow. Teammates finish their current request or tool call before stopping.
+- One team per session. Clean up before starting a new one.
+- No nested teams. Teammates cannot spawn their own teams or teammates.
+- Lead is fixed. The session that creates the team leads it for its lifetime.
+- Teammates inherit the lead's permission mode by default. Use `permissionMode` to override per-teammate, or change individually after spawning. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting.
 - Split panes require tmux or iTerm2 (not supported in VS Code terminal, Windows Terminal, or Ghostty)
 
-Teammates read `CLAUDE.md` from their working directory — use this to provide project-specific guidance to all teammates.
+Teammates read `CLAUDE.md` from their working directory. Use this to provide project-specific guidance to all teammates.
 
 ## Troubleshooting
 
@@ -184,7 +196,7 @@ Teammates read `CLAUDE.md` from their working directory — use this to provide 
 | Teammate stops on errors | Message them with instructions, or spawn a replacement teammate to continue the work. |
 | Lead implements instead of delegating | Use `--delegate`, or tell the lead to wait for teammates to finish. |
 | Lead shuts down before work is done | The lead may decide the team is finished before all tasks are complete. Tell it to keep going, or tell it to wait for teammates to finish before proceeding. |
-| Task appears stuck | Check if the work is actually done — teammates sometimes forget to mark tasks completed. Update manually or nudge the teammate. |
+| Task appears stuck | Check if the work is actually done. Teammates sometimes forget to mark tasks completed. Update manually or nudge the teammate. |
 | Orphaned tmux sessions | `tmux ls` then `tmux kill-session -t <session-name>` |
 
 ---

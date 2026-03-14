@@ -15,7 +15,7 @@ If two teammates need the same file:
 2. Make the second teammate depend on the first
 3. Or: assign both edits to one teammate
 
-"Shared" files are edited by the lead only, or by one designated teammate — never two.
+"Shared" files are edited by the lead only, or by one designated teammate, never two.
 
 ## Permissions
 
@@ -25,9 +25,19 @@ All teammates inherit the lead's permission settings at spawn. Pre-approve commo
 - Git operations (status, diff, add, commit, push)
 - Build and test commands (npm, bun, cargo, go, etc.)
 
-Per-teammate permissions can only be changed after spawning, not at spawn time. This is a known limitation of agent teams.
+### Per-teammate permission modes
 
-**Warning:** If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting. Be deliberate about the lead's permission mode before spawning.
+Set `permissionMode` on individual teammates to control how they handle permission prompts:
+
+| Mode | Behavior |
+|------|----------|
+| `default` | Standard permission checking with prompts |
+| `acceptEdits` | Auto-accept file edits |
+| `dontAsk` | Auto-deny prompts (explicitly allowed tools still work) |
+| `bypassPermissions` | Skip all permission checks |
+| `plan` | Read-only exploration mode |
+
+If the lead runs with `bypassPermissions`, this takes precedence and cannot be overridden. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting. Be deliberate about the lead's permission mode before spawning.
 
 ## Display Mode
 
@@ -37,6 +47,63 @@ Split-pane mode requires either tmux or iTerm2 with the `it2` CLI:
 - **iTerm2**: install the `it2` CLI, then enable the Python API in iTerm2 → Settings → General → Magic → Enable Python API.
 
 Split-pane mode is not supported in VS Code's integrated terminal, Windows Terminal, or Ghostty.
+
+## Teammate Isolation
+
+Set `isolation: "worktree"` on a teammate to run it in a temporary git worktree. Each isolated teammate gets its own copy of the repository, eliminating file conflicts entirely. The worktree is cleaned up automatically if the teammate makes no changes.
+
+Use isolation when:
+- Multiple teammates need to edit files in overlapping directories
+- Teammates run build/test commands that produce side effects
+- You want full independence without file ownership constraints
+
+`WorktreeCreate` and `WorktreeRemove` hooks fire when worktrees are created and removed, enabling custom setup/teardown (e.g., installing dependencies, seeding databases).
+
+## Teammate Turn Limits
+
+Set `maxTurns` on a teammate to cap the number of agentic turns before it stops. Use this to prevent runaway teammates or to enforce time-boxing on exploratory tasks.
+
+## Teammate Memory
+
+Set `memory` on a teammate to give it a persistent directory that survives across conversations. The teammate builds knowledge over time: codebase patterns, debugging insights, architectural decisions.
+
+| Scope | Location | When to use |
+|-------|----------|-------------|
+| `user` | `~/.claude/agent-memory/<name>/` | Learnings across all projects |
+| `project` | `.claude/agent-memory/<name>/` | Project-specific, shareable via VCS |
+| `local` | `.claude/agent-memory-local/<name>/` | Project-specific, not checked in |
+
+When memory is enabled, the teammate gets instructions to read/write its memory directory and the first 200 lines of `MEMORY.md` from that directory.
+
+## Teammate MCP Servers
+
+Set `mcpServers` on a teammate to scope specific MCP servers to it. Two forms:
+
+- **Reference by name**: `"github"` reuses an already-configured server from the parent session
+- **Inline definition**: full server config keyed by name, connected when the teammate starts and disconnected when it finishes
+
+Inline servers stay out of the main conversation's context, reducing tool definition overhead for the lead.
+
+## SubagentStart Hook
+
+The `SubagentStart` hook event fires when any subagent (including teammates) begins execution. Use it with a matcher to target specific agent types:
+
+```json
+{
+  "hooks": {
+    "SubagentStart": [
+      {
+        "matcher": "db-agent",
+        "hooks": [
+          { "type": "command", "command": "./scripts/setup-db.sh" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Pair with `SubagentStop` for cleanup. These hooks run in the parent session's context, not inside the subagent.
 
 ## Task States
 
@@ -58,7 +125,7 @@ Task claiming uses file locking to prevent races when multiple teammates try to 
 - **Self-claim**: after finishing assigned work, a teammate picks up the next unassigned, unblocked task from the shared list
 - **Idle**: if no tasks are available, the teammate messages the lead and waits
 
-Teammates auto-notify the lead when they go idle. Messages arrive automatically — no polling needed.
+Teammates auto-notify the lead when they go idle. Messages arrive automatically, no polling needed.
 
 ## Task Sizing
 
@@ -92,22 +159,22 @@ When a teammate completes a blocking task, dependent tasks unblock automatically
 
 Teams and tasks are stored locally:
 
-- **Team config:** `~/.claude/teams/{team-name}/config.json` — contains `members` array with each teammate's name, agent ID, and agent type
+- **Team config:** `~/.claude/teams/{team-name}/config.json`: contains `members` array with each teammate's name, agent ID, and agent type
 - **Task list:** `~/.claude/tasks/{team-name}/`
 
 Teammates can read the team config to discover other team members.
 
 ## Communication Protocol
 
-Use the `SendMessage` tool. Two message types:
-- **`message`** (`SendMessage` with `type: "message"`, `recipient: "name"`, `content: "..."`, `summary: "5-10 word preview"`) — send to one specific teammate. Standard communication.
-- **`broadcast`** (`SendMessage` with `type: "broadcast"`, `content: "..."`, `summary: "5-10 word preview"`) — send to all teammates simultaneously. Token cost scales with team size. Use sparingly.
+Use the `SendMessage` tool. Two addressing modes:
+- **Direct**: `SendMessage({ to: "name", message: "text", summary: "5-10 word preview" })`, send to one specific teammate. Standard communication.
+- **Broadcast**: `SendMessage({ to: "*", message: "text", summary: "5-10 word preview" })`, send to all teammates simultaneously. Token cost scales with team size. Use sparingly.
 
-The `summary` field is **required** for both `message` and `broadcast` — it's shown as a UI preview.
+The `summary` field is **required**. It's shown as a UI preview.
 
 Messages are delivered automatically. The lead does not need to poll.
 
-**Idle state:** Teammates go idle after every turn — this is normal, not an error. Sending a message to an idle teammate wakes them up. When a teammate DMs another teammate, a brief summary appears in the idle notification so the lead has visibility into peer collaboration.
+**Idle state:** Teammates go idle after every turn. This is normal, not an error. Sending a message to an idle teammate wakes them up. When a teammate DMs another teammate, a brief summary appears in the idle notification so the lead has visibility into peer collaboration.
 
 ### Teammate → Lead
 
@@ -125,8 +192,8 @@ Messages are delivered automatically. The lead does not need to poll.
 | Teammate stuck | Provide guidance or reassign |
 | Scope drift | Redirect with specific file paths |
 | New task discovered | Create task, assign to appropriate teammate |
-| Plan submitted | `SendMessage` with `type: "plan_approval_response"`, `request_id`, `approve`, and optional `content` for feedback |
-| Work complete | Send shutdown request via `SendMessage` with `type: "shutdown_request"` |
+| Plan submitted | `SendMessage({ to: "name", message: { type: "plan_approval_response", request_id: "...", approve: true/false, feedback: "..." }, summary: "Approve/reject plan" })` |
+| Work complete | `SendMessage({ to: "name", message: { type: "shutdown_request", reason: "..." }, summary: "Shutdown request" })` |
 
 ### Teammate → Teammate
 
@@ -157,11 +224,60 @@ Broadcasts cost tokens proportional to team size. Use sparingly.
 
 1. All tasks marked completed in the shared task list
 2. Lead verifies deliverables (for review teams: synthesize findings)
-3. Lead sends shutdown request via `SendMessage` with `type: "shutdown_request"`, `recipient: "name"`. Teammates respond with `type: "shutdown_response"`, `request_id` (from the request), and `approve: true` (exit) or `approve: false` with `content` explaining why. If rejected, wait and retry.
-4. Teammates finish in-flight operations before exiting — this can be slow.
+3. Lead sends shutdown request: `SendMessage({ to: "name", message: { type: "shutdown_request", reason: "All tasks complete" }, summary: "Shutdown request" })`. Teammates respond with `type: "shutdown_response"`, `request_id` (from the request), and `approve: true` (exit) or `approve: false` with `reason` explaining why. If rejected, wait and retry.
+4. Teammates finish in-flight operations before exiting. This can be slow.
 5. Wait for all teammates to stop. Cleanup fails if any teammate is still running.
-6. Lead runs `TeamDelete` to clean up (only the lead should do this — teammates' team context may not resolve correctly).
+6. Lead runs `TeamDelete` to clean up (only the lead should do this; teammates' team context may not resolve correctly).
 7. Lead reports summary to user.
+
+## Quality Gates
+
+Hooks can enforce quality standards at key checkpoints:
+
+| Hook | Trigger | Exit code 2 effect |
+|------|---------|-------------------|
+| `SubagentStart` | Subagent/teammate spawns | Can block spawn or run setup scripts |
+| `TeammateIdle` | Teammate goes idle | Sends feedback to teammate and keeps them working |
+| `TaskCompleted` | Task marked complete | Prevents completion with feedback, teammate must address issues |
+| `SubagentStop` | Subagent finishes | Validates subagent output quality before results return to caller |
+
+Exit code 0 = pass (proceed normally). Exit code 2 = reject (send stderr as feedback). Any other exit code is treated as a hook error.
+
+All hooks support matchers to target specific agent types by name. These hooks let the lead enforce standards without manual review of every task. Example: a `TaskCompleted` hook that runs the test suite and rejects tasks where tests fail.
+
+## Spawn Prompt Template
+
+Every teammate spawn prompt follows this structure:
+
+```
+You are {name}, {role description}.
+
+## Your scope
+EDIT: {paths the teammate may modify}
+READ: {paths for context only}
+DO NOT TOUCH: {paths that are off-limits}
+
+## Tasks
+Claim task #{N} from the shared task list.
+
+## {Steps/What to do}
+{Detailed instructions with specific commands, file lists, or checklists}
+
+## Communication
+Send findings to lead via SendMessage when done.
+Mark task #{N} as completed.
+```
+
+Rules:
+
+- **EDIT/READ/DO NOT TOUCH is mandatory** for every teammate spawn prompt. No exceptions.
+- **EDIT paths** grant exclusive file ownership. No two teammates share EDIT paths.
+- **READ paths** provide context without edit permission. Teammates can read these but must not modify them.
+- **DO NOT TOUCH** prevents accidental changes to shared files or other teammates' files. Default to "Everything else" when scope is narrow.
+- **Tasks section** always references the shared task list with a specific task number.
+- **Communication section** always includes `SendMessage` to lead and `TaskUpdate` to mark complete.
+- For **read-only teammates** (researchers, auditors, reviewers), set `EDIT: NONE`.
+- For **fixer teammates**, list every file they may edit explicitly. No wildcards unless the teammate owns an entire directory.
 
 ## Failure Modes
 
