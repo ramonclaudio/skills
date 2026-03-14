@@ -2,7 +2,7 @@
 
 Pick the pattern that matches the work. Adapt as needed; these are starting points, not prescriptions.
 
-**Cost:** Agent teams use 3-10x more tokens than a single session (roughly 7x in plan mode). Each teammate has its own context window, and total usage scales with the number of active teammates. Use Sonnet for teammates when possible. Keep spawn prompts focused. Clean up teams when done. The overhead is justified when parallelism provides a clear benefit. For routine tasks, a single session is cheaper and faster.
+**Cost:** Agent teams use 3-10x more tokens than a single session (roughly 7x in plan mode). Each teammate has its own context window (1M tokens with Opus 4.6 on Max/Team/Enterprise), and total usage scales with the number of active teammates. Use Sonnet for teammates when possible. Keep spawn prompts focused. Clean up teams when done. The overhead is justified when parallelism provides a clear benefit. For routine tasks, a single session is cheaper and faster.
 
 **Team sizing:** Start with 3-5 teammates for most workflows. Target 5-6 tasks per teammate. Beyond 5 teammates, coordination overhead dominates and diminishing returns kick in. Three focused teammates often outperform five scattered ones.
 

@@ -27,7 +27,7 @@ All teammates inherit the lead's permission settings at spawn. Pre-approve commo
 
 ### Per-teammate permission modes
 
-Set `permissionMode` on individual teammates to control how they handle permission prompts:
+Set `mode` on individual teammates (via the Agent tool's `mode` parameter) to control how they handle permission prompts:
 
 | Mode | Behavior |
 |------|----------|
@@ -36,6 +36,7 @@ Set `permissionMode` on individual teammates to control how they handle permissi
 | `dontAsk` | Auto-deny prompts (explicitly allowed tools still work) |
 | `bypassPermissions` | Skip all permission checks |
 | `plan` | Read-only exploration mode |
+| `auto` | Automatic permission decisions based on context |
 
 If the lead runs with `bypassPermissions`, this takes precedence and cannot be overridden. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting. Be deliberate about the lead's permission mode before spawning.
 
@@ -56,6 +57,8 @@ Use isolation when:
 - Multiple teammates need to edit files in overlapping directories
 - Teammates run build/test commands that produce side effects
 - You want full independence without file ownership constraints
+
+Project configs and auto-memory are shared across git worktrees of the same repository, so isolated teammates still pick up CLAUDE.md and project settings.
 
 `WorktreeCreate` and `WorktreeRemove` hooks fire when worktrees are created and removed, enabling custom setup/teardown (e.g., installing dependencies, seeding databases).
 
@@ -242,6 +245,8 @@ Hooks can enforce quality standards at key checkpoints:
 | `SubagentStop` | Subagent finishes | Validates subagent output quality before results return to caller |
 
 Exit code 0 = pass (proceed normally). Exit code 2 = reject (send stderr as feedback). Any other exit code is treated as a hook error.
+
+`TeammateIdle` and `TaskCompleted` hooks also support JSON output with `{"continue": false, "stopReason": "..."}` to stop the teammate entirely, matching `Stop` hook behavior. Use this for hard quality gates where a teammate should not continue after a failure.
 
 All hooks support matchers to target specific agent types by name. These hooks let the lead enforce standards without manual review of every task. Example: a `TaskCompleted` hook that runs the test suite and rejects tasks where tests fail.
 
