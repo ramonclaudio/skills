@@ -1,13 +1,14 @@
 ---
 name: frames
 description: Use this skill when the user asks to watch, view, or analyze a video file (.mov, .mp4, .webm, .avi). Extracts frames as images since Claude cannot view videos directly.
-argument-hint: <video-path>
+argument-hint: "<video-file>"
 allowed-tools:
   - Bash(ffmpeg *)
   - Bash(ffprobe *)
   - Bash(/bin/cp *)
   - Bash(/bin/ls *)
   - Bash(mkdir -p /tmp/video-frames)
+  - Bash(trash *)
   - Bash(wc *)
   - Read
 model: opus
@@ -27,6 +28,8 @@ apt install ffmpeg   # Linux
 
 ## Quick Workflow (2 Commands)
 
+Parse the video path from `$ARGUMENTS`.
+
 **IMPORTANT:** File paths with spaces, timestamps, and special characters are problematic. ALWAYS use this pattern:
 
 ### Step 1: Copy + Probe + Extract (single command)
@@ -35,7 +38,7 @@ Extract a unique identifier from the user's path (like a timestamp) and use glob
 
 ```bash
 /bin/cp -f /path/to/dir/*UNIQUE_PART* /tmp/video.mov && \
-mkdir -p /tmp/video-frames; \
+trash /tmp/video-frames 2>/dev/null; mkdir -p /tmp/video-frames && \
 ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,duration -of csv=p=0 /tmp/video.mov && \
 ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 /bin/ls /tmp/video-frames/ | wc -l
@@ -44,7 +47,7 @@ ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 **Example for** `Screen Recording 2026-01-10 at 11.33.27 AM.mov`:
 ```bash
 /bin/cp -f ~/Desktop/Screen*11.33.27* /tmp/video.mov && \
-mkdir -p /tmp/video-frames; \
+trash /tmp/video-frames 2>/dev/null; mkdir -p /tmp/video-frames && \
 ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate,duration -of csv=p=0 /tmp/video.mov && \
 ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 /bin/ls /tmp/video-frames/ | wc -l
@@ -53,6 +56,8 @@ ffmpeg -y -v warning -i /tmp/video.mov /tmp/video-frames/frame_%03d.png && \
 This returns: `frame_rate,duration` on one line, then frame count.
 
 ### Step 2: View frames
+
+Read sampled frames in parallel (multiple Read calls in one response) for faster analysis.
 
 Sample frames evenly. Use Read tool on PNG files:
 
