@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.0
+
+- Rename plugin from `simplify` to `polish` to avoid collision with bundled `/simplify` skill (Claude Code 2.1.63+)
+- Differentiate from built-in `/simplify`: full codebase sweep vs recently changed files
+- Rename `Task` tool to `Agent` (Claude Code 2.1.63)
+- Move Phase 2-5 to references/workflow.md for progressive disclosure
+- Add `[path]` to argument-hint for scoped analysis
+- Use `${CLAUDE_SKILL_DIR}` for workflow.md reference path
+- Add path scoping support to arguments
+- Replace "comprehensive" AI vocabulary with plain language
+
 ## 1.2.0
 
 - Drop `sonnet[1m]` for worker subagents, use `sonnet` (1M context unavailable on subscription plans)

@@ -1,50 +1,4 @@
----
-name: simplify
-description: Use this skill when the user asks to simplify code or reduce complexity. Analyzes files and applies simplifications using parallel background agents.
-argument-hint: [--dry-run]
-context: fork
-agent: general-purpose
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Bash(git *)
-  - Bash(wc *)
-  - Edit
-  - Task
-  - TaskGet
-  - TaskCreate
-  - TaskUpdate
-  - TaskList
-model: opus
----
-
-# Codebase Simplification Analysis
-
-ultrathink
-
-You are a code simplification specialist performing a comprehensive codebase analysis. Your task is to identify ALL files that could benefit from simplification, then refine them systematically using parallel background agents.
-
-## Arguments
-
-- `$ARGUMENTS` containing `--dry-run`: Only analyze and report, don't modify files
-
-## Phase 1: Codebase Discovery
-
-First, fetch EVERY source file in the codebase. Use multiple parallel glob patterns to ensure complete coverage:
-
-**Required glob patterns to run IN PARALLEL:**
-- `**/*.ts` - TypeScript files
-- `**/*.tsx` - React TypeScript files
-- `**/*.js` - JavaScript files
-- `**/*.jsx` - React JavaScript files
-- `**/*.py` - Python files
-- `**/*.go` - Go files
-- `**/*.rs` - Rust files
-- `**/*.vue` - Vue files
-- `**/*.svelte` - Svelte files
-
-Exclude: `node_modules/**`, `dist/**`, `build/**`, `.next/**`, `coverage/**`, `*.min.*`, `*.d.ts`, `_generated/**`, `.git/**`
+# Polish Workflow: Phases 2-5
 
 ## Phase 2: Deep Analysis (ultrathink)
 
@@ -55,7 +9,7 @@ Exclude: `node_modules/**`, `dist/**`, `build/**`, `.next/**`, `coverage/**`, `*
 
 For EVERY file discovered, read its contents and analyze with extended thinking:
 
-**Simplification Criteria** - Flag a file if it has ANY of:
+**Polish Criteria** - Flag a file if it has ANY of:
 1. **Unnecessary complexity**: Deep nesting (>3 levels), overly clever solutions
 2. **Redundant code**: Duplicate logic, unused variables/imports, dead code
 3. **Poor clarity**: Unclear naming, missing/excessive comments, dense one-liners
@@ -63,31 +17,31 @@ For EVERY file discovered, read its contents and analyze with extended thinking:
 5. **Inconsistent style**: Mixed conventions, improper imports, arrow vs function inconsistency
 6. **Over-abstraction**: Premature optimization, unnecessary indirection
 
-**Scoring**: Rate each file 0-10 on simplification potential (10 = most needs work)
+**Scoring**: Rate each file 0-10 on polish potential (10 = most needs work)
 
 ## Phase 3: Create Work Queue
 
-Use TaskCreate to create a prioritized list of files needing simplification (score >= 5).
+Use TaskCreate to create a prioritized list of files needing polish (score >= 5).
 
 Format each task:
 ```
 TaskCreate(
-  subject: "Simplify {filepath}",
+  subject: "Polish {filepath}",
   description: "Score: {N}/10 | Reason: {brief reason}",
-  activeForm: "Simplifying {filename}"
+  activeForm: "Polishing {filename}"
 )
 ```
 
-## Phase 4: Parallel Simplification
+## Phase 4: Parallel Polish
 
 For EACH file in the queue, launch a background agent:
 
 ```
-Task(
+Agent(
   subagent_type="general-purpose",
   model="sonnet",
   run_in_background=true,
-  prompt="Simplify the file at {filepath}.
+  prompt="Polish the file at {filepath}.
 
   Use only Read, Edit, Glob, and Grep tools. Do NOT use Bash or spawn sub-agents.
 
@@ -110,8 +64,8 @@ Task(
 
 After all agents complete:
 1. TaskUpdate each task to `completed`
-2. Summarize total files analyzed, files simplified, key changes made
-3. List any files that couldn't be simplified and why
+2. Summarize total files analyzed, files polished, key changes made
+3. List any files that couldn't be polished and why
 
 ## Constraints
 

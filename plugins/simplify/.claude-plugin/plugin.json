@@ -1,8 +1,0 @@
-{
-  "name": "simplify",
-  "description": "Analyze and simplify entire codebases using parallel background agents",
-  "author": {
-    "name": "ramonclaudio",
-    "email": "hello@ramonclaudio.com"
-  }
-}

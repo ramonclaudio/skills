@@ -1,0 +1,9 @@
+{
+  "name": "polish",
+  "version": "1.4.0",
+  "description": "Full codebase sweep that scores every file 0-10 on polish potential and refines files scoring 5+",
+  "author": {
+    "name": "ramonclaudio",
+    "email": "hello@ramonclaudio.com"
+  }
+}
