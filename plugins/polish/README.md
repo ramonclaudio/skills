@@ -1,32 +1,25 @@
-# Simplify Plugin
+# Polish Plugin
 
 Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Cleaning it up file by file is tedious. This runs parallel agents across the whole codebase and only touches what actually needs work.
+
+> [!NOTE]
+> **Not the same as built-in `/simplify`.** The bundled `/simplify` skill (Claude Code 2.1.63+) reviews recently changed files. `/polish` does a full codebase sweep: it reads every source file, scores each 0-10 on polish potential, and targets files scoring 5+.
 
 ## Usage
 
 ```bash
-/simplify             # Analyze and apply simplifications
-/simplify --dry-run   # Report only, no modifications
+/polish             # Analyze and apply refinements
+/polish --dry-run   # Report only, no modifications
+/polish src/        # Scope to specific path
 ```
-
-<details>
-<summary>Fully-qualified syntax</summary>
-
-If another plugin has a conflicting skill name, use the full `plugin:skill` form:
-
-```bash
-/simplify:simplify [--dry-run]
-```
-
-</details>
 
 ## How It Works
 
 1. Globs all source files in the codebase
-2. Reads every file, scores 0-10 on simplification potential
+2. Reads every file, scores 0-10 on polish potential
 3. Creates tasks for files scoring 5+
-4. Launches up to 5 background agents (sonnet) simultaneously, each simplifying one file
-5. Summarizes files analyzed, simplified, and what changed
+4. Launches up to 5 background agents (sonnet) simultaneously, each refining one file
+5. Summarizes files analyzed, refined, and what changed
 
 <details open>
 <summary>What It Looks For</summary>
