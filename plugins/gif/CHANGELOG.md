@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Add pre-loaded ffmpeg availability check via shell interpolation for fail-fast behavior
+- Add `ultrathink` for better ffmpeg filter chain reasoning
+- Add negative trigger to description ("Do NOT use for frame extraction")
+- Add `version`, `repository`, `license`, `keywords` to `plugin.json`
+- Remove Prerequisites section (replaced by pre-loaded environment check)
+
 ## 1.3.0
 
 - Remove `Bash(for *)` from allowed-tools

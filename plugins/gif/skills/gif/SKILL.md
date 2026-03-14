@@ -1,6 +1,6 @@
 ---
 name: gif
-description: Use this skill when the user asks to convert a video or screen recording to GIF. Handles HDR recordings, macOS filenames with spaces, and ffmpeg two-pass palette compression.
+description: Convert a video or screen recording to GIF. Handles HDR recordings, macOS filenames with spaces, and ffmpeg two-pass palette compression. Do NOT use for frame extraction (use /frames instead).
 argument-hint: "<video-file> [--speed N] [--width N] [--fps N] [--crop]"
 allowed-tools:
   - Bash(ffmpeg *)
@@ -18,15 +18,15 @@ model: opus
 
 # Video to GIF
 
+ultrathink
+
 Convert screen recordings to compressed GIFs using ffmpeg's two-pass palette method. Handles HDR (HDR10/PQ) recordings from macOS automatically.
 
-## Prerequisites
+## Environment
 
-Requires `ffmpeg` to be installed:
-```bash
-brew install ffmpeg  # macOS
-apt install ffmpeg   # Linux
-```
+- ffmpeg: !`which ffmpeg 2>/dev/null && ffmpeg -version 2>&1 | head -1 || echo "NOT INSTALLED - run: brew install ffmpeg"`
+
+If ffmpeg is NOT INSTALLED, stop immediately and tell the user to install it. Do not attempt any conversion.
 
 ## Defaults
 
