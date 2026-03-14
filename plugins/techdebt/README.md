@@ -2,7 +2,7 @@
 
 Lightweight end-of-session sweep. Run it at the end of every session to find and kill accumulated tech debt before it compounds.
 
-Fast and targeted — not a full audit.
+Fast and targeted. Not a full audit.
 
 ## Usage
 
@@ -43,13 +43,13 @@ If another plugin has a conflicting skill name, use the full `plugin:skill` form
 **Files scanned:** 47
 
 ### Duplicated Code
-- [HIGH] `src/api/users.ts:45` — 25-line block duplicated from `src/api/teams.ts:82`. **Fix:** Extract to shared `buildQuery()` in `src/api/shared.ts`.
+- [HIGH] `src/api/users.ts:45`: 25-line block duplicated from `src/api/teams.ts:82`. **Fix:** Extract to shared `buildQuery()` in `src/api/shared.ts`.
 
 ### Unused Dependencies
-- [MEDIUM] `package.json` — `lodash` not imported anywhere. **Fix:** Remove from dependencies.
+- [MEDIUM] `package.json`: `lodash` not imported anywhere. **Fix:** Remove from dependencies.
 
 ### Stale TODOs
-- [LOW] `src/utils.ts:12` — `// TODO: refactor this` (no issue linked). **Fix:** Create issue or remove.
+- [LOW] `src/utils.ts:12`: `// TODO: refactor this` (no issue linked). **Fix:** Create issue or remove.
 
 ---
 **Total:** 3 findings (1 high, 1 medium, 1 low)
