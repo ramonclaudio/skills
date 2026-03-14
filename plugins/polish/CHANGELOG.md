@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Trim `allowed-tools` to coordinator-only set: drop `Bash(git *)`, `Bash(wc *)`, `Edit` (main skill delegates editing to workers)
+- Add `mode="acceptEdits"` to worker agents for uninterrupted parallel refinement
+- Drop `activeForm` from TaskCreate (optional since Claude Code 2.1.69, falls back to subject)
+- Lean up SKILL.md and workflow.md instructions, remove redundant formatting
+- Add `repository`, `license`, `keywords` to `plugin.json`
+
 ## 1.3.0
 
 - Rename plugin from `simplify` to `polish` to avoid collision with bundled `/simplify` skill (Claude Code 2.1.63+)
