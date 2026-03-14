@@ -18,21 +18,18 @@ model: opus
 
 ultrathink
 
-<role>
-You are a senior DevOps engineer at a Fortune 500 company with 10+ years maintaining production git repositories. You enforce conventional commit standards, design atomic commit strategies, conduct code reviews focused on git history quality, and manage production rollbacks using granular commit history.
-</role>
-
 <task>
-Commit code changes using atomic commits with conventional commit format. Each commit must represent one independent logical change that can be reverted without breaking other functionality.
+Commit code changes using atomic commits with conventional commit format. Each commit is one independent logical change that can be reverted without breaking other functionality.
 </task>
 
-<context>
-Production platform where git history is critical infrastructure for:
-- Debugging production incidents (identifying when/why bugs were introduced)
-- Safe feature rollbacks (reverting specific changes without affecting others)
-- Efficient code review (understanding changes in logical chunks)
-- Compliance audits (proving what changed and when)
-</context>
+## Voice
+
+Follow `~/.claude/rules/voice.md` for all authored text. Key commit-specific rules:
+- Commit messages: lowercase after colon, no period, specific verbs (add, fix, extract, drop)
+- PR bodies: start with what changed and why. No filler sections. Test plan at end.
+- PR titles: same format as commit messages
+- No `**Bold:** description` lists in PR bodies
+- Never mention Claude/Anthropic/AI
 
 ## Git State (auto-populated)
 
@@ -59,7 +56,7 @@ Analyze the git state above. Group changes by layer + type. Verify independence.
 
 Use TaskCreate to track commit groups:
 ```
-TaskCreate(subject: "Commit group N: {files}", description: "type(scope): message | Independent: yes/no")
+TaskCreate(subject: "Commit group N: {files}", description: "type(scope): message | Independent: yes/no", activeForm: "Committing group N: {description}")
 ```
 
 Output analysis in `<analysis>` tags.
@@ -125,19 +122,30 @@ Push branch and create PR targeting `BASE_BRANCH` from Phase 2:
 ```bash
 git push -u origin HEAD
 gh pr create --base "$BASE_BRANCH" --title "type(scope): description" --body "$(cat <<'EOF'
-## Summary
-- {bullet points summarizing the changes}
+{1-3 sentences: what changed and why. No headers, no preamble. Start with a verb.}
 
-## Changes by layer
-- {data/backend/UI/config/docs changes}
+{Optional: code example or key technical detail if it helps reviewers}
 
-## Impact
-- Performance: {none/improved/regressed}
-- Breaking: {none/description}
-- Migrations: {none/description}
+{List of concrete changes, one per line, no bold headers:}
+- {what file/module changed and what was done}
+- {next change}
+
+## Test plan
+
+- {concrete test performed or command run}
+- {next test}
 EOF
 )"
 ```
+
+PR body guidelines:
+- First line answers "what and why" in plain language
+- No "Summary" or "Overview" headers at the top
+- No `**Bold:** description` list format
+- No "Impact: none" or "Migrations: none" filler. If there's no impact, don't mention it.
+- Include breaking changes or migrations only when they exist
+- Test plan: list what you actually tested. Commands run, behavior verified.
+- Keep it short. Reviewers read diffs, not novels.
 
 ### Phase 5 - Merge & Cleanup (with `--merge PR#`)
 
@@ -236,6 +244,51 @@ git commit -S -m "refactor(products): extract filtering logic to shared utils"
 Verified
 </correction>
 </example>
+<example name="pr_body_voice">
+<scenario>PR body written in the correct voice</scenario>
+
+<good>
+Add subscription pricing with Stripe sync and a new pricing page.
+
+Stripe products/prices sync on webhook. Tiers stored in `subscriptions` table with foreign key to users. Pricing card reads from DB, not hardcoded.
+
+- schema: add `subscriptions` and `tiers` tables
+- api: webhook handler for `product.updated` and `price.updated`
+- api: customer portal session endpoint
+- components: pricing card with tier comparison
+- pages: `/pricing` with tier toggle (monthly/annual)
+
+## Test plan
+
+- Triggered `stripe trigger product.updated`, verified DB write
+- Loaded `/pricing`, confirmed tiers render from DB
+- Toggled monthly/annual, verified price switch
+- `bun test` passes
+</good>
+
+<bad>
+## Summary
+
+This PR introduces a comprehensive subscription pricing system with Stripe integration. The changes span multiple architectural layers, ensuring a robust and scalable implementation.
+
+## Changes
+
+- **Schema:** Added subscription and tier tables to support the new pricing model
+- **API:** Implemented webhook handlers for Stripe product and price synchronization
+- **Components:** Created a new pricing card component showcasing tier comparisons
+- **Pages:** Added a dedicated pricing page with intuitive monthly/annual toggle
+
+## Impact
+
+- **Performance:** None
+- **Breaking:** None
+- **Migrations:** New tables added
+
+## Additional Notes
+
+This implementation leverages Stripe's webhook system to ensure real-time synchronization of pricing data, providing a seamless experience for end users.
+</bad>
+</example>
 </examples>
 
 ## Recovery
@@ -260,5 +313,6 @@ Verified
 - Verify independently revertable
 - Sign commits with `-S` flag when GPG is available
 - Be terse in confirmations
-- Never mention Claude Code in commits
-- Never use co-authored-by Claude
+- Never mention Claude, Claude Code, Anthropic, or AI in commits, PR bodies, or any output
+- Never use co-authored-by or "generated by" attributions
+- All text must pass as human-written. Re-read before submitting. If it sounds like a chatbot wrote it, rewrite it.
