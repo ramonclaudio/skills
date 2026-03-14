@@ -1,15 +1,14 @@
 ---
 name: gif
 description: Use this skill when the user asks to convert a video or screen recording to GIF. Handles HDR recordings, macOS filenames with spaces, and ffmpeg two-pass palette compression.
-argument-hint: <video-path> [--speed N] [--width N] [--fps N] [--crop]
+argument-hint: "<video-file> [--speed N] [--width N] [--fps N] [--crop]"
 allowed-tools:
   - Bash(ffmpeg *)
   - Bash(ffprobe *)
   - Bash(avconvert *)
-  - Bash(for *)
   - Bash(/bin/cp *)
   - Bash(/bin/ls *)
-  - Bash(mkdir *)
+  - Bash(mkdir -p /tmp/gif-output)
   - Bash(wc *)
   - Bash(du *)
   - Bash(open *)
@@ -48,6 +47,8 @@ Parse arguments from the user's invocation:
 
 ## Quick Workflow
 
+Parse the video path from `$ARGUMENTS`.
+
 **IMPORTANT:** File paths with spaces, timestamps, and special characters are problematic. ALWAYS use the glob+copy pattern.
 
 ### Step 1: Copy + Probe
@@ -55,7 +56,7 @@ Parse arguments from the user's invocation:
 Extract a unique identifier from the user's path (like a timestamp) and use glob:
 
 ```bash
-for f in /path/to/dir/*UNIQUE_PART*; do /bin/cp -f "$f" /tmp/video.mov; done && \
+/bin/cp -f /path/to/dir/*UNIQUE_PART* /tmp/video.mov && \
 ffprobe -v error -select_streams v:0 \
   -show_entries stream=width,height,r_frame_rate,duration \
   -show_entries stream=color_transfer \
@@ -64,7 +65,7 @@ ffprobe -v error -select_streams v:0 \
 
 **Example for** `Screen Recording 2026-01-29 at 12.33.07 PM.mov`:
 ```bash
-for f in ~/Desktop/Screen*12.33.07*; do /bin/cp -f "$f" /tmp/video.mov; done && \
+/bin/cp -f ~/Desktop/Screen*12.33.07* /tmp/video.mov && \
 ffprobe -v error -select_streams v:0 \
   -show_entries stream=width,height,r_frame_rate,duration \
   -show_entries stream=color_transfer \
