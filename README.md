@@ -158,7 +158,7 @@ Session continuity. Preserves context across sessions, machines, and compactions
 - `/handoff:end` - archive session state with health checks (build/test/lint), severity, done/failed/blockers
 - `/handoff:start` - auto-triggered on critical context loss. Deep rehydration with drift detection.
 
-**Hooks (6):**
+**Hooks (7):**
 - `session-start.sh` - auto-init on startup/resume, context injection on compact
 - `compact-reinject.sh` - re-inject context after compaction
 - `session-clear.sh` - reset counters, archive events
