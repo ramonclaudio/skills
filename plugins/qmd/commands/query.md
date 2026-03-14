@@ -1,12 +1,12 @@
 ---
-description: Primary search tool — hybrid pipeline with query document support
+description: Primary search tool, hybrid pipeline with query document support
 allowed-tools: Bash(qmd query*)
 argument-hint: <query> [-n N] [-c collection] [--json|--csv|--md|--xml|--files]
 ---
 
 Run `qmd query $ARGUMENTS`.
 
-This is the CLI equivalent of the `query` MCP tool — use when MCP is down.
+This is the CLI equivalent of the `query` MCP tool. Use when MCP is down.
 
 Full hybrid pipeline: BM25 probe → conditional expansion → parallel FTS+vector → RRF fusion (k=60) → top-40 candidates → LLM reranking → position-aware blending → dedup. ~10s latency. Most accurate.
 
@@ -23,7 +23,7 @@ Flags:
 - `-c <name>` / `--collection <name>`: filter to collection (repeatable)
 - Output: `--json`, `--csv`, `--md`, `--xml`, `--files`
 
-Alias: `qmd deep-search` (note: the `deep_search` MCP tool no longer exists — use the `query` MCP tool instead)
+Alias: `qmd deep-search` (note: the `deep_search` MCP tool no longer exists. Use the `query` MCP tool instead)
 
 Requires embeddings and all 3 GGUF models. First query is slower while models load into VRAM.
 

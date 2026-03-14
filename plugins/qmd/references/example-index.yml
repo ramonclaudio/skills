@@ -1,12 +1,12 @@
 # QMD Collections Configuration
 # Location: ${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml
 #
-# Custom example for the qmd plugin — shows reference repos + local notes pattern.
+# Custom example for the qmd plugin. Shows reference repos + local notes pattern.
 # Upstream qmd uses personal notes only (Meetings, journals, codex).
 #
 # This file defines all collections and their contexts.
-# You can manually edit this file — changes take effect immediately.
-# Collection paths can point to any directory — ~/Developer/refs/ is just a convention.
+# You can manually edit this file. Changes take effect immediately.
+# Collection paths can point to any directory. ~/Developer/refs/ is just a convention.
 
 # Global context applied to all collections
 # Use this for universal search instructions or patterns
@@ -36,7 +36,7 @@ collections:
     pattern: "**/*.{md,txt,ts,tsx,js,jsx,json,yaml,yml}"
     update: "git -C ~/Developer/refs/qmd pull --ff-only"
     context:
-      "/": "QMD search engine — on-device BM25, vector, and hybrid search"
+      "/": "QMD search engine. On-device BM25, vector, and hybrid search"
       "/src": "QMD core source code"
 
   # Local notes (not managed by /qmd:add)

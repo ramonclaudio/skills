@@ -81,10 +81,10 @@ qmd query $'vec: state management patterns in React'
 ```
 
 **Sub-query types:**
-- `lex:` — BM25 keyword search. Supports `"phrase"` for exact match (bypasses prefix matching) and `-term` for negation.
-- `vec:` — Vector similarity search.
-- `hyde:` — Hypothetical document embedding (vector search with synthetic answer).
-- `expand:` — Auto-expand into multiple sub-queries.
+- `lex:`: BM25 keyword search. Supports `"phrase"` for exact match (bypasses prefix matching) and `-term` for negation.
+- `vec:`: Vector similarity search.
+- `hyde:`: Hypothetical document embedding (vector search with synthetic answer).
+- `expand:`: Auto-expand into multiple sub-queries.
 
 **Aliases:** `deep-search`
 
@@ -154,7 +154,7 @@ qmd ls next.js              # List files in next.js collection
 qmd ls next.js/docs         # List files under next.js/docs
 ```
 
-Output format: `ls -l` style (size, date, path). Both `qmd ls` and `qmd collection list` read from YAML + database — they differ in output format, not data source.
+Output format: `ls -l` style (size, date, path). Both `qmd ls` and `qmd collection list` read from YAML + database. They differ in output format, not data source.
 
 ### qmd status
 
@@ -190,7 +190,7 @@ First run auto-downloads 3 GGUF models (~2GB). Uses 900 tokens/chunk with 15% ov
 
 ### qmd update
 
-Re-index all collections. Always updates ALL collections — no single-collection argument.
+Re-index all collections. Always updates ALL collections. No single-collection argument.
 
 ```bash
 qmd update                  # Run update commands + re-index all collections
@@ -203,7 +203,7 @@ Pipeline:
 
 Update commands are defined per collection in `~/.config/qmd/index.yml` (e.g., `update: "git -C ~/Developer/refs/next.js pull --ff-only"`). If a collection has no `update` field, only re-indexing runs.
 
-Note: `--pull` appears in `qmd --help` but is a dead flag — defined in the CLI parser but never read (`values.pull` has zero references). Update commands from YAML always run regardless.
+Note: `--pull` appears in `qmd --help` but is a dead flag. Defined in the CLI parser but never read (`values.pull` has zero references). Update commands from YAML always run regardless.
 
 ### qmd pull
 
@@ -254,7 +254,7 @@ qmd mcp stop                        # Stop daemon via PID file
 | `--port <N>` | HTTP port (default: 8181) |
 | `--daemon` | Run in background (HTTP only) |
 
-**stdio transport:** For Claude Code, Claude Desktop — standard input/output communication.
+**stdio transport:** For Claude Code, Claude Desktop. Standard input/output communication.
 
 **HTTP transport:**
 - Endpoint: `POST /mcp` (JSON mode, no SSE streaming)
@@ -265,7 +265,7 @@ qmd mcp stop                        # Stop daemon via PID file
 **MCP tools:** MCP exposes a single `query` tool (replacing the previous `search`, `vector_search`, and `deep_search` tools). The HTTP endpoint is `/query` (`/search` is kept as a silent alias for backward compatibility). The `query` tool accepts a `collections` array parameter instead of a single `collection` string.
 
 **MCP subcommand:**
-- `qmd mcp stop` — Stop daemon via PID file
+- `qmd mcp stop`: Stop daemon via PID file
 
 ## Collection Management
 
@@ -280,7 +280,7 @@ qmd collection add ~/Documents/notes --name notes --mask "**/*.md"
 
 | Flag | Purpose |
 |------|---------|
-| `--name <name>` | Collection name (optional — auto-generated from directory name if omitted) |
+| `--name <name>` | Collection name (optional, auto-generated from directory name if omitted) |
 | `--mask <pattern>` | Glob pattern for file inclusion (default: `**/*.md`) |
 
 **Default mask:** `**/*.md`
@@ -367,14 +367,14 @@ qmd context add / "If you see a [[WikiWord]], search for it"
 qmd context add docs/api.md "API reference for v2.0"
 ```
 
-**One-arg form:** `qmd context add "text"` — no path argument, auto-detects collection from cwd.
+**One-arg form:** `qmd context add "text"`: no path argument, auto-detects collection from cwd.
 
 **Path formats (two-arg form):**
 - Virtual: `qmd://collection/path`
 - Global: `/` (applies to all collections)
 - Filesystem: absolute or relative paths
 
-Context is hierarchical — all matching path prefixes are concatenated (global → root → specific), joined with `\n\n`.
+Context is hierarchical. All matching path prefixes are concatenated (global → root → specific), joined with `\n\n`.
 
 ### qmd context list
 

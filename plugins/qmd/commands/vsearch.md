@@ -1,5 +1,5 @@
 ---
-description: Semantic search (CLI only — MCP `vector_search` tool removed in v1.0.8, use `query` with `vec:` prefix instead)
+description: Semantic search (CLI only, MCP `vector_search` tool removed in v1.0.8, use `query` with `vec:` prefix instead)
 allowed-tools: Bash(qmd vsearch*)
 argument-hint: <query> [-n N] [-c collection] [--json|--csv|--md|--xml|--files]
 ---

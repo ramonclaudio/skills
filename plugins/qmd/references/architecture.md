@@ -10,7 +10,7 @@ All data stored in a single SQLite database: `~/.cache/qmd/index.sqlite` (or `~/
 
 #### content
 
-Content-addressable storage. SHA-256 deduplication — same content = one row, referenced by multiple documents.
+Content-addressable storage. SHA-256 deduplication. Same content = one row, referenced by multiple documents.
 
 | Column | Type | Constraints |
 |--------|------|-------------|
@@ -65,9 +65,9 @@ CREATE VIRTUAL TABLE documents_fts USING fts5(
 - `body`: 1.0
 
 **Triggers (auto-sync):**
-- `documents_ai` — INSERT → populate FTS
-- `documents_au` — UPDATE → update FTS
-- `documents_ad` — DELETE → remove from FTS
+- `documents_ai`: INSERT -> populate FTS
+- `documents_au`: UPDATE -> update FTS
+- `documents_ad`: DELETE -> remove from FTS
 
 #### content_vectors
 
@@ -99,7 +99,7 @@ CREATE VIRTUAL TABLE vectors_vec USING vec0(
 
 **Composite key:** `hash_seq` = `{hash}_{seq}` (e.g., `abc123_0`)
 
-**Dimensions:** Dynamic — table created lazily on first embed via `ensureVecTable()`, using actual dimensions from the embedding model (768 for embeddinggemma-300M). Table recreated if model changes.
+**Dimensions:** Dynamic, table created lazily on first embed via `ensureVecTable()`, using actual dimensions from the embedding model (768 for embeddinggemma-300M). Table recreated if model changes.
 
 **Distance metric:** Cosine similarity
 
@@ -124,7 +124,7 @@ LLM response cache for query expansion and reranking.
 | result | TEXT | NOT NULL |
 | created_at | TEXT | NOT NULL |
 
-**Auto-pruning:** Probabilistic eviction — on each cache write, 1% chance to keep only the newest 1000 entries (deletes everything outside the top 1000 by `created_at`).
+**Auto-pruning:** Probabilistic eviction. On each cache write, 1% chance to keep only the newest 1000 entries (deletes everything outside the top 1000 by `created_at`).
 
 **Hash:** SHA-256 of prompt + model + temperature + topK + topP.
 
@@ -373,10 +373,10 @@ Remove duplicate documents (same hash). Keep highest-scoring instance.
 **XDG support:** Respects `XDG_CONFIG_HOME` (config dir) and `XDG_CACHE_HOME` (database dir).
 
 **Environment overrides:**
-- `INDEX_PATH` — override database path entirely (used in tests)
-- `QMD_CONFIG_DIR` — override config directory (used in tests)
+- `INDEX_PATH`: override database path entirely (used in tests)
+- `QMD_CONFIG_DIR`: override config directory (used in tests)
 
-**Production mode:** `enableProductionMode()` must be called before `createStore()` when using default paths. Without it, QMD requires an explicit path or `INDEX_PATH` env var — prevents tests from accidentally writing to the global index.
+**Production mode:** `enableProductionMode()` must be called before `createStore()` when using default paths. Without it, QMD requires an explicit path or `INDEX_PATH` env var. This prevents tests from accidentally writing to the global index.
 
 **Named indexes:** Use `--index <name>` for separate work/personal collections.
 

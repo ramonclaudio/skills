@@ -13,4 +13,4 @@ Run `qmd collection remove $ARGUMENTS` (alias: `qmd collection rm`). This:
 
 Reports count of deleted documents and cleaned content hashes.
 
-NEVER delete the repo from ~/Developer/refs/ unless user explicitly asks — if they do, use `trash`, never `rm`.
+NEVER delete the repo from ~/Developer/refs/ unless user explicitly asks. If they do, use `trash`, never `rm`.

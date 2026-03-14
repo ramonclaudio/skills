@@ -7,6 +7,6 @@ argument-hint: <name>
 
 Run `qmd collection include $ARGUMENTS`.
 
-Sets `includeByDefault: true` for the collection. This is the default state — collection appears in all queries.
+Sets `includeByDefault: true` for the collection. This is the default state. Collection appears in all queries.
 
 Opposite of `qmd collection exclude`.

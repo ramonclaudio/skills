@@ -13,7 +13,7 @@ model: sonnet
 
 ## When to use QMD
 
-QMD searches **indexed collections** — external codebases, notes, docs you've added with `qmd collection add`. For files in the current working directory, use Grep and Glob instead. They're faster, cheaper on context, and more precise.
+QMD searches **indexed collections**: external codebases, notes, docs you've added with `qmd collection add`. For files in the current working directory, use Grep and Glob instead. They're faster, cheaper on context, and more precise.
 
 ## Modality
 
@@ -49,7 +49,7 @@ content ::= [^\n]+
 |------|-----------|---------|
 | `lex:` | BM25 only | Exact keywords, identifiers, error strings |
 | `vec:` | Vector only | Semantic rephrasing, concept search |
-| `hyde:` | Vector only | Hypothetical document — describe what the answer looks like |
+| `hyde:` | Vector only | Hypothetical document. Describe what the answer looks like |
 | `expand:` | Full pipeline | Auto-expand into lex/vec/hyde sub-queries. Max one per query document. |
 | _(plain text)_ | Full pipeline | Implicit `expand:`. Same as `expand:` but shorter to write. |
 
@@ -92,7 +92,7 @@ Lex queries support phrase matching and exclusions:
 
 | Tool | Purpose |
 |------|---------|
-| `query` | Search — plain text auto-expands, typed queries for control |
+| `query` | Search: plain text auto-expands, typed queries for control |
 | `get` | Retrieve one document by path |
 | `multi_get` | Retrieve multiple documents |
 | `status` | List collections, document counts, pending embeds |
@@ -108,7 +108,7 @@ by searching the next.js QMD collection.
 
 The subagent runs searches in its own context and returns a summary. Your main conversation stays clean.
 
-For targeted lookups (one query, one collection), search directly — the overhead is low.
+For targeted lookups (one query, one collection), search directly. The overhead is low.
 
 ## Retrieval
 
@@ -130,7 +130,7 @@ After search returns results, retrieve full documents:
 | `query` | `qmd query` (alias: `deep-search`) | `searches` (array of `{type, query}` objects, min 1, max 10), `limit` (default 10), `minScore` (default 0), `collections` (array) |
 | `get` | `qmd get` | `file` (path or `#docid`), `fromLine`, `maxLines`, `lineNumbers` |
 | `multi_get` | `qmd multi-get` | `pattern` (glob or comma list), `maxLines`, `maxBytes` (default 10KB), `lineNumbers` |
-| `status` | `qmd status` | — |
+| `status` | `qmd status` | (none) |
 
 CLI has additional search commands (`qmd search`, `qmd vsearch`) that map to BM25-only and vector-only searches. Use these in CLI fallback scenarios when you need a specific modality.
 
@@ -152,7 +152,7 @@ CLI output formats (not available via MCP): `--files`, `--json`, `--csv`, `--md`
 ## Recommended Workflow
 
 1. **Check what's available**: `status`
-2. **Search**: `query("topic")` — auto-expands by default
+2. **Search**: `query("topic")`, auto-expands by default
 3. **Refine with typed queries if needed**: `lex:"exact term"` for identifiers, `vec:` for concepts, combine in one query document
 4. **Retrieve full documents**: `get` with path or `#docid`
 
@@ -161,7 +161,7 @@ CLI output formats (not available via MCP): `--files`, `--json`, `--csv`, `--md`
 <scenario>User asks how Next.js handles authentication middleware</scenario>
 <search>
 1. query("authentication middleware", collections: ["next.js"], limit: 10)
-2. Review results — pick top 3 by score
+2. Review results, pick top 3 by score
 3. get(file: "next.js/packages/next/src/server/web/adapter.ts", lineNumbers: true)
 4. Summarize the pattern for the user
 </search>
@@ -203,11 +203,11 @@ Delegate to subagent (broad research consumes context):
 
 - Run `status` first to see available collections and confirm zero pending embeddings.
 - Scope searches with the `collections` array parameter when you know which repos to search.
-- First query line gets 2x fusion weight — put your strongest signal first.
+- First query line gets 2x fusion weight. Put your strongest signal first.
 - Use typed queries when auto-expand misses: `lex:` for exact identifiers, `vec:` for concepts, `hyde:` for "what would the answer look like".
 - Max one `expand:` per query document. Multiple `lex:`/`vec:`/`hyde:` lines are fine.
 - After search returns a path, use `@<absolute-path>` to pull the full file into context (the collection path is in `qmd status`).
-- If MCP tools are missing, the server may have disconnected — run `/qmd:status` as a Bash fallback.
+- If MCP tools are missing, the server may have disconnected. Run `/qmd:status` as a Bash fallback.
 - Multi-get with glob: `multi_get` pattern `"docs/*.md"` or comma list `"#abc, #def"`
 - Get with line offset: `get` file `"docs/api.md:100"` or use fromLine + maxLines params
 - Context is hierarchical: all matching path prefixes are concatenated (global → root → specific), not just the deepest match

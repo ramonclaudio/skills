@@ -8,10 +8,10 @@ argument-hint: <path> [--name N] [--mask P]
 
 Run `qmd collection add $ARGUMENTS`.
 
-This adds a local directory to the QMD index. For GitHub repos, use `/qmd:add` instead — it handles cloning, mask detection, context, and embedding.
+This adds a local directory to the QMD index. For GitHub repos, use `/qmd:add` instead. It handles cloning, mask detection, context, and embedding.
 
 Flags:
-- `--name <name>`: collection name (optional — auto-generated from directory name via `handelize()` if omitted). Must match `[a-zA-Z0-9_-]+`.
+- `--name <name>`: collection name (optional, auto-generated from directory name via `handelize()` if omitted). Must match `[a-zA-Z0-9_-]+`.
 - `--mask <pattern>`: glob pattern for file inclusion (default: `**/*.md`)
 
 Behavior:
