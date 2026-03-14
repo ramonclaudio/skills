@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.0
+
+- Make `/handoff:start` user-invocable (remove `user-invocable: false`)
+- Extract `agent_id`, `agent_type`, and `worktree` in event-capture hook
+- Add "Handoff vs Auto-Memory" section to README
+- Add troubleshooting note for `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS`
+- Add `SubagentStart` hook to inject handoff context into subagents
+- Capture `tool_use_id` from hook input in event-capture
+- Replace all emdashes with commas, colons, and periods
+- Compatible with suppressed async hook completion messages (v2.1.75)
+
 ## 1.2.0
 
 - Upgrade to `opus` model for both start and end skills

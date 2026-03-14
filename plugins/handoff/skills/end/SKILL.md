@@ -40,7 +40,7 @@ Senior engineer. Hospital shift changes. Precise state capture: exact errors, sp
 </role>
 
 <task>
-Archive session state. Hooks auto-save a lightweight snapshot on compaction — this provides the thorough version with health checks, corrections persistence, and validation.
+Archive session state. Hooks auto-save a lightweight snapshot on compaction. This provides the thorough version with health checks, corrections persistence, and validation.
 </task>
 
 ## Pre-loaded State
@@ -68,22 +68,22 @@ Branch: !`git branch --show-current 2>/dev/null || echo "unknown"`
    - Tests: `[pkg] test 2>&1 | tail -10; echo "EXIT:$?"`
    - Lint: `[pkg] run lint 2>&1 | tail -5; echo "EXIT:$?"`
 4. **Update CONTEXT.md**: Regenerate AUTO sections (Structure from Glob, Invocation from lockfile). Preserve CURATED sections exactly. Append new corrections from `session_memory.corrections` to `## Corrections` section (deduplicate against existing entries).
-5. **Analyze session** — infer from conversation + pre-loaded git/events, DO NOT ask user:
-   - **Severity**: 🔴 build failing → CRITICAL; 🟡 tests failing/dirty/mid-feature → IN PROGRESS; 🟢 all green → READY. Ground truth — health checks ran, not inferred from stale events.
-   - **Done**: commits, PRs, features completed — `[{"description": "...", "ref": "abc1234"}]`
-   - **Failed**: with Tried/Error/Why/Need for each — `[{"description":"...", "tried":"...", "error":"...", "why":"...", "need":"..."}]`
+5. **Analyze session**: infer from conversation + pre-loaded git/events, DO NOT ask user:
+   - **Severity**: 🔴 build failing → CRITICAL; 🟡 tests failing/dirty/mid-feature → IN PROGRESS; 🟢 all green → READY. Ground truth: health checks ran, not inferred from stale events.
+   - **Done**: commits, PRs, features completed: `[{"description": "...", "ref": "abc1234"}]`
+   - **Failed**: with Tried/Error/Why/Need for each: `[{"description":"...", "tried":"...", "error":"...", "why":"...", "need":"..."}]`
    - **Blockers**: external deps, missing credentials, pending decisions
    - **Watch Out For**: gotchas, workarounds, edge cases discovered
    - **Resume**: specific file:line next action, files to read first, reasoning
 6. **Write session memory** to state.json `.session_memory`:
-   - `user_intent` — one paragraph
-   - `corrections` — APPEND to existing array, never replace (persisted to CONTEXT.md in step 4)
-   - `active_context` — file:line, function names, current step
-   - `key_references` — file paths, error messages, PR numbers
-   - `last_updated` — ISO timestamp
-   - `last_event_index` — current events.jsonl line count
+   - `user_intent`: one paragraph
+   - `corrections`: APPEND to existing array, never replace (persisted to CONTEXT.md in step 4)
+   - `active_context`: file:line, function names, current step
+   - `key_references`: file paths, error messages, PR numbers
+   - `last_updated`: ISO timestamp
+   - `last_event_index`: current events.jsonl line count
 7. **Write state.json**: Set `source` to `"manual-end"`, set `_runtime.hostname` to current hostname. Update all fields. Write to `.tmp.$$` first, then validate and move (atomic write).
-8. **Validate against schema** — the state.json MUST conform to this contract:
+8. **Validate against schema**: the state.json MUST conform to this contract:
    ```json
    {
      "_version": 1,

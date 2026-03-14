@@ -1,7 +1,7 @@
 #!/bin/bash
 # Lightweight auto-save on PreCompact.
 # Captures session state from git + events.jsonl without health checks.
-# Single-pass state write — one jq invocation, one disk write.
+# Single-pass state write: one jq invocation, one disk write.
 
 source "$(dirname "$0")/state.sh"
 
@@ -59,7 +59,7 @@ else
 fi
 
 # Severity: inferred from current signals, not ground truth.
-# Auto-save has no health checks — severity is a best-effort snapshot.
+# Auto-save has no health checks, severity is a best-effort snapshot.
 # A stale build failure stays CRITICAL until rebuild or manual-end.
 NEW_SEV="READY"
 [ -n "$GIT_DIRTY" ] && NEW_SEV="IN_PROGRESS"

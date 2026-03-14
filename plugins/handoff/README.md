@@ -15,7 +15,7 @@ Think hospital shift change. Doctors don't try to remember everything about ever
 /handoff:start   # Optional: deep context hydration (tasks, git, drift)
 ```
 
-Hooks handle everything else automatically — auto-init on first run, context injection on startup, auto-save before compaction.
+Hooks handle everything else automatically: auto-init on first run, context injection on startup, auto-save before compaction.
 
 ## How It Works
 
@@ -75,11 +75,12 @@ The plugin ships with lifecycle hooks that run without manual invocation:
 | `session-clear.sh` | SessionStart (clear) | Resets runtime counters, archives events, preserves corrections |
 | `pre-compact.sh` | PreCompact | Triggers auto-save before compaction |
 | `event-capture.sh` | PostToolUse | Appends raw tool events (cmd/exit/file) to `events.jsonl` |
+| `session-start.sh` | SubagentStart | Injects handoff context (severity, resume, blockers) into subagents |
 | `prompt-reminder.sh` | UserPromptSubmit | Escalating context degradation suggestions |
 | `pre-compact.sh` | SessionEnd (logout/exit) | Auto-saves session state before exit |
 
 > [!TIP]
-> Every fresh session automatically sees the handoff resume point — even without running `/handoff:start`. The full START is still available for deep hydration (tasks, git activity, drift check).
+> Every fresh session automatically sees the handoff resume point, even without running `/handoff:start`. The full START is still available for deep hydration (tasks, git activity, drift check).
 
 </details>
 
@@ -97,11 +98,28 @@ CLAUDE_CODE_TASK_LIST_ID=my-project claude
 ---
 
 > [!IMPORTANT]
-> **Install at User scope.** The plugin writes per-session state to `.handoff/state.json`. Project scope causes multi-user collision — last writer wins. `.handoff/CONTEXT.md` can be committed for team context sharing; transient state is auto-gitignored.
+> **Install at User scope.** The plugin writes per-session state to `.handoff/state.json`. Project scope causes multi-user collision, last writer wins. `.handoff/CONTEXT.md` can be committed for team context sharing; transient state is auto-gitignored.
 >
 > Requires `git` and `jq`. Optional: `gh` (GitHub CLI).
 
-**Headless / CI** — Set `HANDOFF_DISABLED=1` to skip all hooks:
+## Handoff vs Auto-Memory
+
+| | Auto-Memory (built-in) | Handoff |
+|:---|:---|:---|
+| Scope | Cross-session, durable | Session-scoped working state |
+| Storage | `~/.claude/projects/` (per-user) | `.handoff/` (per-project) |
+| Content | User preferences, feedback, project context | What happened, what broke, what's next |
+| Sharing | Private to the user | `CONTEXT.md` committable for team sharing via git |
+
+They complement each other. Auto-memory tracks persistent preferences and corrections. Handoff captures session continuity: current status, blockers, resume points.
+
+## Troubleshooting
+
+If session-end auto-save is truncated, increase `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS` (milliseconds) in your environment or `settings.json` env block.
+
+---
+
+**Headless / CI**: Set `HANDOFF_DISABLED=1` to skip all hooks:
 
 ```bash
 HANDOFF_DISABLED=1 claude -p "explain this function"

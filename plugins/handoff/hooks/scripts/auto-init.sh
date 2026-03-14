@@ -2,7 +2,7 @@
 # Zero-config project bootstrap.
 # Creates minimal .handoff/ with auto-detected project info.
 # Called by session-start.sh when no .handoff/ exists in a git repo.
-# Must complete in <2s — heavy scanning deferred to /handoff:end.
+# Must complete in <2s. Heavy scanning deferred to /handoff:end.
 
 source "$(dirname "$0")/state.sh"
 
@@ -41,7 +41,7 @@ RUNTIME=""
 [ -z "$RUNTIME" ] && [ -f "$DIR/uv.lock" ] && RUNTIME="uv"
 [ -z "$RUNTIME" ] && [ -f "$DIR/pyproject.toml" ] && RUNTIME="uv"
 
-REMOTE=$(git -C "$DIR" remote get-url origin 2>/dev/null || echo "—")
+REMOTE=$(git -C "$DIR" remote get-url origin 2>/dev/null || echo "--")
 
 # Build invocation table
 INVOKE=""

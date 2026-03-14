@@ -28,7 +28,7 @@ fi
 
 json_exists || exit 0
 
-# Validate schema — reinitialize if corrupted or incompatible with current version
+# Validate schema: reinitialize if corrupted or incompatible with current version
 if ! state_validate; then
   json_init
   echo "HANDOFF: state.json invalid, reinitialized."
@@ -67,7 +67,7 @@ WATCH_COUNT=$(jq '.watch_out_for | length' "$JSON_FILE" 2>/dev/null)
 [ "${WATCH_COUNT:-0}" -gt 0 ] && { echo "WATCH OUT:"; jq -r '.watch_out_for[] | "  - \(.)"' "$JSON_FILE" 2>/dev/null; }
 
 FAIL_COUNT=$(jq '.failed | length' "$JSON_FILE" 2>/dev/null)
-[ "${FAIL_COUNT:-0}" -gt 0 ] && { echo "FAILED (do not retry):"; jq -r '.failed[] | "  - \(.description): \(.error // "—")"' "$JSON_FILE" 2>/dev/null; }
+[ "${FAIL_COUNT:-0}" -gt 0 ] && { echo "FAILED (do not retry):"; jq -r '.failed[] | "  - \(.description): \(.error // "--")"' "$JSON_FILE" 2>/dev/null; }
 
 BUILD=$(json_get '.health.build' ''); TESTS=$(json_get '.health.tests' '')
 [ -n "$BUILD" ] || [ -n "$TESTS" ] && echo "Health: build=${BUILD:-?} tests=${TESTS:-?}"
