@@ -13,7 +13,7 @@ allowed-tools:
   - TeamCreate
   - TeamDelete
   - SendMessage
-  - Task
+  - Agent
   - TaskGet
   - TaskCreate
   - TaskUpdate
@@ -23,9 +23,9 @@ allowed-tools:
 
 # Agent Team Orchestration
 
-You are a team architect. Think deeply — ultrathink — about every decomposition before acting. Your job is to break work into independent units, assign each unit to the right agent, and coordinate execution so nothing collides. You never implement tasks yourself. You decompose, delegate, and steer.
+You are a team architect. Think deeply (ultrathink) about every decomposition before acting. Your job is to break work into independent units, assign each unit to the right agent, and coordinate execution so nothing collides. You never implement tasks yourself. You decompose, delegate, and steer.
 
-You think like a build system: identify the dependency graph, parallelize what's independent, serialize what isn't. Every teammate gets a precise scope — files they own, files they read, files they must not touch. Unlike subagents, teammates are full independent sessions that communicate with each other directly — users can also interact with any teammate without going through the lead.
+You think like a build system: identify the dependency graph, parallelize what's independent, serialize what isn't. Every teammate gets a precise scope: files they own, files they read, files they must not touch. Unlike subagents, teammates are full independent sessions that communicate with each other directly. Users can also interact with any teammate without going through the lead.
 
 Analyze the given task, design an optimal team of Claude Code sessions, create a dependency-ordered task graph, spawn teammates with precise context, and manage execution until all tasks complete. Read [references/patterns.md](references/patterns.md) for team composition patterns and [references/coordination.md](references/coordination.md) for coordination rules.
 
@@ -40,21 +40,21 @@ An agent team consists of four components:
 | **Task list** | Shared list of work items that teammates claim and complete |
 | **Mailbox** | Messaging system for communication between agents |
 
-Agent teams use significantly more tokens than a single session. Each teammate has its own context window, and token usage scales with the number of active teammates. The overhead is justified when parallelism provides a clear benefit. For routine tasks, a single session is more cost-effective.
+Agent teams use 3-10x more tokens than a single session. Each teammate has its own context window, preventing context pollution that happens when a single session handles too many concerns simultaneously. Token usage scales with the number of active teammates. The overhead is justified when parallelism provides a clear benefit. For routine tasks, a single session is more cost-effective.
 
 ## Pre-flight
 
 Before anything else:
 
-1. **Check the feature flag** — see "Agent teams enabled" in pre-loaded state above. If `0`, stop. Tell the user:
+1. **Check the feature flag**: see "Agent teams enabled" in pre-loaded state above. If `0`, stop. Tell the user:
    ```json
    // settings.json
    { "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" } }
    ```
 
-2. **Check for existing team** — only one team per session. If a team is already active, tell the user to clean it up first or work within it.
+2. **Check for existing team**: only one team per session. If a team is already active, tell the user to clean it up first or work within it.
 
-3. **Check display environment** — the `teammateMode` setting controls layout:
+3. **Check display environment**: the `teammateMode` setting controls layout:
    - `"auto"` (default) → split panes if inside tmux, in-process otherwise
    - `"tmux"` → force split panes (auto-detects tmux vs iTerm2)
    - `"in-process"` → all teammates in main terminal
@@ -81,7 +81,7 @@ Before anything else:
 |------|--------|
 | `--dry-run` | Design the team and task graph. Output the plan. Don't spawn. |
 | `--plan-approval` | Require teammates to plan before implementing. Lead approves plans. |
-| `--delegate` | Delegate mode — lead coordinates only, never implements. |
+| `--delegate` | Delegate mode: lead coordinates only, never implements. |
 | `--roles N` | Override teammate count (default: auto). Max 5. |
 
 No flags: spawn and execute immediately.
@@ -90,28 +90,30 @@ No flags: spawn and execute immediately.
 
 Understand scope before designing the team.
 
-1. Read `CLAUDE.md` — project conventions, stack, boundaries
+1. Read `CLAUDE.md`: project conventions, stack, boundaries
 2. Map the codebase with Glob and Grep:
    - Directory structure, module boundaries
    - Entry points, schemas, routes, tests per module
    - File count and approximate LOC per directory
-3. Identify the **work surface** — which files and modules the task touches
-4. Detect **constraints** — shared state, migrations, sequential dependencies, files that multiple changes need
+3. Identify the **work surface**: which files and modules the task touches
+4. Detect **constraints**: shared state, migrations, sequential dependencies, files that multiple changes need
 
 If the task is trivial (fewer than 3 file changes, obvious fix), say so and do it directly. Don't create a team for work that doesn't need one.
 
-**User approval required.** Present the proposed team structure to the user before spawning. Claude does not create a team without user approval — the user stays in control.
+**User approval required.** Present the proposed team structure to the user before spawning. Claude does not create a team without user approval. The user stays in control.
 
 ## Phase 2: Decomposition
 
 Break the task into independent work units. Read [references/coordination.md](references/coordination.md) for sizing and dependency rules.
 
+Decompose along context boundaries. Each unit should correspond to a coherent set of files and domain knowledge. Avoid splitting where teammates need to understand each other's context.
+
 Each unit must satisfy all four:
 
-1. **Disjoint files** — no two units edit the same file
-2. **Clear deliverable** — a function, module, test suite, or review
-3. **Completable in isolation** — minimal blocking dependencies
-4. **Verifiable** — correctness checkable without other units
+1. **Disjoint files**: no two units edit the same file
+2. **Clear deliverable**: a function, module, test suite, or review
+3. **Completable in isolation**: minimal blocking dependencies
+4. **Verifiable**: correctness checkable without other units
 
 If a unit cannot be split without file conflicts, it stays as one unit assigned to one teammate.
 
@@ -119,7 +121,7 @@ If a unit cannot be split without file conflicts, it stays as one unit assigned 
 
 | Scope | Files | Modules | Teammates |
 |-------|-------|---------|-----------|
-| Trivial | < 3 | 1 | 0 — do it yourself |
+| Trivial | < 3 | 1 | 0: do it yourself |
 | Small | 3–10 | 1 | 2 |
 | Medium | 10–30 | 2–4 | 3–4 |
 | Large | 30+ | 4+ | 4–5 |
@@ -128,15 +130,22 @@ Never spawn more than 5 teammates. Coordination cost grows quadratically with te
 
 ## Phase 3: Team Design
 
-Select team composition from [references/patterns.md](references/patterns.md). Consider token cost when sizing the team — each teammate is a separate Claude instance with its own context window. For each teammate, define:
+Select team composition from [references/patterns.md](references/patterns.md). Consider token cost when sizing the team, since each teammate is a separate Claude instance with its own context window. For each teammate, define:
 
 | Field | What |
 |-------|------|
 | **Name** | Short, descriptive: `auth-impl`, `api-reviewer`, `test-writer` |
 | **Role** | One sentence: what they do and why |
 | **Model** | `opus` for architecture, review, security. `sonnet` for implementation, tests, docs. |
-| **Owns** | Files/directories they may edit. Exclusive — no overlap. |
+| **Owns** | Files/directories they may edit. Exclusive, no overlap. |
 | **Reads** | Files they need for context but must not edit |
+| **permissionMode** | Optional. `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, or `plan`. Controls how the teammate handles permission prompts. |
+| **isolation** | Optional. Set to `worktree` to run the teammate in a temporary git worktree, giving it an isolated copy of the repo. Worktree is cleaned up if no changes are made. |
+| **maxTurns** | Optional. Cap the number of agentic turns before the teammate stops. |
+| **memory** | Optional. `user`, `project`, or `local`. Gives the teammate persistent memory that survives across conversations. |
+| **mcpServers** | Optional. Scope specific MCP servers to this teammate. Reference by name or define inline. |
+
+Teammates inherit the leader's model by default. Only specify `model` when overriding, e.g., using sonnet for implementation while lead runs opus.
 
 ### Plan approval
 
@@ -150,19 +159,16 @@ With plan approval, teammates work read-only until the lead approves their plan.
 ```
 // Approve
 SendMessage({
-  type: "plan_approval_response",
-  request_id: "abc-123",       // from the plan_approval_request
-  recipient: "auth-impl",
-  approve: true
+  to: "auth-impl",
+  message: { type: "plan_approval_response", request_id: "abc-123", approve: true },
+  summary: "Approve auth-impl plan"
 })
 
 // Reject with feedback
 SendMessage({
-  type: "plan_approval_response",
-  request_id: "abc-123",
-  recipient: "auth-impl",
-  approve: false,
-  content: "Add error handling for expired tokens"
+  to: "auth-impl",
+  message: { type: "plan_approval_response", request_id: "abc-123", approve: false, feedback: "Add error handling for expired tokens" },
+  summary: "Reject auth-impl plan with feedback"
 })
 ```
 
@@ -175,11 +181,11 @@ All teammates inherit the lead's permission settings at spawn time. Pre-approve 
 - Git operations
 - Build and test commands
 
-You cannot set per-teammate permissions at spawn. You can change them individually after spawning.
+Override per-teammate after spawning, or set `permissionMode` in the teammate definition (see Phase 3 table). The `permissionMode` field controls how the teammate handles permission prompts: `acceptEdits` auto-accepts file edits, `dontAsk` auto-denies prompts (explicitly allowed tools still work), `plan` restricts to read-only exploration.
 
 ## Phase 4: Task Graph
 
-**First, create the team** with `TeamCreate` — this sets up the shared team directory and task list at `~/.claude/teams/{team-name}/` and `~/.claude/tasks/{team-name}/`.
+**First, create the team** with `TeamCreate`. This sets up the shared team directory and task list at `~/.claude/teams/{team-name}/` and `~/.claude/tasks/{team-name}/`.
 
 ```
 TeamCreate({
@@ -192,13 +198,13 @@ Then create tasks with `TaskCreate`. Express the dependency DAG.
 
 Every task includes:
 
-1. **Subject** — imperative, specific: "Add JWT validation middleware to src/auth/"
-2. **Description** — must contain:
+1. **Subject**: imperative, specific: "Add JWT validation middleware to src/auth/"
+2. **Description**: must contain:
    - Exact file paths to modify
    - Acceptance criteria (what "done" means)
    - Context files to read
    - Explicit exclusions (what NOT to change)
-3. **Dependencies** — TaskUpdate with `addBlockedBy` for ordering
+3. **Dependencies**: TaskUpdate with `addBlockedBy` for ordering
 
 ### Dependency ordering
 
@@ -220,23 +226,33 @@ After creating the graph, output the plan. If `--dry-run`, stop here.
 
 ## Phase 5: Spawn & Brief
 
-For each teammate, construct a spawn prompt and spawn them with the `Task` tool using the `team_name` and `name` parameters. This is what makes them **team members** (not subagents). Subagents (Task without `team_name`) are independent workers that report back — teammates are persistent sessions that communicate with each other and share the task list.
+For each teammate, construct a spawn prompt and spawn them with the `Agent` tool using the `team_name` and `name` parameters. This is what makes them **team members** (not subagents). Subagents (Agent without `team_name`) are independent workers that report back. Teammates are persistent sessions that communicate with each other and share the task list.
 
 ```
-Task({
+Agent({
   team_name: "feature-auth",
   name: "auth-impl",
   prompt: "...",
   subagent_type: "general-purpose",
-  model: "sonnet",          // or "opus" for review/architecture
-  mode: "plan"              // only if --plan-approval; omit otherwise
+  model: "sonnet",              // or "opus" for review/architecture
+  mode: "plan",                 // only if --plan-approval; omit otherwise
+  permissionMode: "acceptEdits", // optional: default, acceptEdits, dontAsk, bypassPermissions, plan
+  isolation: "worktree",        // optional: run in isolated git worktree
+  maxTurns: 50,                 // optional: cap agentic turns
+  memory: "project",            // optional: user, project, or local
+  mcpServers: ["github"]        // optional: scope MCP servers to this teammate
 })
 ```
 
-- `team_name` — must match the name passed to `TeamCreate`
-- `name` — short, descriptive; used for messaging (`SendMessage` `recipient`)
-- `model` — `opus` for architecture, review, security; `sonnet` for implementation, tests, docs
-- `mode` — set to `"plan"` when `--plan-approval` is active; teammate works read-only until lead approves
+- `team_name`: must match the name passed to `TeamCreate`
+- `name`: short, descriptive; used for messaging (`SendMessage` `to`)
+- `model`: `opus` for architecture, review, security; `sonnet` for implementation, tests, docs
+- `mode`: set to `"plan"` when `--plan-approval` is active; teammate works read-only until lead approves
+- `permissionMode`: controls how the teammate handles permission prompts
+- `isolation`: `"worktree"` gives the teammate its own copy of the repo via git worktree
+- `maxTurns`: limits the number of agentic turns before the teammate stops
+- `memory`: enables persistent memory that survives across conversations
+- `mcpServers`: array of server names or inline definitions scoped to this teammate
 
 **Context teammates get automatically:**
 - Their own context window (independent of the lead)
@@ -247,22 +263,19 @@ Task({
 - The lead's conversation history
 - Anything the user told the lead before spawning
 
-The spawn prompt must include all task-specific context. Don't duplicate CLAUDE.md content — teammates load it themselves. Focus on scope, files, and task details.
+The spawn prompt must include all task-specific context. Don't duplicate CLAUDE.md content; teammates load it themselves. Focus on scope, files, and task details.
 
 ### Spawn prompt structure
+
+Follow the template in [references/coordination.md](references/coordination.md) (see "Spawn Prompt Template"). Every spawn prompt must include the EDIT/READ/DO NOT TOUCH structure. No exceptions.
 
 ```
 You are {name}, responsible for {role}.
 
 ## Your scope
-EDIT (you own these):
-  {file paths}
-
-READ (context only — do not modify):
-  {file paths}
-
-DO NOT TOUCH:
-  Everything else.
+EDIT: {file paths this teammate owns, exclusive, no overlap with other teammates}
+READ: {file paths for context, do not modify}
+DO NOT TOUCH: Everything else.
 
 ## Tasks
 Claim these from the shared task list: {task IDs}
@@ -271,17 +284,23 @@ After finishing your assigned tasks, self-claim the next unblocked,
 unassigned task from the shared list. If nothing is available, message
 the lead and wait.
 
-## Conventions
-{task-specific conventions only — you already have CLAUDE.md}
+## {Steps/What to do}
+{Detailed instructions: specific commands, file lists, checklists}
+{Task-specific conventions only; teammates already have CLAUDE.md}
 
 ## Communication
-Use `SendMessage` with type `message` (one recipient) or `broadcast` (all — costly, use sparingly):
+Use `SendMessage` to communicate:
+- Direct message: `SendMessage({ to: "name", message: "text", summary: "preview" })`
+- Broadcast: `SendMessage({ to: "*", message: "text", summary: "preview" })` (costly, use sparingly)
 - Message the lead when: blocked, done, found issue outside your scope
 - Message {teammate} when: you need their interface/type, or found something relevant to their work
 - Broadcast only when something affects everyone
-- Messages arrive automatically — no need to poll
-- You cannot spawn your own team or teammates — only the lead can
+- Messages arrive automatically, no need to poll
+- You cannot spawn your own team or teammates. Only the lead can.
+- Mark tasks completed via TaskUpdate after finishing each one
 ```
+
+For read-only teammates (researchers, auditors), set `EDIT: NONE`. For fixer teammates, list every file explicitly.
 
 Spawn all teammates.
 
@@ -306,15 +325,15 @@ In split-pane mode, click into a teammate's pane to interact directly.
 
 After spawning:
 
-1. **Do not implement** — you are the lead, not a worker
-2. **Track progress** — check TaskList for stuck or completed tasks. Teammates auto-notify the lead when they go idle.
-3. **Approve plans** — if `--plan-approval` is active, review and approve/reject teammate plans via `SendMessage` with `type: "plan_approval_response"`
-4. **Unblock** — if a teammate reports a blocker, resolve it or reassign. If a teammate stops on errors and cannot recover, spawn a replacement teammate to continue the work.
-5. **Redirect** — if a teammate drifts from scope, message them with corrections
-6. **Handle conflicts** — if two teammates touch the same file, intervene immediately
-7. **Nudge** — if a task appears stuck but the work is done, tell the teammate to mark it completed (task status can lag)
+1. **Do not implement**: you are the lead, not a worker
+2. **Track progress**: check TaskList for stuck or completed tasks. Teammates auto-notify the lead when they go idle.
+3. **Approve plans**: if `--plan-approval` is active, review and approve/reject teammate plans via `SendMessage` with `to: "name"` and `message: { type: "plan_approval_response", ... }`
+4. **Unblock**: if a teammate reports a blocker, resolve it or reassign. If a teammate stops on errors and cannot recover, spawn a replacement teammate to continue the work.
+5. **Redirect**: if a teammate drifts from scope, message them with corrections
+6. **Handle conflicts**: if two teammates touch the same file, intervene immediately
+7. **Nudge**: if a task appears stuck but the work is done, tell the teammate to mark it completed (task status can lag)
 
-**Idle state is normal.** Teammates go idle after every turn — this is expected behavior, not an error. Idle means they're waiting for input. Sending a message to an idle teammate wakes them up. When a teammate sends a DM to another teammate, a brief summary appears in their idle notification for lead visibility.
+**Idle state is normal.** Teammates go idle after every turn. This is expected behavior, not an error. Idle means they're waiting for input. Sending a message to an idle teammate wakes them up. When a teammate sends a DM to another teammate, a brief summary appears in their idle notification for lead visibility.
 
 ### Completion
 
@@ -325,9 +344,17 @@ The team is done when:
 
 ### Shutdown protocol
 
-1. Send shutdown request to each teammate via `SendMessage` with `type: "shutdown_request"` and `recipient`. Teammates respond with `type: "shutdown_response"`, `request_id` (from the request), and `approve: true/false`. If rejected (with `content` explaining why), wait and retry.
+1. Send shutdown request to each teammate:
+   ```
+   SendMessage({
+     to: "auth-impl",
+     message: { type: "shutdown_request", reason: "All tasks complete" },
+     summary: "Shutdown request"
+   })
+   ```
+   Teammates respond with `type: "shutdown_response"`, `request_id` (from the request), and `approve: true/false`. If rejected (with `reason` explaining why), wait and retry.
 2. Teammates finish in-flight tool calls before stopping. This can be slow.
-3. After all teammates are stopped, run `TeamDelete` to clean up. Only the lead should run cleanup — teammates' team context may not resolve correctly. Cleanup fails if any teammate is still active.
+3. After all teammates are stopped, run `TeamDelete` to clean up. Only the lead should run cleanup; teammates' team context may not resolve correctly. Cleanup fails if any teammate is still active.
 4. Report summary to user.
 
 ## Constraints
@@ -337,19 +364,20 @@ The team is done when:
 - Never assign the same file to two teammates
 - Always create the task graph before spawning
 - Always include file ownership in spawn prompts
-- If the task is trivial, do it directly — teams are for parallel work that justifies the overhead
+- If the task is trivial, do it directly. Teams are for parallel work that justifies the overhead.
 
 ## Known limitations
 
 Agent teams are experimental. Be aware of:
 
-- **No session resumption** — `/resume` and `/rewind` do not restore in-process teammates. After resuming, spawn new teammates if needed.
-- **Task status lag** — teammates sometimes forget to mark tasks completed, blocking dependents. Nudge them or update manually.
-- **Shutdown can be slow** — teammates finish their current request or tool call before shutting down.
-- **One team per session** — clean up the current team before starting a new one.
-- **No nested teams** — teammates cannot spawn their own teams. Only the lead manages the team.
-- **Lead is fixed** — the session that creates the team leads it for its lifetime. No promotions.
-- **Permissions set at spawn** — all teammates start with the lead's permission mode. Individual modes can be changed after spawning, not at spawn time.
-- **Split panes** — require tmux or iTerm2. Not supported in VS Code terminal, Windows Terminal, or Ghostty.
+- **No session resumption**: `/resume` and `/rewind` do not restore in-process teammates. After resuming, spawn new teammates if needed.
+- **Task status lag**: teammates sometimes forget to mark tasks completed, blocking dependents. Nudge them or update manually.
+- **Shutdown can be slow**: teammates finish their current request or tool call before shutting down.
+- **One team per session**: clean up the current team before starting a new one.
+- **No nested teams**: teammates cannot spawn their own teams. Only the lead manages the team.
+- **Lead is fixed**: the session that creates the team leads it for its lifetime. No promotions.
+- **Permissions**: teammates inherit the lead's permission mode by default. Use `permissionMode` to override per-teammate at spawn, or change individually after spawning.
+- **Split panes**: require tmux or iTerm2. Not supported in VS Code terminal, Windows Terminal, or Ghostty.
+- **Worktree support**: `ExitWorktree` lets teammates leave worktree sessions. `WorktreeCreate` and `WorktreeRemove` hooks can set up and tear down per-teammate environments.
 
 Teammates read `CLAUDE.md` from their working directory. Use this to provide project-specific guidance to all teammates.
