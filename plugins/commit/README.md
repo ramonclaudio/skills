@@ -51,11 +51,11 @@ Pushes commits directly to the current branch. No branch creation, no PR.
 
 ### Phase 4 - Pull Request (`--pr`)
 
-Pushes branch and creates PR with summary, changes by layer, and impact sections.
+Pushes branch and creates PR targeting the base branch with a concise body.
 
 ### Phase 5 - Merge (`--merge PR#`)
 
-Merges via `gh pr merge`, checks out main, cleans up local and remote branches.
+Merges via `gh pr merge`, checks out the base branch, cleans up local and remote branches.
 
 ## Commit Types
 

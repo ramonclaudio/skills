@@ -1,7 +1,8 @@
 ---
 name: commit
-description: Use this skill when the user asks to commit, push, create a PR, or merge. Atomic conventional commits grouped by architectural layer with GPG signing.
+description: Atomic conventional commits grouped by architectural layer with GPG signing. Supports --analyze, --push, --pr, --merge.
 argument-hint: [--analyze] [--push] [--pr] [--merge PR#]
+disable-model-invocation: true
 allowed-tools:
   - Bash(git *)
   - Bash(gh *)
@@ -18,19 +19,17 @@ model: opus
 
 ultrathink
 
-<task>
 Commit code changes using atomic commits with conventional commit format. Each commit is one independent logical change that can be reverted without breaking other functionality.
-</task>
 
 ## Voice
 
-Follow `~/.claude/rules/voice.md` for all authored text. Key commit-specific rules:
-- Commit messages: lowercase after colon, no period, specific verbs (add, fix, extract, drop)
-- PR bodies: start with what changed and why. No filler sections.
+Follow `~/.claude/rules/voice.md` for all authored text. Commit-specific rules:
+- Lowercase after colon, no period at end
+- Specific verbs: add, fix, extract, drop, rename, move, split, wire, swap
+- PR bodies: start with what changed and why, plain bullet list, no filler
 - PR titles: same format as commit messages
 - No `**Bold:** description` lists in PR bodies
-- Wrap filenames, paths, commands, config keys, and code references in backticks
-- Use language-tagged fenced code blocks: ```tsx, ```py, ```bash, ```json
+- Backtick all filenames, paths, commands, config keys, and code references
 - Never mention Claude/Anthropic/AI
 
 ## Git State (auto-populated)
@@ -167,7 +166,6 @@ Notes:
 
 ## Reference
 
-<commit_types>
 | Type | Purpose |
 |------|---------|
 | feat | New feature |
@@ -179,9 +177,7 @@ Notes:
 | test | Tests |
 | ci | CI/CD |
 | build | Build system |
-</commit_types>
 
-<architectural_layers>
 | Layer | Examples |
 |-------|---------|
 | Data | schemas, types, migrations, models, database definitions |
@@ -189,63 +185,54 @@ Notes:
 | UI | components, pages, layouts, styles, templates |
 | Config | package.json, tsconfig.json, build configs, CI/CD, env |
 | Docs | README, CHANGELOG, docs/**, comments, API docs |
-</architectural_layers>
 
-<examples>
-<example name="multi_layer_feature">
-<scenario>Adding subscription feature across 5 architectural layers</scenario>
+## Examples
 
-<analysis>
+**Multi-layer feature** (5 files across layers):
+
+```
+Analysis:
 Group 1 - Data: db/schema.ts | "feat(schema): add subscription and tier tables" | Independent: yes
 Group 2 - Backend: api/products-sync.ts, api/customer.ts | "feat(api): add subscription sync endpoints" | Independent: yes
 Group 3 - UI: components/pricing-card.tsx | "feat(components): add pricing card component" | Independent: yes
 Group 4 - Pages: app/pricing/page.tsx | "feat(pages): add subscription pricing page" | Independent: yes
 Group 5 - Docs: README.md, CHANGELOG.md | "docs: document subscription feature setup" | Independent: yes
-</analysis>
 
-<commits>
-Branch: feat/subscription-pricing
+Commits (branch: feat/subscription-pricing):
 1. git commit -S -m "feat(schema): add subscription and tier tables"
 2. git commit -S -m "feat(api): add subscription sync endpoints"
 3. git commit -S -m "feat(components): add pricing card component"
 4. git commit -S -m "feat(pages): add subscription pricing page"
 5. git commit -S -m "docs: document subscription feature setup"
-All verified
-</commits>
-</example>
+All verified ✓
+```
 
-<example name="single_file_fix">
-<scenario>Bug fix in single file</scenario>
+**Single file fix:**
 
-<analysis>
+```
+Analysis:
 Group 1 - Backend: lib/auth-server.ts | "fix(auth): validate session cookie expiration" | Independent: yes
-</analysis>
 
-<commits>
-Branch: fix/session-expiration
+Commits (branch: fix/session-expiration):
 1. git commit -S -m "fix(auth): validate session cookie expiration"
-Verified
-</commits>
-</example>
+Verified ✓
+```
 
-<example name="verification_failure">
-<scenario>Refactoring with vague commit message requiring correction</scenario>
+**Verification failure with correction:**
 
-<initial_attempt>
-Commit: git commit -S -m "refactor: move product filters"
+```
+Attempt: git commit -S -m "refactor: move product filters"
 Verification: FAIL - Too vague, no scope
-</initial_attempt>
 
-<correction>
+Correction:
 git reset --soft HEAD~1
 git commit -S -m "refactor(products): extract filtering logic to shared utils"
-Verified
-</correction>
-</example>
-<example name="pr_body_voice">
-<scenario>PR body written in the correct voice</scenario>
+Verified ✓
+```
 
-<good>
+**PR body (correct voice):**
+
+```
 Add subscription pricing with Stripe sync and a new pricing page.
 
 Stripe products/prices sync on webhook. Tiers stored in `subscriptions` table with foreign key to users. Pricing card reads from DB, not hardcoded.
@@ -255,32 +242,24 @@ Stripe products/prices sync on webhook. Tiers stored in `subscriptions` table wi
 - api: customer portal session endpoint
 - components: pricing card with tier comparison
 - pages: `/pricing` with tier toggle (monthly/annual)
-</good>
+```
 
-<bad>
+**PR body (wrong, do not do this):**
+
+```
 ## Summary
 
-This PR introduces a comprehensive subscription pricing system with Stripe integration. The changes span multiple architectural layers, ensuring a robust and scalable implementation.
+This PR introduces a comprehensive subscription pricing system...
 
 ## Changes
 
-- **Schema:** Added subscription and tier tables to support the new pricing model
-- **API:** Implemented webhook handlers for Stripe product and price synchronization
-- **Components:** Created a new pricing card component showcasing tier comparisons
-- **Pages:** Added a dedicated pricing page with intuitive monthly/annual toggle
+- **Schema:** Added subscription and tier tables...
 
 ## Impact
 
 - **Performance:** None
 - **Breaking:** None
-- **Migrations:** New tables added
-
-## Additional Notes
-
-This implementation leverages Stripe's webhook system to ensure real-time synchronization of pricing data, providing a seamless experience for end users.
-</bad>
-</example>
-</examples>
+```
 
 ## Recovery
 
@@ -303,6 +282,8 @@ This implementation leverages Stripe's webhook system to ensure real-time synchr
 - Commit in dependency order
 - Verify independently revertable
 - Sign commits with `-S` flag when GPG is available
+- Never use `--no-verify` to skip git hooks
+- Never use `--no-gpg-sign` or `-c commit.gpgsign=false` to bypass signing
 - Be terse in confirmations
 - Never mention Claude, Claude Code, Anthropic, or AI in commits, PR bodies, or any output
 - Never use co-authored-by or "generated by" attributions
