@@ -20,6 +20,6 @@ Pipeline:
    d. Clean orphaned content hashes
 3. Post-check: warns if documents need embedding, suggests `qmd embed`
 
-**CRITICAL:** If any collection's update command exits non-zero, `qmd update` calls `process.exit(exitCode)` immediately. Remaining collections are NOT processed. There is no `--continue-on-error` flag.
+If any collection's update command exits non-zero, `qmd update` calls `process.exit(exitCode)` immediately. Remaining collections are NOT processed. There is no `--continue-on-error` flag.
 
 If the user asks to force re-embed everything (e.g., after model changes or corrupted embeddings), run `qmd embed -f` (separate from update).

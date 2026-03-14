@@ -6,7 +6,7 @@ Cloned repos default to `~/Developer/refs/` but any path works. QMD indexes what
 
 ## Architecture
 
-Reads go through MCP. The plugin declares a `.mcp.json` that exposes `query`, `get`, `multi_get`, and `status` as native Claude tools. No bash spawning. The `query` tool accepts query documents: structured multi-line queries with typed sub-queries (`lex:`, `vec:`, `hyde:`, `expand:`). A search guide skill loads automatically before searches so the model knows how to compose effective queries.
+Reads go through MCP. The plugin declares a `.mcp.json` that exposes `query`, `get`, `multi_get`, and `status` as native Claude tools. No bash spawning. The MCP `query` tool accepts typed sub-queries (`lex`, `vec`, `hyde`). The CLI also supports `expand:` and plain text auto-expansion. A search guide skill loads automatically before searches so the model knows how to compose effective queries.
 
 Writes go through skills and commands:
 
@@ -216,4 +216,4 @@ Reference docs, loaded when relevant:
 
 ## Version
 
-1.4.0
+1.6.0

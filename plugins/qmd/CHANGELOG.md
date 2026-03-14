@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.6.0
+
+Clarify MCP vs CLI type availability across all docs. MCP `query` only accepts `lex`, `vec`, `hyde`. The `expand:` type and plain text auto-expansion are CLI-only.
+
+### Changed
+
+#### Search skill
+- Split modality table into "Typed queries (MCP + CLI)" and "Auto-expand (CLI only)" rows
+- Add Availability column to sub-query types table, marking `expand:` and plain text as CLI-only
+- Add MCP type enum note to grammar section: `"lex" | "vec" | "hyde"`
+- Update examples to use typed MCP queries instead of plain text auto-expand
+- Fix recommended workflow: remove `**Bold:**` inline-header formatting
+- Fix query examples to show `searches` array with `{type, query}` objects
+
+#### Add skill
+- Remove `**Bold:** description` formatting from Known Limitations bullet list
+
+#### Pipeline reference
+- Clarify `expand:` and plain text auto-expansion are CLI-only, not MCP
+- Fix full hybrid latency table: show `lex`+`vec`+`hyde` with "(CLI also: `expand:`)" note
+- Add CLI-only annotation to expansion grammar EBNF comment
+
+#### Commands
+- `query.md`: add "(CLI only)" to `expand:` type, note MCP accepts `lex`/`vec`/`hyde` only
+- `search.md`: fix description and MCP equivalent to use `{type: "lex"}` format
+- `vsearch.md`: fix description and MCP equivalent to use `{type: "vec"}` format
+- `update.md`: remove `**CRITICAL:**` prefix (voice rule)
+
+#### Reference docs
+- `MCP-SETUP.md`: remove `expand` from MCP query tool type list (MCP only accepts `lex`/`vec`/`hyde`)
+- `MCP-SETUP.md`: replace `expand` example with `hyde` example showing keyword + semantic + hypothetical pattern
+- `MCP-SETUP.md`: remove `expand:` from dynamic server instructions latency list
+- `MCP-SETUP.md`: fix troubleshooting tip that referenced `expand:` as an MCP option
+- `models.md`: remove `**Bold:**` inline-header formatting from text formatting bullets
+
+#### Root docs
+- `plugin.json`: add `version: "1.6.0"` field
+- `README.md`: clarify MCP `query` types (`lex`, `vec`, `hyde`) vs CLI `expand:`
+- `README.md`: bump version to 1.6.0
+
 ## 1.5.0
 
 - Add `/reload-plugins` note to README for picking up changes without restart
