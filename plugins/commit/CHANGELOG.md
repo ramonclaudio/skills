@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.3.0
 
 - Add voice rules referencing global `~/.claude/rules/voice.md`
 - Add PR body template with good/bad examples showing correct voice
