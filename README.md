@@ -138,15 +138,15 @@ Each plugin is a self-contained directory with a manifest, one or more skills, a
 
 | Plugin | What it ships | Requires | Version |
 | :--- | :--- | :--- | :--- |
-| [handoff](./plugins/handoff) | 2 skills, 6 hooks | `git` | 1.2.0 |
-| [qmd](./plugins/qmd) | 2 skills, 21 commands, 1 MCP server | `qmd`, `git` | 1.4.0 |
+| [handoff](./plugins/handoff) | 2 skills, 7 hooks | `git` | 1.3.0 |
+| [qmd](./plugins/qmd) | 2 skills, 21 commands, 1 MCP server | `qmd`, `git` | 1.5.0 |
 | [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.3.0 |
-| [simplify](./plugins/simplify) | 1 skill | `git` | 1.2.0 |
-| [audit](./plugins/audit) | 1 skill | `git` | 1.2.0 |
-| [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.2.0 |
-| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.2.0 |
-| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.2.0 |
-| [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var | 1.1.0 |
+| [polish](./plugins/polish) | 1 skill | `git` | 1.3.0 |
+| [audit](./plugins/audit) | 1 skill | `git` | 1.3.0 |
+| [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.3.0 |
+| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.3.0 |
+| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.3.0 |
+| [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var | 1.2.0 |
 
 ## What's in each plugin
 
@@ -188,13 +188,13 @@ Atomic commits with conventional format, grouped by architectural layer. GPG sig
 
 5-phase workflow: analysis, execution, verification, push/PR creation, merge.
 
-### simplify
+### polish
 
-Analyze and simplify codebases using parallel background agents.
+Full codebase sweep that scores every file 0-10 on polish potential and refines files scoring 5+. Unlike the built-in `/simplify` (which targets recently changed files), `/polish` analyzes the entire codebase.
 
-**Skill:** `/simplify [--dry-run]`
+**Skill:** `/polish [--dry-run] [path]`
 
-5-phase: discovery (glob all source), deep analysis (0-10 scoring), queue creation, parallel simplification (up to 5 agents), verification. Uses `opus` model.
+5-phase: discovery (glob all source), deep analysis (0-10 scoring), queue creation, parallel refinement (up to 5 agents), verification. Uses `opus` model.
 
 ### audit
 
