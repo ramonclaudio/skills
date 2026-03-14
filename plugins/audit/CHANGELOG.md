@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Upgrade all agents to opus (Opus 4.6 1M context now included for Max/Team/Enterprise)
+- Add LSP tool access (goToDefinition, findReferences, hover) to audit agents for dead code detection and type analysis
+- Remove per-file sweep format from rules.md (token waste on clean files)
+- Drop `subagent_type` from Agent pseudocode (general-purpose is default)
+- Validation and fix agents now use opus instead of sonnet
+
 ## 1.3.0
 
 - Rename `Task` to `Agent` in allowed-tools and code examples

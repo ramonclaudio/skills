@@ -9,6 +9,7 @@ allowed-tools:
   - Edit
   - Glob
   - Grep
+  - LSP
   - Bash(git *)
   - Bash(wc *)
   - Agent
@@ -77,36 +78,35 @@ Read [${CLAUDE_SKILL_DIR}/references/checklists.md](${CLAUDE_SKILL_DIR}/referenc
 
 Prompt includes the "Architecture, Design & Clarity" checklist. Reads all source files. Uses Finding Format.
 
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
 
 ### Agent 2: Bugs & Logic Errors (opus)
 
 Prompt includes the "Bugs & Logic Errors" checklist. Reads all source files. Uses Finding Format. Does NOT flag style issues.
 
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
 
-### Agent 3: Security, Dependencies & Performance (sonnet)
+### Agent 3: Security, Dependencies & Performance (opus)
 
 Prompt includes the "Security, Dependencies & Performance" checklist plus config files. Uses Finding Format. No theoretical risks or micro-optimizations.
 
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
 
-### Agent 4: Convention Compliance (sonnet)
+### Agent 4: Convention Compliance (opus)
 
 Prompt includes the "Convention Compliance" checklist plus all CLAUDE.md files. Uses Finding Format. Quotes exact rules violated.
 
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, and Bash(git *). Do NOT use Edit, Write, or modify any files.
+CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
 
 ## Phase 3: Collect & Validate
 
 Wait for all 4 agents. Collect findings into a single list.
 
-For each CRITICAL or HIGH finding, launch a **validation agent** (parallel, sonnet):
+For each CRITICAL or HIGH finding, launch a **validation agent** (parallel, opus):
 
 ```
 Agent(
-  subagent_type="general-purpose",
-  model="sonnet",
+  model="opus",
   run_in_background=true,
   prompt="Validate this audit finding. Read the file(s) and confirm.
 
@@ -143,8 +143,7 @@ If NOT `--dry-run`: launch background agents (up to 5 concurrent) to apply each 
 
 ```
 Agent(
-  subagent_type="general-purpose",
-  model="sonnet",
+  model="opus",
   run_in_background=true,
   prompt="Apply this fix. Use the Edit tool.
 

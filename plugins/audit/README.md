@@ -32,8 +32,8 @@ Launches 4 parallel agents, each focused on a different audit dimension:
 |:---|:---|:---|
 | Architecture, Design & Clarity | opus | Coupling, dead code, god files, nested ternaries, naming, readability |
 | Bugs & Logic Errors | opus | Null access, race conditions, type safety, edge cases |
-| Security, Dependencies & Performance | sonnet | Injection, auth, bloated deps, N+1 queries, memory leaks |
-| Convention Compliance | sonnet | CLAUDE.md rule violations, inconsistent patterns |
+| Security, Dependencies & Performance | opus | Injection, auth, bloated deps, N+1 queries, memory leaks |
+| Convention Compliance | opus | CLAUDE.md rule violations, inconsistent patterns |
 
 > [!TIP]
 > Use `--dry-run` to preview findings before any modifications are applied.
