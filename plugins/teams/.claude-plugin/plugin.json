@@ -1,5 +1,6 @@
 {
   "name": "teams",
+  "version": "1.3.0",
   "description": "Orchestrate teams of Claude Code sessions working in parallel. Decomposes work, spawns teammates, assigns tasks with file ownership, and coordinates execution.",
   "author": {
     "name": "ramonclaudio",

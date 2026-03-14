@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0
+
+- Use `${CLAUDE_SKILL_DIR}` for reliable reference file paths (Claude Code 2.1.69+)
+- Add 1M context window note for Opus 4.6 teammates (Claude Code 2.1.75)
+- Fix `permissionMode` → `mode` to match Agent tool API (was never a valid param name)
+- Add `auto` to mode options
+- Add `run_in_background: true` to Agent spawn example for parallel teammate launches
+- Add `continue: false` support to TeammateIdle/TaskCompleted hooks (Claude Code 2.1.72)
+- Add worktree memory sharing note (project configs shared across worktrees, Claude Code 2.1.63)
+- Remove `maxTurns`, `memory`, `mcpServers` from Agent spawn example (not in Agent tool schema)
+- Remove "(ultrathink)" from skill body (user keyword, not a model instruction)
+- Tighten permissions section, remove redundant permissionMode explanation
+
 ## 1.2.0
 
 - Fix SendMessage API shape throughout (use `to`/`message`/`summary` fields)

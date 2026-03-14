@@ -162,7 +162,7 @@ Beyond name, role, model, and file ownership, teammates support:
 
 | Field | Effect |
 |:------|:-------|
-| `permissionMode` | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` |
+| `mode` | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan`, `auto` |
 | `isolation` | `worktree` gives the teammate its own git worktree |
 | `maxTurns` | Cap the number of agentic turns |
 | `memory` | `user`, `project`, or `local` for persistent cross-session memory |
@@ -170,7 +170,7 @@ Beyond name, role, model, and file ownership, teammates support:
 
 ## Token cost
 
-Agent teams use 3-10x more tokens than a single session (roughly 7x in plan mode). Each teammate has its own context window, and token usage scales with the number of active teammates. Use Sonnet for teammates when possible. Start with 3-5 teammates, target 5-6 tasks per teammate. For routine tasks, a single session is more cost-effective.
+Agent teams use 3-10x more tokens than a single session (roughly 7x in plan mode). Each teammate has its own context window (1M tokens with Opus 4.6 on Max/Team/Enterprise), and token usage scales with the number of active teammates. Use Sonnet for teammates when possible. Start with 3-5 teammates, target 5-6 tasks per teammate. For routine tasks, a single session is more cost-effective.
 
 ## Limitations
 
@@ -182,7 +182,7 @@ Agent teams are experimental:
 - One team per session. Clean up before starting a new one.
 - No nested teams. Teammates cannot spawn their own teams or teammates.
 - Lead is fixed. The session that creates the team leads it for its lifetime.
-- Teammates inherit the lead's permission mode by default. Use `permissionMode` to override per-teammate, or change individually after spawning. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting.
+- Teammates inherit the lead's permission mode by default. Use `mode` to override per-teammate at spawn, or change individually after spawning. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting.
 - Split panes require tmux or iTerm2 (not supported in VS Code terminal, Windows Terminal, or Ghostty)
 
 Teammates read `CLAUDE.md` from their working directory. Use this to provide project-specific guidance to all teammates.
