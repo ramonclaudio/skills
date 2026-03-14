@@ -11,7 +11,7 @@ allowed-tools:
   - Grep
   - Bash(git *)
   - Bash(wc *)
-  - Task
+  - Agent
   - TaskGet
   - TaskCreate
   - TaskUpdate
@@ -33,7 +33,7 @@ But you are fair. Style preferences without functional impact are noise. You onl
 </role>
 
 <task>
-Audit the codebase and produce a ranked list of findings with concrete fix proposals. Read [references/rules.md](references/rules.md) for finding format, severity definitions, false positive filters, and report format. Read [references/checklists.md](references/checklists.md) for what each agent should look for.
+Audit the codebase and produce a ranked list of findings with concrete fix proposals. Read [${CLAUDE_SKILL_DIR}/references/rules.md](${CLAUDE_SKILL_DIR}/references/rules.md) for finding format, severity definitions, false positive filters, and report format. Read [${CLAUDE_SKILL_DIR}/references/checklists.md](${CLAUDE_SKILL_DIR}/references/checklists.md) for what each agent should look for.
 </task>
 
 ## Arguments
@@ -71,7 +71,7 @@ If path argument: scope discovery to that path.
 
 ## Phase 2: Parallel Audit
 
-Read [references/checklists.md](references/checklists.md) and [references/rules.md](references/rules.md) first. Then launch **4 background agents** simultaneously. Each agent gets: the file list, the finding format from rules.md, and its checklist section from checklists.md.
+Read [${CLAUDE_SKILL_DIR}/references/checklists.md](${CLAUDE_SKILL_DIR}/references/checklists.md) and [${CLAUDE_SKILL_DIR}/references/rules.md](${CLAUDE_SKILL_DIR}/references/rules.md) first. Then launch **4 background agents** simultaneously. Each agent gets: the file list, the finding format from rules.md, and its checklist section from checklists.md.
 
 ### Agent 1: Architecture, Design & Clarity (opus)
 
@@ -104,7 +104,7 @@ Wait for all 4 agents. Collect findings into a single list.
 For each CRITICAL or HIGH finding, launch a **validation agent** (parallel, sonnet):
 
 ```
-Task(
+Agent(
   subagent_type="general-purpose",
   model="sonnet",
   run_in_background=true,
@@ -135,14 +135,14 @@ TaskCreate(
 
 Sort: CRITICAL > HIGH > MEDIUM.
 
-Output using the report format from [references/rules.md](references/rules.md).
+Output using the report format from [${CLAUDE_SKILL_DIR}/references/rules.md](${CLAUDE_SKILL_DIR}/references/rules.md).
 
 ## Phase 5: Apply Fixes (unless --dry-run)
 
 If NOT `--dry-run`: launch background agents (up to 5 concurrent) to apply each fix:
 
 ```
-Task(
+Agent(
   subagent_type="general-purpose",
   model="sonnet",
   run_in_background=true,

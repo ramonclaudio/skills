@@ -1,5 +1,6 @@
 {
   "name": "audit",
+  "version": "1.4.0",
   "description": "Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight.",
   "author": {
     "name": "ramonclaudio",
