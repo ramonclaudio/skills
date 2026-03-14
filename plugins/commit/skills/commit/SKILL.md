@@ -26,7 +26,7 @@ Commit code changes using atomic commits with conventional commit format. Each c
 
 Follow `~/.claude/rules/voice.md` for all authored text. Key commit-specific rules:
 - Commit messages: lowercase after colon, no period, specific verbs (add, fix, extract, drop)
-- PR bodies: start with what changed and why. No filler sections. Test plan at end.
+- PR bodies: start with what changed and why. No filler sections.
 - PR titles: same format as commit messages
 - No `**Bold:** description` lists in PR bodies
 - Never mention Claude/Anthropic/AI
@@ -129,11 +129,6 @@ gh pr create --base "$BASE_BRANCH" --title "type(scope): description" --body "$(
 {List of concrete changes, one per line, no bold headers:}
 - {what file/module changed and what was done}
 - {next change}
-
-## Test plan
-
-- {concrete test performed or command run}
-- {next test}
 EOF
 )"
 ```
@@ -144,7 +139,6 @@ PR body guidelines:
 - No `**Bold:** description` list format
 - No "Impact: none" or "Migrations: none" filler. If there's no impact, don't mention it.
 - Include breaking changes or migrations only when they exist
-- Test plan: list what you actually tested. Commands run, behavior verified.
 - Keep it short. Reviewers read diffs, not novels.
 
 ### Phase 5 - Merge & Cleanup (with `--merge PR#`)
@@ -257,13 +251,6 @@ Stripe products/prices sync on webhook. Tiers stored in `subscriptions` table wi
 - api: customer portal session endpoint
 - components: pricing card with tier comparison
 - pages: `/pricing` with tier toggle (monthly/annual)
-
-## Test plan
-
-- Triggered `stripe trigger product.updated`, verified DB write
-- Loaded `/pricing`, confirmed tiers render from DB
-- Toggled monthly/annual, verified price switch
-- `bun test` passes
 </good>
 
 <bad>
