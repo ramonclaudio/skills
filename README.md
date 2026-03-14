@@ -1,8 +1,8 @@
 # Skills
 
-Plugin marketplace for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). 9 plugins, install what you need.
+A collection of the plugins, skills, agents, commands, hooks, and workflows I use in [Claude Code](https://docs.anthropic.com/en/docs/claude-code), open sourced for everyone. 9 plugins, grab what you need.
 
-I use Claude Code for everything. Session context would vanish between runs, commits needed too many steps, codebases had no good way to audit themselves. So I built the tools I wanted and open sourced them. If they saved you time, [let me know](https://x.com/ramonclaudio).
+Context kept vanishing between sessions. Commits took too many steps. No good way to audit a codebase or coordinate parallel agents. So I built the tools I wanted and started publishing them here. Ping me if they save you time: [@ramonclaudio](https://x.com/ramonclaudio).
 
 ## Install
 
@@ -138,15 +138,15 @@ Each plugin is a self-contained directory with a manifest, one or more skills, a
 
 | Plugin | What it ships | Requires | Version |
 | :--- | :--- | :--- | :--- |
-| [handoff](./plugins/handoff) | 2 skills, 7 hooks | `git` | 1.3.0 |
-| [qmd](./plugins/qmd) | 2 skills, 21 commands, 1 MCP server | `qmd`, `git` | 1.5.0 |
-| [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.3.0 |
-| [polish](./plugins/polish) | 1 skill | `git` | 1.3.0 |
-| [audit](./plugins/audit) | 1 skill | `git` | 1.3.0 |
-| [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.3.0 |
-| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.3.0 |
-| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.3.0 |
-| [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var | 1.2.0 |
+| [handoff](./plugins/handoff) | 2 skills, 2 hooks | `git` | 1.5.0 |
+| [qmd](./plugins/qmd) | 2 skills, 21 commands, 1 MCP server | `qmd`, `git` | 1.6.0 |
+| [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.4.0 |
+| [polish](./plugins/polish) | 1 skill | `git` | 1.4.0 |
+| [audit](./plugins/audit) | 1 skill | `git` | 1.4.0 |
+| [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.4.0 |
+| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.4.0 |
+| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.4.0 |
+| [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var | 1.3.0 |
 
 ## What's in each plugin
 
@@ -158,15 +158,11 @@ Session continuity. Preserves context across sessions, machines, and compactions
 - `/handoff:end` - archive session state with health checks (build/test/lint), severity, done/failed/blockers
 - `/handoff:start` - auto-triggered on critical context loss. Deep rehydration with drift detection.
 
-**Hooks (7):**
-- `session-start.sh` - auto-init on startup/resume, context injection on compact
-- `compact-reinject.sh` - re-inject context after compaction
-- `session-clear.sh` - reset counters, archive events
-- `pre-compact.sh` - auto-save before compaction
-- `event-capture.sh` - capture tool events (async)
-- `prompt-reminder.sh` - context degradation escalation
+**Hooks (2):**
+- `SessionStart` - injects resume context on startup/resume
+- `PostCompact` - re-injects context after compaction
 
-Hooks handle everything automatically. The only command you run is `/handoff:end` when you're done for the day.
+Hooks run automatically. The only command you run is `/handoff:end` when you're done for the day.
 
 ### qmd
 
