@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.5.1
+## 1.5.0
 
 - Add `/reload-plugins` note to README for picking up changes without restart
 - Add MCP dedup note to MCP-SETUP.md: plugin `.mcp.json` handles config, avoid duplicate `settings.json` entry

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.3.0
 
 - Make `/handoff:start` user-invocable (remove `user-invocable: false`)
 - Extract `agent_id`, `agent_type`, and `worktree` in event-capture hook

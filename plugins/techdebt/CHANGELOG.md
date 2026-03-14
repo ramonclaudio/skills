@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.3.0
 
 - Rename `Task` to `Agent` in allowed-tools and code examples
 - Extract sweep and fix agent prompts to `references/agents.md`

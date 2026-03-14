@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.3.0
 
 - Rename plugin from `simplify` to `polish` to avoid collision with bundled `/simplify` skill (Claude Code 2.1.63+)
 - Differentiate from built-in `/simplify`: full codebase sweep vs recently changed files

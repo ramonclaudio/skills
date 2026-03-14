@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.3.0
 
 - Remove `Bash(for *)` from allowed-tools
 - Scope `Bash(mkdir *)` to `Bash(mkdir -p /tmp/gif-output)`

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0
+## 1.2.0
 
 - Fix SendMessage API shape throughout (use `to`/`message`/`summary` fields)
 - Rename `Task` tool references to `Agent` (renamed in Claude Code 2.1.63)

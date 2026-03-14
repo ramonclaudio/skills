@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.3.0
 
 - Add `Bash(trash *)` to allowed-tools
 - Add cleanup step: `trash /tmp/video-frames` before `mkdir -p` to prevent stale frames

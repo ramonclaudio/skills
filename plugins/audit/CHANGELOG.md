@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.3.0
 
 - Rename `Task` to `Agent` in allowed-tools and code examples
 - Use `${CLAUDE_SKILL_DIR}` for reference file paths (checklists.md, rules.md)
