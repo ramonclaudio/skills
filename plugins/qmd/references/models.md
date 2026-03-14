@@ -19,8 +19,8 @@ QMD uses 3 quantized GGUF models for embeddings, query expansion, and reranking.
 **Context window:** 8192 tokens (input)
 
 **Text formatting:**
-- **Queries:** `task: search result | query: {query}` (nomic-style task prefix)
-- **Documents:** `title: {title} | text: {text}`
+- Queries: `task: search result | query: {query}` (nomic-style task prefix)
+- Documents: `title: {title} | text: {text}`
 
 **Batch processing:**
 - Parallel contexts: 1-8 based on VRAM (25% free VRAM reserved, ~143MB/context)

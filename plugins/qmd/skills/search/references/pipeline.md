@@ -14,11 +14,11 @@ Each sub-query is type-routed to the appropriate backend: `lex` queries run BM25
 
 Expansion is conditional. When the BM25 probe returns a strong signal (top score >= 0.85 AND gap to second result >= 0.15), expansion is skipped entirely to save compute.
 
-Note: `qmd vsearch` also uses query expansion internally, filtered to `vec` and `hyde` types only (no `lex`). The full query pipeline (`qmd query` / MCP `expand:`) isn't the only path that expands queries.
+Note: `qmd vsearch` also uses query expansion internally, filtered to `vec` and `hyde` types only (no `lex`). The full query pipeline (`qmd query` CLI) isn't the only path that expands queries. MCP `query` only accepts `lex`, `vec`, `hyde` types. The `expand:` type and plain text auto-expansion are CLI-only.
 
 ### Query Document Format
 
-Queries can be submitted as multi-line **query documents** with typed sub-queries. Each line has an optional type prefix (`lex:`, `vec:`, `hyde:`, `expand:`). Plain text lines (no prefix) are treated as implicit `expand:`. They get auto-expanded by the local LLM.
+Queries can be submitted as multi-line **query documents** with typed sub-queries. Each line has an optional type prefix (`lex:`, `vec:`, `hyde:`). The CLI also supports `expand:` and plain text (implicit `expand:`), which auto-expand via the local LLM. MCP only accepts `lex`, `vec`, `hyde` types.
 
 The first sub-query in the document receives **2x weight** in RRF fusion, so put the most important query first.
 
@@ -117,7 +117,7 @@ Search matches point to the chunk, not the exact line. To narrow down after find
 |----------|-------------|---------------|----------------|-------|
 | BM25 keyword | `qmd search` | `lex:` | ~30ms | No model inference |
 | Vector search | `qmd vsearch` | `vec:`/`hyde:` | ~2s | Embedding + vector lookup + optional expansion |
-| Full hybrid | `qmd query` | `expand:` | ~10s | Expansion + BM25 + vector + reranking |
+| Full hybrid | `qmd query` | `lex`+`vec`+`hyde` (CLI also: `expand:`) | ~10s | Expansion + BM25 + vector + reranking |
 
 First query is slower while models load into VRAM. Use MCP HTTP daemon mode (`qmd mcp --http --daemon`) to keep models warm between requests (~16s → ~10s).
 
@@ -155,10 +155,10 @@ The expansion model is constrained to output in this grammar (EBNF):
 ```
 query_document = { line } ;
 line           = [ type ":" ] text newline ;
-type           = "lex" | "vec" | "hyde" | "expand" ;
+type           = "lex" | "vec" | "hyde" | "expand" ;   # expand is CLI-only
 ```
 
-Lines without a type prefix are treated as implicit `expand:` (auto-expanded by the local LLM). At most one `expand:` line per query document.
+Lines without a type prefix are treated as implicit `expand:` (auto-expanded by the local LLM). At most one `expand:` line per query document. MCP `query` only accepts `lex`, `vec`, `hyde`.
 
 ### Lex Query Sub-Grammar
 

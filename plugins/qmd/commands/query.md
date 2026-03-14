@@ -12,7 +12,7 @@ Full hybrid pipeline: BM25 probe → conditional expansion → parallel FTS+vect
 
 Skips expensive expansion when BM25 returns a strong signal (top score >= 0.85, gap to #2 >= 0.15).
 
-Supports query document format with typed sub-queries via `$'lex: ...\nvec: ...'` syntax. Sub-query types: `lex:` (BM25 keyword), `vec:` (semantic embedding), `hyde:` (hypothetical document), `expand:` (auto-expansion). Lex syntax supports `"phrase"` for exact match and `-term` for negation.
+Supports query document format with typed sub-queries via `$'lex: ...\nvec: ...'` syntax. Sub-query types: `lex:` (BM25 keyword), `vec:` (semantic embedding), `hyde:` (hypothetical document), `expand:` (auto-expansion, CLI only). Lex syntax supports `"phrase"` for exact match and `-term` for negation. MCP `query` tool accepts `lex`, `vec`, `hyde` types only.
 
 Flags:
 - `-n <num>`: max results (default: 5 for cli, 20 for --json/--files)

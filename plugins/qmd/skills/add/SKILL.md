@@ -186,11 +186,11 @@ Report: collection name, document count, mask used, clone type (shallow/full).
 
 ## Known Limitations
 
-- **Embedding interruption**: first run downloads ~2GB of GGUF models (embeddinggemma-300M, qwen3-reranker-0.6b, qmd-expand GRPO). If interrupted mid-download, retry `qmd embed` or `qmd pull` manually.
-- **Shallow clones**: `--depth 1` saves disk but loses git history. Use `--full` if you need blame or log.
-- **Private repos**: `git clone` will fail without SSH keys or tokens configured. The skill does not handle authentication, that's an environment concern.
-- **No branch/tag support**: always clones the default branch. To index a specific release, clone manually and use `/qmd:add` with `--mask`.
-- **Node.js/Bun runtime**: requires Node.js 22+ or Bun to run `qmd` CLI.
+- First run downloads ~2GB of GGUF models (embeddinggemma-300M, qwen3-reranker-0.6b, qmd-expand GRPO). If interrupted mid-download, retry `qmd embed` or `qmd pull` manually.
+- `--depth 1` (default) saves disk but loses git history. Use `--full` if you need blame or log.
+- `git clone` will fail without SSH keys or tokens configured. The skill does not handle authentication, that's an environment concern.
+- Always clones the default branch. To index a specific release, clone manually and use `/qmd:add` with `--mask`.
+- Requires Node.js 22+ or Bun to run `qmd` CLI.
 
 ## Recovery
 

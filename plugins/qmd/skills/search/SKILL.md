@@ -19,10 +19,10 @@ QMD searches **indexed collections**: external codebases, notes, docs you've add
 
 | Approach | When to use | How |
 |----------|-------------|-----|
-| Default (auto-expand) | Most queries. Let the pipeline decide. | MCP: `searches: [{type: "expand", query: "auth middleware"}]`. CLI: `qmd query "auth middleware"` |
-| Typed queries | You know what you need. Exact terms, semantic concepts, or both. | MCP: `searches: [{type: "lex", query: "handleAuth"}, {type: "vec", query: "how auth works"}]`. CLI: `qmd query $'lex: handleAuth\nvec: how auth works'` |
+| Typed queries (MCP + CLI) | You know what you need. Exact terms, semantic concepts, or both. | MCP: `searches: [{type: "lex", query: "handleAuth"}, {type: "vec", query: "how auth works"}]`. CLI: `qmd query $'lex: handleAuth\nvec: how auth works'` |
+| Auto-expand (CLI only) | Most CLI queries. Let the pipeline decide. | CLI: `qmd query "auth middleware"`. Not available via MCP. |
 
-**Use `query` for everything.** Plain text queries auto-expand. Typed queries give you control when auto-expand isn't enough.
+**Use `query` for everything.** MCP accepts typed sub-queries (`lex`, `vec`, `hyde`). CLI also supports `expand:` and plain text (auto-expand).
 
 ## How `query` Works
 
@@ -32,26 +32,28 @@ Documents are chunked into 900-token pieces with 15% overlap. Search matches poi
 
 ## Query Document Format
 
-The `query` tool accepts an array of typed sub-queries. **MCP** uses structured JSON: `searches: [{type: "lex", query: "term"}, ...]`. **CLI** uses a text format: each line has an optional type prefix (`lex: term`). Plain text (no prefix) is treated as `expand:`.
+The `query` tool accepts an array of typed sub-queries. **MCP** uses structured JSON: `searches: [{type: "lex", query: "term"}, ...]` with types `lex`, `vec`, `hyde` only. **CLI** uses a text format: each line has an optional type prefix (`lex: term`). CLI also supports `expand:` and plain text (auto-expand).
 
 ### Grammar
+
+MCP `type` enum: `"lex" | "vec" | "hyde"`. CLI adds `"expand"` and implicit expand (plain text).
 
 ```
 root    ::= line ("\n" line)*
 line    ::= (type ":" SP)? content
-type    ::= "lex" | "vec" | "hyde" | "expand"
+type    ::= "lex" | "vec" | "hyde" | "expand"   # expand is CLI-only
 content ::= [^\n]+
 ```
 
 ### Types
 
-| Type | Routed to | Purpose |
-|------|-----------|---------|
-| `lex:` | BM25 only | Exact keywords, identifiers, error strings |
-| `vec:` | Vector only | Semantic rephrasing, concept search |
-| `hyde:` | Vector only | Hypothetical document. Describe what the answer looks like |
-| `expand:` | Full pipeline | Auto-expand into lex/vec/hyde sub-queries. Max one per query document. |
-| _(plain text)_ | Full pipeline | Implicit `expand:`. Same as `expand:` but shorter to write. |
+| Type | Routed to | Purpose | Availability |
+|------|-----------|---------|-------------|
+| `lex:` | BM25 only | Exact keywords, identifiers, error strings | MCP + CLI |
+| `vec:` | Vector only | Semantic rephrasing, concept search | MCP + CLI |
+| `hyde:` | Vector only | Hypothetical document. Describe what the answer looks like | MCP + CLI |
+| `expand:` | Full pipeline | Auto-expand into lex/vec/hyde sub-queries. Max one per query document. | CLI only |
+| _(plain text)_ | Full pipeline | Implicit `expand:`. Same as `expand:` but shorter to write. | CLI only |
 
 ### Fusion Weight
 
@@ -59,7 +61,7 @@ The **first query line gets 2x fusion weight** in RRF. Put your strongest signal
 
 ### Examples
 
-Single line (auto-expands):
+Single line, auto-expands (CLI only):
 ```
 auth middleware
 ```
@@ -71,7 +73,7 @@ vec:how does request authentication work
 hyde:The middleware validates the JWT token from the Authorization header and attaches the decoded user object to the request context
 ```
 
-Mixed (typed + auto-expand):
+Mixed, typed + auto-expand (CLI only, `expand:` not available via MCP):
 ```
 lex:"ECONNREFUSED" retry logic
 expand:how connection errors are retried
@@ -92,7 +94,7 @@ Lex queries support phrase matching and exclusions:
 
 | Tool | Purpose |
 |------|---------|
-| `query` | Search: plain text auto-expands, typed queries for control |
+| `query` | Search: typed sub-queries (`lex`, `vec`, `hyde`). CLI also supports `expand:` and plain text. |
 | `get` | Retrieve one document by path |
 | `multi_get` | Retrieve multiple documents |
 | `status` | List collections, document counts, pending embeds |
@@ -127,7 +129,7 @@ After search returns results, retrieve full documents:
 
 | MCP Tool | CLI Equivalent | Key Parameters |
 |----------|---------------|----------------|
-| `query` | `qmd query` (alias: `deep-search`) | `searches` (array of `{type, query}` objects, min 1, max 10), `limit` (default 10), `minScore` (default 0), `collections` (array) |
+| `query` | `qmd query` (alias: `deep-search`) | `searches` (array of `{type, query}` objects, types: `lex`/`vec`/`hyde`, min 1, max 10), `limit` (default 10), `minScore` (default 0), `collections` (array) |
 | `get` | `qmd get` | `file` (path or `#docid`), `fromLine`, `maxLines`, `lineNumbers` |
 | `multi_get` | `qmd multi-get` | `pattern` (glob or comma list), `maxLines`, `maxBytes` (default 10KB), `lineNumbers` |
 | `status` | `qmd status` | (none) |
@@ -151,16 +153,16 @@ CLI output formats (not available via MCP): `--files`, `--json`, `--csv`, `--md`
 
 ## Recommended Workflow
 
-1. **Check what's available**: `status`
-2. **Search**: `query("topic")`, auto-expands by default
-3. **Refine with typed queries if needed**: `lex:"exact term"` for identifiers, `vec:` for concepts, combine in one query document
-4. **Retrieve full documents**: `get` with path or `#docid`
+1. Check what's available: `status`
+2. Search: `query` with `lex`/`vec`/`hyde` sub-queries
+3. Refine: `lex:"exact term"` for identifiers, `vec:` for concepts, combine in one query document
+4. Retrieve full documents: `get` with path or `#docid`
 
 <examples>
 <example name="finding_implementation_patterns">
 <scenario>User asks how Next.js handles authentication middleware</scenario>
 <search>
-1. query("authentication middleware", collections: ["next.js"], limit: 10)
+1. query(searches: [{type: "lex", query: "authentication middleware"}, {type: "vec", query: "how auth middleware validates requests"}], collections: ["next.js"], limit: 10)
 2. Review results, pick top 3 by score
 3. get(file: "next.js/packages/next/src/server/web/adapter.ts", lineNumbers: true)
 4. Summarize the pattern for the user
@@ -181,8 +183,8 @@ CLI output formats (not available via MCP): `--files`, `--json`, `--csv`, `--md`
 <example name="comparing_across_repos">
 <scenario>User wants to compare error handling across React and Next.js</scenario>
 <search>
-1. query("error boundary implementation", collections: ["react"], limit: 5)
-2. query("error handling middleware", collections: ["next.js"], limit: 5)
+1. query(searches: [{type: "lex", query: "error boundary"}, {type: "vec", query: "error boundary implementation"}], collections: ["react"], limit: 5)
+2. query(searches: [{type: "lex", query: "error handling middleware"}, {type: "vec", query: "how errors are handled in middleware"}], collections: ["next.js"], limit: 5)
 3. get for top results from each
 4. Compare approaches side-by-side
 </search>
@@ -205,7 +207,7 @@ Delegate to subagent (broad research consumes context):
 - Scope searches with the `collections` array parameter when you know which repos to search.
 - First query line gets 2x fusion weight. Put your strongest signal first.
 - Use typed queries when auto-expand misses: `lex:` for exact identifiers, `vec:` for concepts, `hyde:` for "what would the answer look like".
-- Max one `expand:` per query document. Multiple `lex:`/`vec:`/`hyde:` lines are fine.
+- Max one `expand:` per query document (CLI only). Multiple `lex:`/`vec:`/`hyde:` lines are fine.
 - After search returns a path, use `@<absolute-path>` to pull the full file into context (the collection path is in `qmd status`).
 - If MCP tools are missing, the server may have disconnected. Run `/qmd:status` as a Bash fallback.
 - Multi-get with glob: `multi_get` pattern `"docs/*.md"` or comma list `"#abc, #def"`

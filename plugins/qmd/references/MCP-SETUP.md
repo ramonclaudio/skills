@@ -78,7 +78,6 @@ Primary search tool. Accepts a query document: one or more typed sub-queries com
   - `lex`: BM25 keyword search. Supports `"phrase"` for exact match and `-term` for negation.
   - `vec`: Semantic vector search. Write a natural language question.
   - `hyde`: Hypothetical document embedding. Write 50-100 words that look like the answer.
-  - `expand`: Auto-expand via local LLM into lex+vec+hyde variants. Max one per query.
 - `collections` (optional): Array of collection names to filter (OR match). Omit for all default collections.
 - `limit` (optional): Maximum number of results (default: 10)
 - `minScore` (optional): Minimum relevance score 0-1 (default: 0)
@@ -96,8 +95,12 @@ First sub-query gets 2x weight in RRF fusion. Put your strongest signal first.
   {"type": "vec", "query": "how does the auth middleware verify tokens"}
 ]}
 
-// Unknown vocabulary: let the LLM expand
-{"searches": [{"type": "expand", "query": "auth middleware"}]}
+// Complex/nuanced: keyword + semantic + hypothetical document
+{"searches": [
+  {"type": "lex", "query": "\"connection pool\" timeout -redis"},
+  {"type": "vec", "query": "why do database connections time out under load"},
+  {"type": "hyde", "query": "Connection pool exhaustion occurs when all connections are in use and new requests must wait. This typically happens under high concurrency when queries run longer than expected."}
+]}
 ```
 
 ### get
@@ -136,7 +139,7 @@ Show the status of the QMD index: collections, document counts, and health infor
 - Ensure embeddings are generated: `qmd embed`
 
 ### Slow searches
-- For faster results, use `query` with `lex:` sub-queries instead of `expand:`
+- For faster results, use `query` with `lex:` sub-queries (fast BM25) instead of `vec:`/`hyde:` (slower, loads models)
 - The first search may be slow while models load (~2GB)
 - Subsequent searches are much faster
 
@@ -195,7 +198,6 @@ The MCP server generates instructions at startup from actual index state. Inject
 - `query` tool usage guidance with sub-query types and latency estimates:
   - `lex:` (~30ms): BM25 keyword and exact phrase matching
   - `vec:`/`hyde:` (~2s): semantic vector search
-  - `expand:` (~10s): auto-expands query via local LLM, searches by keyword + meaning, reranks
 - Retrieval workflow guidance (get, multi_get)
 - Score interpretation tips (e.g., `minScore: 0.5` to filter low-confidence)
 
