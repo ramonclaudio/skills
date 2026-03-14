@@ -40,24 +40,6 @@ Only flag real issues. If it works and is readable, move on.
 - Every finding must have an actionable fix, not a vague suggestion
 - Respect CLAUDE.md conventions - the project's rules are law
 
-## Per-File Sweep Format
-
-Phase 2 sweep agents output one block per file scanned:
-
-```
-=== FILE: src/path/to/file.ts ===
-LINES: 142
-IMPORTS: [exact import paths relevant to analysis]
-TYPES: [types referenced or exported]
-ISSUES: [specific problems with line numbers, or NONE]
-BEHAVIORAL CONCERNS: [race conditions, implicit behavior, etc., or NONE]
-```
-
-- Every file gets a block, even clean ones. Shows coverage and confirms the file was read.
-- ISSUES are concrete bugs or violations (same bar as Finding Format).
-- BEHAVIORAL CONCERNS are not bugs but could cause problems under certain conditions.
-- After the sweep, promote confirmed issues into the Finding Format for the final report.
-
 ## Report Format
 
 ```
