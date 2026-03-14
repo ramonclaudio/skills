@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Use `${CLAUDE_SKILL_DIR}` for reference paths (reliable skill-relative resolution)
+- Add `TaskStop` and `TaskOutput` to allowed-tools
+- Add `description` parameter to all agent pseudo-code blocks
+- Improve skill description with trigger phrases and negative trigger
+- Add version, keywords, repository, license to plugin.json
+
 ## 1.3.0
 
 - Rename `Task` to `Agent` in allowed-tools and code examples

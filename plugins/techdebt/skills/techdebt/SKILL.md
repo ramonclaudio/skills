@@ -1,6 +1,6 @@
 ---
 name: techdebt
-description: Use this skill when the user asks for a tech debt sweep or end-of-session cleanup. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files.
+description: Lightweight end-of-session tech debt sweep. Finds duplicated code, dead exports, unused deps, stale TODOs, and bloated files. Use when user asks for "tech debt", "cleanup", "dead code", "unused exports", "code sweep", or end-of-session hygiene. Do NOT use for full codebase audits (use /audit instead).
 argument-hint: [--dry-run] [path/to/scope]
 context: fork
 agent: general-purpose
@@ -17,6 +17,8 @@ allowed-tools:
   - TaskCreate
   - TaskUpdate
   - TaskList
+  - TaskStop
+  - TaskOutput
 model: opus
 ---
 
@@ -61,7 +63,7 @@ Collect file list. If >200 files, limit to files changed in last 30 commits: `gi
 
 Launch **3 background agents** simultaneously. Each gets the file list.
 
-Use the agent prompts from [references/agents.md](references/agents.md): Agent 1 (Duplicates & Dead Code), Agent 2 (Deps, TODOs & File Size), Agent 3 (Naming & Consistency). Pass `{file_list}` into each prompt.
+Use the agent prompts from [references/agents.md](${CLAUDE_SKILL_DIR}/references/agents.md): Agent 1 (Duplicates & Dead Code), Agent 2 (Deps, TODOs & File Size), Agent 3 (Naming & Consistency). Pass `{file_list}` into each prompt.
 
 ## Phase 3: Collect & Report
 
@@ -108,7 +110,7 @@ Each finding line:
 
 ## Phase 4: Apply Fixes (unless --dry-run)
 
-If NOT `--dry-run`: for each HIGH finding, launch a background agent using the fix agent prompt from [references/agents.md](references/agents.md). Pass `{file_path}`, `{description}`, and `{exact_fix}` into the prompt.
+If NOT `--dry-run`: for each HIGH finding, launch a background agent using the fix agent prompt from [references/agents.md](${CLAUDE_SKILL_DIR}/references/agents.md). Pass `{file_path}`, `{description}`, and `{exact_fix}` into the prompt.
 
 After all complete, output fix summary.
 
