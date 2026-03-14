@@ -29,6 +29,8 @@ Follow `~/.claude/rules/voice.md` for all authored text. Key commit-specific rul
 - PR bodies: start with what changed and why. No filler sections.
 - PR titles: same format as commit messages
 - No `**Bold:** description` lists in PR bodies
+- Wrap filenames, paths, commands, config keys, and code references in backticks
+- Use language-tagged fenced code blocks: ```tsx, ```py, ```bash, ```json
 - Never mention Claude/Anthropic/AI
 
 ## Git State (auto-populated)
@@ -139,6 +141,8 @@ PR body guidelines:
 - No `**Bold:** description` list format
 - No "Impact: none" or "Migrations: none" filler. If there's no impact, don't mention it.
 - Include breaking changes or migrations only when they exist
+- Backtick all filenames (`schema.ts`), paths (`src/auth/`), commands (`bun test`), and code refs
+- Use language-tagged fenced code blocks when including code snippets
 - Keep it short. Reviewers read diffs, not novels.
 
 ### Phase 5 - Merge & Cleanup (with `--merge PR#`)
