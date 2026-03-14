@@ -7,9 +7,9 @@ allowed-tools:
 
 Run `qmd update && qmd embed`. Report any collections whose update command failed.
 
-`qmd update` always updates ALL collections — there is no argument to target a single collection.
+`qmd update` always updates ALL collections. There is no argument to target a single collection.
 
-`--pull` appears in `qmd --help` output but is a dead flag — defined in the CLI parser but never actually used. Update commands configured in YAML always run regardless of this flag.
+`--pull` appears in `qmd --help` output but is a dead flag. Defined in the CLI parser but never actually used. Update commands configured in YAML always run regardless of this flag.
 
 Pipeline:
 1. Clear LLM cache (entire `llm_cache` table wiped)

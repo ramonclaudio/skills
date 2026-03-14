@@ -1,12 +1,12 @@
 # QMD Plugin
 
-Reference repo manager. Clone GitHub repos, index with [QMD](https://github.com/tobi/qmd), search with BM25/vector/hybrid — all on-device.
+Reference repo manager. Clone GitHub repos, index with [QMD](https://github.com/tobi/qmd), search with BM25/vector/hybrid. All on-device.
 
-Cloned repos default to `~/Developer/refs/` but any path works — QMD indexes whatever directory you point it at. Incremental updates only re-embed what changed.
+Cloned repos default to `~/Developer/refs/` but any path works. QMD indexes whatever directory you point it at. Incremental updates only re-embed what changed.
 
 ## Architecture
 
-Reads go through MCP. The plugin declares a `.mcp.json` that exposes `query`, `get`, `multi_get`, and `status` as native Claude tools. No bash spawning. The `query` tool accepts query documents — structured multi-line queries with typed sub-queries (`lex:`, `vec:`, `hyde:`, `expand:`). A search guide skill loads automatically before searches so the model knows how to compose effective queries.
+Reads go through MCP. The plugin declares a `.mcp.json` that exposes `query`, `get`, `multi_get`, and `status` as native Claude tools. No bash spawning. The `query` tool accepts query documents: structured multi-line queries with typed sub-queries (`lex:`, `vec:`, `hyde:`, `expand:`). A search guide skill loads automatically before searches so the model knows how to compose effective queries.
 
 Writes go through skills and commands:
 
@@ -72,7 +72,7 @@ Use `--defer-embed` to add multiple repos without embedding after each one, then
 /qmd:update
 ```
 
-Once MCP is active, Claude uses `query`, `get` etc. directly as tools — no slash command needed for reads.
+Once MCP is active, Claude uses `query`, `get` etc. directly as tools. No slash command needed for reads.
 
 ### Composability
 
@@ -94,7 +94,7 @@ qmd search "auth pattern" | claude -p "summarize these results"
 
 1. Parses URL or `owner/repo` shorthand
 2. Shallow clones to `$REFS/<name>` (default `~/Developer/refs/`, override with `--dest`; pulls if exists). Use `--full` for complete history.
-3. Auto-detects file types (TypeScript, Rust, Go, Python, Swift) to build glob mask. Merges masks for polyglot repos. Fails explicitly if no type detected — use `--mask` to override. *(`--dry-run` stops here — prints the plan and exits)*
+3. Auto-detects file types (TypeScript, Rust, Go, Python, Swift) to build glob mask. Merges masks for polyglot repos. Fails explicitly if no type detected. Use `--mask` to override. *(`--dry-run` stops here, prints the plan and exits)*
 4. Adds QMD collection with detected mask
 5. Sets update command via `qmd collection update-cmd`
 6. Extracts collection context from README (first meaningful paragraph)
@@ -103,7 +103,7 @@ qmd search "auth pattern" | claude -p "summarize these results"
 
 The add skill runs with `context: fork`, so it executes in isolation and returns a summary without polluting your conversation.
 
-The skill is idempotent. If it fails partway, re-run with the same arguments — it pulls instead of re-cloning and removes/re-adds existing collections.
+The skill is idempotent. If it fails partway, re-run with the same arguments. It pulls instead of re-cloning and removes/re-adds existing collections.
 
 ## Context Cost
 
@@ -113,9 +113,11 @@ All commands and skills are model-invocable. Claude can invoke them on its own w
 
 MCP connections can fail silently mid-session. If search tools stop responding, run `/qmd:status` (Bash fallback) or `/mcp` to check the server connection.
 
+After updating the qmd plugin, run `/reload-plugins` to pick up changes without restarting Claude Code.
+
 ## Installation
 
-Install at **user scope** (recommended — this is a personal reference library):
+Install at **user scope** (recommended, this is a personal reference library):
 
 ```bash
 /plugin install qmd@ramonclaudio-skills
@@ -127,7 +129,7 @@ Project scope would push it to all collaborators and add MCP context cost to the
 
 The add skill sets `update: "git -C <path> pull --ff-only"` in each collection's config (`${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`). When `/qmd:update` runs `qmd update`, it clears the LLM cache, then executes each collection's update command before re-indexing. Then `qmd embed` generates embeddings for new/changed content.
 
-`qmd update` always processes ALL collections — there is no single-collection argument. If any collection's update command fails, the process exits immediately (remaining collections are skipped).
+`qmd update` always processes ALL collections. There is no single-collection argument. If any collection's update command fails, the process exits immediately (remaining collections are skipped).
 
 To force re-embed everything (e.g., after a model update or corrupted embeddings):
 
@@ -193,20 +195,20 @@ Reference docs, loaded when relevant:
 
 ## CLI Extras
 
-- `qmd --version` / `qmd -v` — show version with git commit hash (e.g. `1.0.8 (abc1234)`)
-- `qmd --help` — full command reference (note: `--pull` appears here but is a dead flag)
-- `qmd deep-search` — alias for `qmd query`
-- `qmd vector-search` — alias for `qmd vsearch`
-- `qmd collection rm` — alias for `qmd collection remove`
-- `qmd collection mv` — alias for `qmd collection rename`
-- `qmd context remove` — alias for `qmd context rm`
+- `qmd --version` / `qmd -v`: show version with git commit hash (e.g. `1.0.8 (abc1234)`)
+- `qmd --help`: full command reference (note: `--pull` appears here but is a dead flag)
+- `qmd deep-search`: alias for `qmd query`
+- `qmd vector-search`: alias for `qmd vsearch`
+- `qmd collection rm`: alias for `qmd collection remove`
+- `qmd collection mv`: alias for `qmd collection rename`
+- `qmd context remove`: alias for `qmd context rm`
 - Multiple collection filters: `qmd search "query" -c react -c next.js`
-- `--line-numbers` — add line numbers to search/get output
+- `--line-numbers`: add line numbers to search/get output
 - Output formats: `--files`, `--json`, `--csv`, `--md`, `--xml`
 
 ## Requirements
 
-- `qmd` ([github.com/tobi/qmd](https://github.com/tobi/qmd)) — `npm install -g @tobilu/qmd` or `bun install -g @tobilu/qmd`
+- `qmd` ([github.com/tobi/qmd](https://github.com/tobi/qmd)): `npm install -g @tobilu/qmd` or `bun install -g @tobilu/qmd`
 - Node.js 22+ or Bun runtime
 - `git`
 - macOS: Homebrew SQLite (`brew install sqlite`) for extension support

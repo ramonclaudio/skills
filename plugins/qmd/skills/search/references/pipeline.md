@@ -12,13 +12,13 @@ The hybrid pipeline uses a GRPO-optimized query expansion model (fine-tuned from
 
 Each sub-query is type-routed to the appropriate backend: `lex` queries run BM25 keyword search only, `vec` and `hyde` queries run vector search only. This eliminates wasted backend calls (~10 → 6 per query).
 
-Expansion is conditional — when the BM25 probe returns a strong signal (top score >= 0.85 AND gap to second result >= 0.15), expansion is skipped entirely to save compute.
+Expansion is conditional. When the BM25 probe returns a strong signal (top score >= 0.85 AND gap to second result >= 0.15), expansion is skipped entirely to save compute.
 
 Note: `qmd vsearch` also uses query expansion internally, filtered to `vec` and `hyde` types only (no `lex`). The full query pipeline (`qmd query` / MCP `expand:`) isn't the only path that expands queries.
 
 ### Query Document Format
 
-Queries can be submitted as multi-line **query documents** with typed sub-queries. Each line has an optional type prefix (`lex:`, `vec:`, `hyde:`, `expand:`). Plain text lines (no prefix) are treated as implicit `expand:` — they get auto-expanded by the local LLM.
+Queries can be submitted as multi-line **query documents** with typed sub-queries. Each line has an optional type prefix (`lex:`, `vec:`, `hyde:`, `expand:`). Plain text lines (no prefix) are treated as implicit `expand:`. They get auto-expanded by the local LLM.
 
 The first sub-query in the document receives **2x weight** in RRF fusion, so put the most important query first.
 
@@ -26,7 +26,7 @@ Only one `expand:` line is allowed per query document (explicit or implicit).
 
 **Examples:**
 
-Single-line (unchanged behavior — implicit `expand:`):
+Single-line (unchanged behavior, implicit `expand:`):
 ```
 auth middleware JWT validation
 ```
@@ -38,7 +38,7 @@ vec: how does the auth middleware verify tokens
 hyde: The middleware extracts the Bearer token from the Authorization header and verifies it using jsonwebtoken
 ```
 
-Mixed — first line is high-priority, rest are supplementary:
+Mixed: first line is high-priority, rest are supplementary:
 ```
 lex: "C++ performance" optimization -sports -athlete
 vec: techniques to optimize C++ code for speed
@@ -56,7 +56,7 @@ expand: C++ profiling and bottleneck detection
 | Negation (phrase) | `-"exact phrase"` | Exclude documents containing phrase | `-"session cookie"` |
 | Word | bare word | Standard BM25 keyword match (with stemming) | `middleware` |
 
-Negations are useful for disambiguation — e.g., `"python" web framework -snake -reptile` to search for the programming language.
+Negations are useful for disambiguation, e.g., `"python" web framework -snake -reptile` to search for the programming language.
 
 ## RRF Fusion
 
@@ -70,7 +70,7 @@ After fusion, the top 40 candidates (RERANK_CANDIDATE_LIMIT) pass to the reranke
 
 ## Reranking
 
-For each candidate document, the pipeline picks the single best chunk (by keyword overlap with the query) and sends only that chunk to the LLM cross-encoder reranker. There is no multi-chunk score aggregation — one chunk per document.
+For each candidate document, the pipeline picks the single best chunk (by keyword overlap with the query) and sends only that chunk to the LLM cross-encoder reranker. There is no multi-chunk score aggregation. One chunk per document.
 
 The reranker uses node-llama-cpp's `createRankingContext()` and `rankAll()` API with a 2048-token context window and flash attention enabled.
 
@@ -133,7 +133,7 @@ FTS5 columns: filepath (10x weight), title (1x), body (1x). Uses Porter stemmer 
 | `qwen3-reranker-0.6b` (Q8_0) | Cross-encoder re-ranking | ~640MB (600M params) | From `ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF` |
 | `qmd-query-expansion-1.7B` (Q4_K_M) | Query expansion | ~1.1GB (GRPO fine-tuned from Qwen3-1.7B) | From `tobil/qmd-query-expansion-1.7B-gguf` |
 
-Models are cached in `~/.cache/qmd/models/`. Auto-downloaded on first use via node-llama-cpp, or manually via `qmd pull [--refresh]`. GPU parallelism (multiple LlamaContext instances) is used when available for faster embedding and reranking — up to 2.7x speedup.
+Models are cached in `~/.cache/qmd/models/`. Auto-downloaded on first use via node-llama-cpp, or manually via `qmd pull [--refresh]`. GPU parallelism (multiple LlamaContext instances) is used when available for faster embedding and reranking, up to 2.7x speedup.
 
 ## Constants
 

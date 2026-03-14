@@ -14,7 +14,7 @@ allowed-tools:
 model: opus
 ---
 
-# QMD Add — Clone + Index a GitHub Repo
+# QMD Add: Clone + Index a GitHub Repo
 
 ultrathink
 
@@ -36,16 +36,16 @@ You are a reference library curator. Your job is to clone external repos, detect
 - `$ARGUMENTS` containing `--dest`: Override clone destination (default: `~/Developer/refs/`)
 - `$ARGUMENTS` containing `--full`: Clone with full history (not shallow)
 - `$ARGUMENTS` containing `--defer-embed`: Skip embedding step, run `/qmd:update` later
-- `$ARGUMENTS` containing `--dry-run`: Preview only — run Steps 1-3, print plan, exit
+- `$ARGUMENTS` containing `--dry-run`: Preview only. Run Steps 1-3, print plan, exit
 
 ## Constraints
 
-- Execute commands, not suggestions — no dry-run prose
-- Stop immediately on any step failure — do not continue with broken state
-- Never delete anything — use `trash` (if available), never `rm`
-- Refs directory: `--dest` value if provided, otherwise `~/Developer/refs/` — all steps below reference this as `REFS`
+- Execute commands, not suggestions. No dry-run prose
+- Stop immediately on any step failure. Do not continue with broken state
+- Never delete anything. Use `trash` (if available), never `rm`
+- Refs directory: `--dest` value if provided, otherwise `~/Developer/refs/`. All steps below reference this as `REFS`
 - QMD config: `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`
-- If `--dry-run`: exit after Step 3 — no cloning, no indexing, no embedding
+- If `--dry-run`: exit after Step 3. No cloning, no indexing, no embedding
 - If embed fails: report error, print retry command (`qmd embed`), exit
 
 ---
@@ -186,24 +186,24 @@ Report: collection name, document count, mask used, clone type (shallow/full).
 
 ## Known Limitations
 
-- **Embedding interruption** — first run downloads ~2GB of GGUF models (embeddinggemma-300M, qwen3-reranker-0.6b, qmd-expand GRPO). If interrupted mid-download, retry `qmd embed` or `qmd pull` manually.
-- **Shallow clones** — `--depth 1` saves disk but loses git history. Use `--full` if you need blame or log.
-- **Private repos** — `git clone` will fail without SSH keys or tokens configured. The skill does not handle authentication — that's an environment concern.
-- **No branch/tag support** — always clones the default branch. To index a specific release, clone manually and use `/qmd:add` with `--mask`.
-- **Node.js/Bun runtime** — requires Node.js 22+ or Bun to run `qmd` CLI.
+- **Embedding interruption**: first run downloads ~2GB of GGUF models (embeddinggemma-300M, qwen3-reranker-0.6b, qmd-expand GRPO). If interrupted mid-download, retry `qmd embed` or `qmd pull` manually.
+- **Shallow clones**: `--depth 1` saves disk but loses git history. Use `--full` if you need blame or log.
+- **Private repos**: `git clone` will fail without SSH keys or tokens configured. The skill does not handle authentication, that's an environment concern.
+- **No branch/tag support**: always clones the default branch. To index a specific release, clone manually and use `/qmd:add` with `--mask`.
+- **Node.js/Bun runtime**: requires Node.js 22+ or Bun to run `qmd` CLI.
 
 ## Recovery
 
-This skill is idempotent. If it fails partway through, re-run `/qmd:add` with the same arguments — Step 2 pulls instead of re-cloning, Step 4 removes and re-adds the collection.
+This skill is idempotent. If it fails partway through, re-run `/qmd:add` with the same arguments. Step 2 pulls instead of re-cloning, Step 4 removes and re-adds the collection.
 
 | Situation | Recovery |
 |-----------|----------|
-| Clone failed (network) | Re-run — Step 2 retries the clone |
+| Clone failed (network) | Re-run. Step 2 retries the clone |
 | Detection failed | Re-run with `--mask "<glob>"` to skip detection |
-| Collection add failed | Re-run — Step 4 removes then re-adds |
+| Collection add failed | Re-run. Step 4 removes then re-adds |
 | Update-cmd failed | Re-run `qmd collection update-cmd <name> "<cmd>"` |
 | Embed interrupted | Run `qmd embed` to resume |
-| Wrong mask indexed | Re-run with `--mask` — the skill is idempotent |
+| Wrong mask indexed | Re-run with `--mask`. The skill is idempotent |
 
 ---
 

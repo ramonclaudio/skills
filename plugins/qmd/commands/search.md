@@ -1,5 +1,5 @@
 ---
-description: BM25 keyword search (CLI only — MCP `search` tool removed in v1.0.8, use `query` with `lex:` prefix instead)
+description: BM25 keyword search (CLI only, MCP `search` tool removed in v1.0.8, use `query` with `lex:` prefix instead)
 allowed-tools: Bash(qmd search*)
 argument-hint: <query> [-n N] [-c collection] [--json|--csv|--md|--xml|--files]
 ---

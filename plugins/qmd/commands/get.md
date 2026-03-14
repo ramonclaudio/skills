@@ -6,7 +6,7 @@ argument-hint: <file>[:line] [--from N] [-l N] [--line-numbers]
 
 Run `qmd get $ARGUMENTS`.
 
-This is the CLI fallback for `get` MCP tool — use when MCP is down.
+This is the CLI fallback for `get` MCP tool. Use when MCP is down.
 
 Path formats (in resolution order):
 1. Docid: `#abc123` or `abc123` (6-char content hash prefix)
@@ -26,4 +26,4 @@ Output: optional context header (from hierarchical context config) + document bo
 
 If not found: prints "Document not found" error. The MCP `get` tool (not CLI) suggests similar files via Levenshtein distance fuzzy matching.
 
-Prefer MCP `get` tool when available — this command is for when MCP is down or for piping output.
+Prefer MCP `get` tool when available. This command is for when MCP is down or for piping output.

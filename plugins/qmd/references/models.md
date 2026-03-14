@@ -52,7 +52,7 @@ QMD uses 3 quantized GGUF models for embeddings, query expansion, and reranking.
 
 **Context window:** 32768 tokens (input)
 
-**Base model:** Qwen3-1.7B (fine-tuned with GRPO — Group Relative Policy Optimization)
+**Base model:** Qwen3-1.7B (fine-tuned with GRPO, Group Relative Policy Optimization)
 
 **Generation grammar:**
 ```
@@ -68,7 +68,7 @@ content ::= [^\n]+
 ```
 
 **Generation parameters:**
-- `temperature`: 0.7 (NOT 0 — temperature 0 causes infinite loops with grammar constraints)
+- `temperature`: 0.7 (NOT 0, temperature 0 causes infinite loops with grammar constraints)
 - `topK`: 20
 - `topP`: 0.8
 - `maxTokens`: 150
@@ -111,7 +111,7 @@ hyde: The middleware checks the JWT token in the Authorization header and attach
 
 **Context window:** 2048 tokens (fixed, allows ~800 token chunks + ~200 token template + query)
 
-**Reranking mode:** Native ranking context (node-llama-cpp feature). No custom prompt — model trained as cross-encoder.
+**Reranking mode:** Native ranking context (node-llama-cpp feature). No custom prompt. Model trained as cross-encoder.
 
 **Input format:**
 ```
@@ -235,7 +235,7 @@ Output: float[768]
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| Download fails | Network interruption | Re-run `qmd pull` — resumes from last chunk |
+| Download fails | Network interruption | Re-run `qmd pull`. Resumes from last chunk |
 | "Model not found" error | Cache corrupted | Delete `~/.cache/qmd/models/`, re-run `qmd pull` |
 | Slow first query | Models loading into VRAM | Use `qmd mcp --http --daemon` to keep warm |
 | OOM (out of memory) | Too many parallel contexts | Reduce VRAM usage: close other apps, use fewer contexts |

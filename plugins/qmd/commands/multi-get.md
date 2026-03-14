@@ -6,7 +6,7 @@ argument-hint: <pattern> [-l N] [--max-bytes N] [--json|--csv|--md|--xml|--files
 
 Run `qmd multi-get $ARGUMENTS`.
 
-This is the CLI fallback for `multi_get` MCP tool — use when MCP is down.
+This is the CLI fallback for `multi_get` MCP tool. Use when MCP is down.
 
 Pattern formats:
 - Glob: `"docs/*.md"`, `"next.js/packages/**/*.ts"`
