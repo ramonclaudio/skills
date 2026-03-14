@@ -18,8 +18,10 @@ Codebases accumulate cruft. Nested ternaries, god functions, dead imports. Clean
 1. Globs all source files in the codebase
 2. Reads every file, scores 0-10 on polish potential
 3. Creates tasks for files scoring 5+
-4. Launches up to 5 background agents (sonnet) simultaneously, each refining one file
+4. Launches up to 5 background agents simultaneously, each refining one file
 5. Summarizes files analyzed, refined, and what changed
+
+The main skill runs on Opus with 1M context for deep analysis. Worker agents run on Sonnet with `acceptEdits` mode for uninterrupted parallel refinement.
 
 <details open>
 <summary>What It Looks For</summary>
