@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0
+
+- Rename `Task` to `Agent` in allowed-tools and code examples
+- Extract sweep and fix agent prompts to `references/agents.md`
+- Add `argument-hint` frontmatter for autocomplete preview
+- Replace all emdashes
+
 ## 1.2.0
 
 - Upgrade to `opus` model for skill execution
