@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.0
+
+- Add voice rules referencing global `~/.claude/rules/voice.md`
+- Add PR body template with good/bad examples showing correct voice
+- Add PR body guidelines: no filler sections, no bold-header lists, test plan required
+- Slim voice section to commit-specific rules (global rules handle the rest)
+- Add `activeForm` to TaskCreate calls for commit group spinner UX
+- Add `argument-hint` frontmatter for autocomplete preview
+
 ## 1.3.0
 
 - Upgrade to `opus` model for skill execution
