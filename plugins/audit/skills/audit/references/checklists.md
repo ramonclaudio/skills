@@ -10,7 +10,7 @@ ARCHITECTURE - flag if found:
 1. COUPLING: Circular imports. Modules that know too much about each other's internals.
 2. ABSTRACTION ROT: Interfaces that add indirection without value. Wrapper classes that just pass through. 'Manager' classes that manage nothing.
 3. GOD FILES: Files >300 lines doing too many things. Functions >50 lines.
-4. DEAD CODE: Exported functions nobody imports. Unused variables. Commented-out code. Stale feature flags.
+4. DEAD CODE: Exported functions nobody imports. Unused variables. Commented-out code. Stale feature flags. Run `${CLAUDE_SKILL_DIR}/scripts/count-dead-exports.sh` for deterministic dead export detection.
 5. STRUCTURE: Files in wrong directories. No clear module boundaries. Flat directory with 50 files.
 
 CLARITY - flag if found:
