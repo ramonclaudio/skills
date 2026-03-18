@@ -1,7 +1,7 @@
 {
   "name": "frames",
-  "version": "1.4.0",
-  "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos",
+  "version": "1.5.0",
+  "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos.",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com"
