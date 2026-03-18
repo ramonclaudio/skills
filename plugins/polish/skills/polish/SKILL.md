@@ -44,3 +44,10 @@ If path argument provided, scope discovery to that path.
 ## Phases 2-5
 
 Read [${CLAUDE_SKILL_DIR}/references/workflow.md](${CLAUDE_SKILL_DIR}/references/workflow.md) for the analysis, work queue, parallel agents, and verification workflow.
+
+## Gotchas
+
+- Generated files (`*.d.ts`, `_generated/`, codegen output) get picked up by glob patterns. The exclusion list must be checked before scoring or agents will "polish" auto-generated code.
+- Polishing test files can silently break assertions. Renaming variables, simplifying ternaries, or removing "dead" setup code in tests often changes behavior. Score test files conservatively.
+- Agents run in parallel and can conflict if two files import from each other. One agent renaming an export while another reads the old name causes build failures.
+- 5 simultaneous agents on a large codebase can hit Claude rate limits. If agents start failing, reduce concurrency to 2-3.

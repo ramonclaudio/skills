@@ -21,44 +21,24 @@ Flag a file if it has ANY of:
 
 ## Phase 3: Create Work Queue
 
-Use TaskCreate for files scoring 5+, ordered by score descending:
-
-```
-TaskCreate(
-  subject: "Polish {filepath}",
-  description: "Score: {N}/10 | {brief reason}"
-)
-```
+Create a task per file scoring 5+, ordered by score descending. Subject: `Polish {filepath}`. Description: `Score: {N}/10 | {brief reason}`.
 
 ## Phase 4: Parallel Polish
 
-For EACH task, launch a background agent:
+For each task, launch a background general-purpose agent (opus, mode: acceptEdits) to polish the file. The agent reads the file, then applies refinements with Edit:
+- Flatten nesting, simplify control flow
+- Remove dead code, unused imports
+- Improve naming clarity
+- Replace nested ternaries with if-else/switch
+- Follow project conventions
 
-```
-Agent(
-  subagent_type="general-purpose",
-  model="sonnet",
-  mode="acceptEdits",
-  run_in_background=true,
-  prompt="Polish {filepath}.
+The agent preserves all functionality, skips uncertain changes, and reports changes made or no changes needed.
 
-  Read the file, then apply refinements using Edit:
-  - Flatten nesting, simplify control flow
-  - Remove dead code, unused imports
-  - Improve naming clarity
-  - Replace nested ternaries with if-else/switch
-  - Follow project conventions
-
-  Preserve ALL functionality. Skip uncertain changes.
-  Report: [changes made] or [no changes needed]"
-)
-```
-
-Launch up to 5 agents simultaneously. Poll completion, launch more as slots free.
+Launch up to 5 agents simultaneously. Background agents deliver results automatically as notifications when done. Do NOT use TaskOutput to poll (TaskOutput fails with agent IDs). Launch more as slots free.
 
 ## Phase 5: Report
 
-After all agents complete:
+After all agents complete (results arrive as automatic notifications):
 1. TaskUpdate each task to `completed`
 2. Summarize: files analyzed, files polished, key changes
 3. List any files skipped and why
