@@ -138,15 +138,15 @@ Each plugin is a self-contained directory with a manifest, one or more skills, a
 
 | Plugin | What it ships | Requires | Version |
 | :--- | :--- | :--- | :--- |
-| [handoff](./plugins/handoff) | 2 skills, 2 hooks | `git` | 1.5.0 |
-| [qmd](./plugins/qmd) | 2 skills, 21 commands, 1 MCP server | `qmd`, `git` | 1.6.0 |
-| [commit](./plugins/commit) | 1 skill | `git`, `gh` | 1.4.0 |
-| [polish](./plugins/polish) | 1 skill | `git` | 1.4.0 |
-| [audit](./plugins/audit) | 1 skill | `git` | 1.4.0 |
-| [techdebt](./plugins/techdebt) | 1 skill | `git` | 1.4.0 |
-| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.4.0 |
-| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.4.0 |
-| [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var | 1.3.0 |
+| [handoff](./plugins/handoff) | 2 skills, 2 hooks | `git` | 1.6.0 |
+| [qmd](./plugins/qmd) | 2 skills, 21 commands, 1 MCP server | `qmd`, `git` | 1.7.0 |
+| [commit](./plugins/commit) | 1 skill, 1 hook, 2 scripts | `git`, `gh` | 1.5.0 |
+| [polish](./plugins/polish) | 1 skill | `git` | 1.5.0 |
+| [audit](./plugins/audit) | 1 skill, 1 script | `git` | 1.5.0 |
+| [techdebt](./plugins/techdebt) | 1 skill, 1 script | `git` | 1.5.0 |
+| [gif](./plugins/gif) | 1 skill | `ffmpeg` | 1.5.0 |
+| [frames](./plugins/frames) | 1 skill | `ffmpeg` | 1.5.0 |
+| [teams](./plugins/teams) | 1 skill | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` env var | 1.4.0 |
 
 ## What's in each plugin
 
@@ -182,7 +182,7 @@ Atomic commits with conventional format, grouped by architectural layer. GPG sig
 
 **Skill:** `/commit [--analyze] [--push] [--pr] [--merge PR#]`
 
-5-phase workflow: analysis, execution, verification, push/PR creation, merge.
+5-phase workflow: analysis, execution, verification, push/PR creation, merge. Ships a `PreToolUse` hook that blocks force-push, `--no-verify`, and GPG bypass. Helper scripts validate commit message format and block dangerous git operations.
 
 ### polish
 
@@ -241,13 +241,15 @@ Every plugin follows this layout:
 
 ```text
 plugins/{name}/
-  .claude-plugin/plugin.json    manifest (name, version, description)
-  skills/{skill-name}/SKILL.md  skill instructions
-  hooks/hooks.json              event hooks (handoff only)
-  hooks/scripts/*.sh            hook scripts (handoff only)
-  commands/*.md                 extra commands (qmd only)
-  .mcp.json                     MCP server config (qmd only)
-  README.md                     plugin docs
+  .claude-plugin/plugin.json         manifest (name, version, description)
+  skills/{skill-name}/SKILL.md       skill instructions + frontmatter hooks
+  skills/{skill-name}/scripts/*.sh   helper scripts (deterministic ops)
+  skills/{skill-name}/references/    checklists, patterns, agent prompts
+  hooks/hooks.json                   plugin-level event hooks (handoff)
+  hooks/scripts/*.sh                 hook handler scripts (handoff)
+  commands/*.md                      extra commands (qmd only)
+  .mcp.json                          MCP server config (qmd only)
+  README.md                          plugin docs
 ```
 
 ## Version pinning
