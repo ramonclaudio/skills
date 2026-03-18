@@ -12,6 +12,7 @@ allowed-tools:
   - LSP
   - Bash(git *)
   - Bash(wc *)
+  - Bash(*/count-dead-exports.sh *)
   - Agent
   - TaskGet
   - TaskCreate
@@ -78,60 +79,31 @@ Read [${CLAUDE_SKILL_DIR}/references/checklists.md](${CLAUDE_SKILL_DIR}/referenc
 
 Prompt includes the "Architecture, Design & Clarity" checklist. Reads all source files. Uses Finding Format.
 
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
-
 ### Agent 2: Bugs & Logic Errors (opus)
 
 Prompt includes the "Bugs & Logic Errors" checklist. Reads all source files. Uses Finding Format. Does NOT flag style issues.
-
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
 
 ### Agent 3: Security, Dependencies & Performance (opus)
 
 Prompt includes the "Security, Dependencies & Performance" checklist plus config files. Uses Finding Format. No theoretical risks or micro-optimizations.
 
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
-
 ### Agent 4: Convention Compliance (opus)
 
 Prompt includes the "Convention Compliance" checklist plus all CLAUDE.md files. Uses Finding Format. Quotes exact rules violated.
 
-CONSTRAINT: You are a READ-ONLY audit agent. Use only Read, Glob, Grep, Bash(git *), and LSP (goToDefinition, findReferences, hover). Do NOT use Edit, Write, or modify any files.
+Phase 2 agents use Explore subagent type (read-only by design, Edit/Write denied at tool level). Override model to opus.
 
 ## Phase 3: Collect & Validate
 
-Wait for all 4 agents. Collect findings into a single list.
+Wait for all 4 agents to complete. Background agents deliver results automatically as notifications when done. Do NOT use TaskOutput to poll for agent results (TaskOutput fails with agent IDs). Collect findings into a single list.
 
-For each CRITICAL or HIGH finding, launch a **validation agent** (parallel, opus):
-
-```
-Agent(
-  model="opus",
-  run_in_background=true,
-  prompt="Validate this audit finding. Read the file(s) and confirm.
-
-  FINDING: {finding_description}
-  FILE: {file_path}
-  LINES: {line_numbers}
-
-  Return: CONFIRMED or FALSE_POSITIVE (1-sentence reason).
-  If confirmed, return the exact fix."
-)
-```
+For each CRITICAL or HIGH finding, launch a background validation agent (Explore, opus) to read the cited file and return CONFIRMED or FALSE_POSITIVE with one-sentence reason.
 
 Remove FALSE_POSITIVE findings.
 
 ## Phase 4: Rank & Report
 
-Create tasks for validated findings:
-
-```
-TaskCreate(
-  subject: "[SEVERITY] {short description}",
-  description: "File: {path}:{lines}\nProblem: {description}\nFix: {fix}",
-  activeForm: "Fixing {short description}"
-)
-```
+Create a task per validated finding. Subject: `[SEVERITY] short description`. Description: file:line, problem, fix.
 
 Sort: CRITICAL > HIGH > MEDIUM.
 
@@ -139,23 +111,16 @@ Output using the report format from [${CLAUDE_SKILL_DIR}/references/rules.md](${
 
 ## Phase 5: Apply Fixes (unless --dry-run)
 
-If NOT `--dry-run`: launch background agents (up to 5 concurrent) to apply each fix:
+If NOT `--dry-run`: for each finding, launch a background fix agent (general-purpose, opus) to read the file, apply the fix with Edit, and verify surrounding code. Report APPLIED or SKIPPED.
 
-```
-Agent(
-  model="opus",
-  run_in_background=true,
-  prompt="Apply this fix. Use the Edit tool.
-
-  FILE: {file_path}
-  PROBLEM: {description}
-  FIX: {exact_fix}
-
-  Read first. Apply. Verify surrounding code.
-  Report: APPLIED or SKIPPED (reason)."
-)
-```
-
-After all complete, TaskUpdate each to `completed`. Output fix summary.
+Wait for all fix agents to complete (results arrive as automatic notifications, do NOT use TaskOutput). TaskUpdate each to `completed`. Output fix summary.
 
 If `--dry-run`: skip. Report from Phase 4 is the final output.
+
+## Gotchas
+
+- Style preferences aren't findings. Only flag bugs, security, performance, maintainability.
+- Skip vendored/generated code: `node_modules`, `dist`, `_generated`, `*.min.*`, `*.d.ts`.
+- Don't modify test files, lockfiles, or generated files during fixes.
+- Explore agents lack Edit/Write. If a Phase 2 agent tries to "fix" something, it fails silently. Read-only is enforced, not advisory.
+- Validation agents sometimes mark findings FALSE_POSITIVE when they can't find the exact line. Always include file path AND line range in the finding.

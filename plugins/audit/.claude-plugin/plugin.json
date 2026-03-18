@@ -1,9 +1,12 @@
 {
   "name": "audit",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Brutally honest codebase audit with parallel agents. Finds bugs, architectural rot, and dead weight.",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com"
-  }
+  },
+  "repository": "https://github.com/ramonclaudio/skills",
+  "license": "MIT",
+  "keywords": ["audit", "code-review", "parallel-agents", "security"]
 }
