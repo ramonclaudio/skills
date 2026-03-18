@@ -162,3 +162,11 @@ For large or long videos:
 | Trim to range | Add `-ss 00:00:05 -t 10` before `-i` to grab 10s starting at 5s |
 | Crop region | Add `crop=w:h:x:y` to the filter chain |
 | Remove overlay | `crop=in_w:in_h-60:0:60` removes top 60px (macOS recording bar) |
+
+## Gotchas
+
+- `avconvert` is macOS-only. On Linux, HDR tone mapping requires ffmpeg built with `zimg` or `libplacebo`, which Homebrew/apt default builds lack.
+- `--full` on retina screen recordings (2880x1800+) produces GIFs over 100MB. Always warn about file size when skipping the scale filter.
+- The two-pass palette method writes `/tmp/gif-output/palette.png` and `/tmp/gif-output/output.gif` but never cleans them up. Repeated runs overwrite, but stale files persist across sessions.
+- `scale=640:-1` fails when the source height is odd after scaling. Use `scale=640:-2` to force even dimensions.
+- `--crop` assumes 60px for the macOS recording bar, but this varies by display scale and macOS version. Always probe actual dimensions and let the user confirm the crop value.

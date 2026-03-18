@@ -1,7 +1,7 @@
 {
   "name": "gif",
   "version": "1.4.0",
-  "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method",
+  "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method.",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com"
