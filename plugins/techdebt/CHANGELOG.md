@@ -3,7 +3,7 @@
 ## 1.4.0
 
 - Use `${CLAUDE_SKILL_DIR}` for reference paths (reliable skill-relative resolution)
-- Add `TaskStop` and `TaskOutput` to allowed-tools
+- Add `TaskStop` to allowed-tools
 - Add `description` parameter to all agent pseudo-code blocks
 - Improve skill description with trigger phrases and negative trigger
 - Add version, keywords, repository, license to plugin.json

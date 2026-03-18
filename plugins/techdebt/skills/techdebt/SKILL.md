@@ -11,6 +11,7 @@ allowed-tools:
   - Grep
   - Bash(git *)
   - Bash(wc *)
+  - Bash(*/find-unused-exports.sh *)
   - Write
   - Agent
   - TaskGet
@@ -18,7 +19,6 @@ allowed-tools:
   - TaskUpdate
   - TaskList
   - TaskStop
-  - TaskOutput
 model: opus
 ---
 
@@ -67,7 +67,7 @@ Use the agent prompts from [references/agents.md](${CLAUDE_SKILL_DIR}/references
 
 ## Phase 3: Collect & Report
 
-Wait for all 3 agents. Collect findings into a single list.
+Wait for all 3 agents to complete. Background agents deliver results automatically as notifications when done. Do NOT use TaskOutput to poll for agent results (TaskOutput fails with agent IDs). Collect findings into a single list.
 
 **DO NOT validate findings.** This is a fast sweep, not a full audit. Trust the agents.
 
@@ -112,6 +112,14 @@ Each finding line:
 
 If NOT `--dry-run`: for each HIGH finding, launch a background agent using the fix agent prompt from [references/agents.md](${CLAUDE_SKILL_DIR}/references/agents.md). Pass `{file_path}`, `{description}`, and `{exact_fix}` into the prompt.
 
-After all complete, output fix summary.
+Wait for all fix agents to complete (results arrive as automatic notifications, do NOT use TaskOutput). Output fix summary.
 
 If `--dry-run`: skip. Report from Phase 3 is the final output.
+
+## Gotchas
+
+- Barrel exports (`index.ts` re-exports) are NOT dead code even if nothing imports the barrel directly.
+- Test utilities (helpers, fixtures, factories) are NOT unused just because only test files import them.
+- Unused deps in `package.json` may be used by scripts, configs, or CLI tools not in `src/`.
+- Files >200 lines aren't automatically "bloated." Check if they have one concern.
+- Don't flag TODOs that link to issues (`#123` or URLs). Only flag orphaned TODOs.
