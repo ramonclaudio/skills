@@ -32,7 +32,7 @@
     {
       "name": "polish",
       "source": "./plugins/polish",
-      "description": "Full codebase sweep that scores every file 0-10 on polish potential and refines files scoring 5+. Unlike built-in /simplify (recently changed files only), /polish analyzes all source files.",
+      "description": "Full codebase sweep that scores every file 0-10 on polish potential and refines files scoring 5+.",
       "version": "1.4.0",
       "author": {
         "name": "ramonclaudio",
@@ -75,7 +75,7 @@
     {
       "name": "gif",
       "source": "./plugins/gif",
-      "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method",
+      "description": "Convert screen recordings to compressed GIFs using ffmpeg two-pass palette method.",
       "version": "1.4.0",
       "author": {
         "name": "ramonclaudio",
@@ -96,7 +96,7 @@
     {
       "name": "frames",
       "source": "./plugins/frames",
-      "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos",
+      "description": "Extract video frames as images so Claude can analyze screen recordings, bug reproductions, and demos.",
       "version": "1.4.0",
       "author": {
         "name": "ramonclaudio",
@@ -137,7 +137,7 @@
     {
       "name": "qmd",
       "source": "./plugins/qmd",
-      "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid, manage embeddings and models -- all on-device.",
+      "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid, manage embeddings and models. All on-device.",
       "version": "1.6.0",
       "author": {
         "name": "ramonclaudio",
