@@ -6,7 +6,6 @@ context: fork
 agent: general-purpose
 allowed-tools:
   - Bash(qmd *)
-  - Bash(qmd collection*)
   - Bash(git *)
   - Bash(mkdir *)
   - Bash(ls *)
@@ -204,6 +203,15 @@ This skill is idempotent. If it fails partway through, re-run `/qmd:add` with th
 | Update-cmd failed | Re-run `qmd collection update-cmd <name> "<cmd>"` |
 | Embed interrupted | Run `qmd embed` to resume |
 | Wrong mask indexed | Re-run with `--mask`. The skill is idempotent |
+
+---
+
+## Gotchas
+
+- Collections must be re-indexed after upstream docs change (`/qmd:update`).
+- Embeddings must be regenerated after model updates (`/qmd:embed`).
+- `--mask` glob must match actual file extensions. Wrong mask = empty collection.
+- Large repos (>1000 files) take several minutes to embed. Use `--defer-embed` and run `/qmd:embed` separately.
 
 ---
 
