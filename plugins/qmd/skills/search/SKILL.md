@@ -2,7 +2,6 @@
 name: search
 description: When to use the query MCP tool and query documents to search indexed reference collections.
 user-invocable: false
-model: sonnet
 ---
 
 # QMD Search Guide
@@ -249,3 +248,10 @@ qmd --index personal search "journal"
 | Search hangs or times out | Index corruption or model loading | Run `qmd cleanup` then `qmd embed -f` to rebuild |
 | Low-quality results | Query too vague or wrong approach | Use typed queries: `lex:` for exact terms, `vec:` for concepts, combine both |
 | "Collection not found" error | Typo or collection was removed | Run `status` to list available collections |
+
+## Gotchas
+
+- `minScore: 0.5` filters too aggressively for broad queries. Use 0.3 for exploratory search.
+- BM25 (`lex`) is better for exact identifiers. Vec is better for concepts. Combine both for best recall.
+- `expand:` and plain text auto-expand are CLI-only. MCP requires explicit typed queries.
+- Chunks are 900 tokens with 15% overlap. Search matches point to chunks, not exact lines. Use `get` with `fromLine`/`maxLines` to narrow down.

@@ -5,5 +5,8 @@
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com"
-  }
+  },
+  "repository": "https://github.com/ramonclaudio/skills",
+  "license": "MIT",
+  "keywords": ["search", "documentation", "bm25", "vector-search", "embeddings"]
 }
