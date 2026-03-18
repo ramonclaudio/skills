@@ -147,7 +147,6 @@ Lead tracks progress, unblocks stuck teammates, redirects scope drift, and synth
 | `Enter` | View a teammate's session |
 | `Escape` | Interrupt a teammate's current turn |
 | `Ctrl+T` | Toggle the shared task list |
-| `Shift+Tab` | Cycle into delegate mode (lead only) |
 
 ### Split-pane mode
 

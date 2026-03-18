@@ -2,7 +2,7 @@
 
 Pick the pattern that matches the work. Adapt as needed; these are starting points, not prescriptions.
 
-**Cost:** Agent teams use 3-10x more tokens than a single session (roughly 7x in plan mode). Each teammate has its own context window (1M tokens with Opus 4.6 on Max/Team/Enterprise), and total usage scales with the number of active teammates. Use Sonnet for teammates when possible. Keep spawn prompts focused. Clean up teams when done. The overhead is justified when parallelism provides a clear benefit. For routine tasks, a single session is cheaper and faster.
+**Cost:** Agent teams use 3-10x more tokens than a single session (roughly 7x in plan mode). Each teammate has its own context window (1M tokens with Opus 4.6 on Max/Team/Enterprise), and total usage scales with the number of active teammates. Keep spawn prompts focused. Clean up teams when done. The overhead is justified when parallelism provides a clear benefit. For routine tasks, a single session is cheaper and faster.
 
 **Team sizing:** Start with 3-5 teammates for most workflows. Target 5-6 tasks per teammate. Beyond 5 teammates, coordination overhead dominates and diminishing returns kick in. Three focused teammates often outperform five scattered ones.
 
@@ -35,8 +35,8 @@ Use subagents (`Agent` without `team_name`) when you need quick, focused workers
 | Role | Model | Does |
 |------|-------|------|
 | Lead | opus | Decompose, assign, review |
-| builder-{module} | sonnet | Implement one module end-to-end |
-| test-writer | sonnet | Write tests after builders finish |
+| builder-{module} | opus | Implement one module end-to-end |
+| test-writer | opus | Write tests after builders finish |
 
 **Task flow:** Interface tasks (unblocked) → builder tasks (blocked by interfaces) → test tasks (blocked by builders).
 
@@ -60,7 +60,7 @@ A single reviewer gravitates toward one type of issue at a time. Splitting revie
 | Role | Model | Does |
 |------|-------|------|
 | Lead | opus | Synthesize findings |
-| reviewer-{lens} | opus/sonnet | Review through one lens |
+| reviewer-{lens} | opus | Review through one lens |
 
 **Task flow:** All reviewers work in parallel (no dependencies). Each works from the same code but applies a different filter. Lead collects and synthesizes across all reviewers.
 
@@ -68,8 +68,8 @@ A single reviewer gravitates toward one type of issue at a time. Splitting revie
 ```
 Review PR #142 with three reviewers:
 - reviewer-security (opus): auth, injection, data exposure
-- reviewer-perf (sonnet): N+1, memory, bundle size
-- reviewer-tests (sonnet): coverage gaps, edge cases, assertion quality
+- reviewer-perf (opus): N+1, memory, bundle size
+- reviewer-tests (opus): coverage gaps, edge cases, assertion quality
 ```
 
 ---
@@ -81,7 +81,7 @@ Review PR #142 with three reviewers:
 | Role | Model | Does |
 |------|-------|------|
 | Lead | opus | Frame questions, synthesize |
-| researcher-{angle} | sonnet | Explore one angle in depth |
+| researcher-{angle} | opus | Explore one angle in depth |
 
 **Task flow:** Researchers work in parallel. Lead synthesizes findings, may spawn follow-up researchers.
 
@@ -95,8 +95,8 @@ Review PR #142 with three reviewers:
 
 | Role | Agent Type | Model | Does |
 |------|-----------|-------|------|
-| codebase-scout | Explore | sonnet | Read every file systematically, directory by directory. Report structure, imports, patterns, issues. EDIT: NONE / READ: entire codebase. |
-| docs-researcher | Explore | sonnet | Search /qmd collections with keyword + semantic + hybrid queries. Read full docs for anything scoring above threshold. Report findings with doc paths and relevant excerpts. EDIT: NONE / READ: QMD collections. |
+| codebase-scout | Explore | opus | Read every file systematically, directory by directory. Report structure, imports, patterns, issues. EDIT: NONE / READ: entire codebase. |
+| docs-researcher | Explore | opus | Search /qmd collections with keyword + semantic + hybrid queries. Read full docs for anything scoring above threshold. Report findings with doc paths and relevant excerpts. EDIT: NONE / READ: QMD collections. |
 | Lead | orchestrator | opus | Gather findings from scout and researcher. Synthesize into action plan. Spawn fixer with explicit numbered fix list. |
 | fixer | general-purpose | opus | Get numbered fix list from lead with explicit EDIT paths for every file. Apply fixes, run validation (lint, typecheck, test, build). Report results. |
 
@@ -121,7 +121,7 @@ Upgrade Expo SDK from 55 to 56.
 | Role | Model | Does |
 |------|-------|------|
 | Lead | opus | Frame hypotheses, judge evidence |
-| investigator-{theory} | sonnet | Gather evidence, attempt to disprove other theories |
+| investigator-{theory} | opus | Gather evidence, attempt to disprove other theories |
 
 **Task flow:** Investigators work in parallel. Each tries to prove their theory AND disprove others. The theory that survives scrutiny is likely correct.
 
@@ -136,10 +136,10 @@ Sequential debugging anchors on the first plausible explanation. Parallel advers
 | Role | Model | Does |
 |------|-------|------|
 | Lead | opus | Define interfaces between layers |
-| data | sonnet | Schema, migrations, queries |
-| backend | sonnet | API routes, business logic |
-| frontend | sonnet | UI components, client state |
-| tests | sonnet | Integration and e2e |
+| data | opus | Schema, migrations, queries |
+| backend | opus | API routes, business logic |
+| frontend | opus | UI components, client state |
+| tests | opus | Integration and e2e |
 
 **Task flow:**
 ```
@@ -159,7 +159,7 @@ Lead defines the interface contracts first. Each layer teammate works within tho
 | Role | Model | Does |
 |------|-------|------|
 | Lead | opus | Coordinate builders and verifier |
-| builder-{area} | sonnet | Implement assigned work |
+| builder-{area} | opus | Implement assigned work |
 | verifier | opus | Check completed work against criteria |
 
 **Task flow:** Builder tasks (parallel) -> verification tasks (blocked by builders).
