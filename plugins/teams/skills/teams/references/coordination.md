@@ -36,7 +36,6 @@ Set `mode` on individual teammates (via the Agent tool's `mode` parameter) to co
 | `dontAsk` | Auto-deny prompts (explicitly allowed tools still work) |
 | `bypassPermissions` | Skip all permission checks |
 | `plan` | Read-only exploration mode |
-| `auto` | Automatic permission decisions based on context |
 
 If the lead runs with `bypassPermissions`, this takes precedence and cannot be overridden. If the lead runs with `--dangerously-skip-permissions`, all teammates inherit that setting. Be deliberate about the lead's permission mode before spawning.
 

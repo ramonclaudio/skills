@@ -136,7 +136,7 @@ Select team composition from [references/patterns.md](${CLAUDE_SKILL_DIR}/refere
 |-------|------|
 | **Name** | Short, descriptive: `auth-impl`, `api-reviewer`, `test-writer` |
 | **Role** | One sentence: what they do and why |
-| **Model** | `opus` for architecture, review, security. `sonnet` for implementation, tests, docs. |
+| **Model** | `opus` for all teammates. Omit to inherit the leader's model. |
 | **Owns** | Files/directories they may edit. Exclusive, no overlap. |
 | **Reads** | Files they need for context but must not edit |
 | **mode** | Optional. `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan`, or `auto`. Controls how the teammate handles permission prompts. Maps to the `mode` parameter on the Agent tool. |
@@ -145,7 +145,7 @@ Select team composition from [references/patterns.md](${CLAUDE_SKILL_DIR}/refere
 | **memory** | Optional. `user`, `project`, or `local`. Gives the teammate persistent memory that survives across conversations. |
 | **mcpServers** | Optional. Scope specific MCP servers to this teammate. Reference by name or define inline. |
 
-Teammates inherit the leader's model by default. Only specify `model` when overriding, e.g., using sonnet for implementation while lead runs opus.
+Teammates inherit the leader's model by default. Omit `model` unless you need to override.
 
 ### Plan approval
 
@@ -185,14 +185,7 @@ Override per-teammate with the `mode` parameter on the Agent tool (see Phase 3 t
 
 ## Phase 4: Task Graph
 
-**First, create the team** with `TeamCreate`. This sets up the shared team directory and task list at `~/.claude/teams/{team-name}/` and `~/.claude/tasks/{team-name}/`.
-
-```
-TeamCreate({
-  team_name: "feature-auth",
-  description: "Implement authentication module"
-})
-```
+**First, create the team** with `TeamCreate` using the team name from Phase 2. This sets up the shared team directory and task list at `~/.claude/teams/{team-name}/` and `~/.claude/tasks/{team-name}/`.
 
 Then create tasks with `TaskCreate`. Express the dependency DAG.
 
@@ -226,27 +219,7 @@ After creating the graph, output the plan. If `--dry-run`, stop here.
 
 ## Phase 5: Spawn & Brief
 
-For each teammate, construct a spawn prompt and spawn them with the `Agent` tool using the `team_name` and `name` parameters. This is what makes them **team members** (not subagents). Subagents (Agent without `team_name`) are independent workers that report back. Teammates are persistent sessions that communicate with each other and share the task list.
-
-```
-Agent({
-  team_name: "feature-auth",
-  name: "auth-impl",
-  prompt: "...",
-  subagent_type: "general-purpose",
-  model: "sonnet",           // or "opus" for review/architecture
-  mode: "acceptEdits",       // optional: default, acceptEdits, dontAsk, plan, auto
-  isolation: "worktree",     // optional: run in isolated git worktree
-  run_in_background: true    // spawn without blocking, launch teammates in parallel
-})
-```
-
-- `team_name`: must match the name passed to `TeamCreate`
-- `name`: short, descriptive; used for messaging (`SendMessage` `to`)
-- `model`: `opus` for architecture, review, security; `sonnet` for implementation, tests, docs. Teammates inherit the leader's model by default.
-- `mode`: controls permissions. Set to `"plan"` when `--plan-approval` is active (teammate works read-only until lead approves). Otherwise: `acceptEdits`, `dontAsk`, `bypassPermissions`, `auto`, or `default`.
-- `isolation`: `"worktree"` gives the teammate its own copy of the repo via git worktree
-- `run_in_background`: `true` to spawn without blocking. Use this to launch all teammates concurrently.
+For each teammate, construct a spawn prompt and spawn them with the `Agent` tool using `team_name`, `name`, `model: "opus"`, and `run_in_background: true`. This is what makes them **team members** (not subagents). Subagents (Agent without `team_name`) are independent workers that report back. Teammates are persistent sessions that communicate with each other and share the task list. Include the spawn prompt from the template below.
 
 **Context teammates get automatically:**
 - Their own context window (independent of the lead)
@@ -300,7 +273,7 @@ Spawn all teammates with `run_in_background: true` to launch them concurrently. 
 
 ### Delegate mode
 
-If `--delegate` is set, remind the user to press `Shift+Tab` to cycle into delegate mode. This restricts the lead to coordination-only tools: spawning, messaging, shutting down teammates, and managing tasks. The lead cannot read files, edit code, or run commands.
+If `--delegate` is set, the lead restricts itself to coordination-only tools: spawning, messaging, shutting down teammates, and managing tasks. The lead does not read files, edit code, or run commands.
 
 ### Interaction controls
 
@@ -308,7 +281,7 @@ Inform the user:
 
 | Key | In-process mode |
 |-----|----------------|
-| `Shift+Up/Down` | Navigate between teammates |
+| `Shift+Down` | Cycle through teammates |
 | `Enter` | View a teammate's session |
 | `Escape` | Interrupt a teammate's current turn |
 | `Ctrl+T` | Toggle the shared task list |
@@ -360,18 +333,21 @@ The team is done when:
 - Always include file ownership in spawn prompts
 - If the task is trivial, do it directly. Teams are for parallel work that justifies the overhead.
 
-## Known limitations
+## Gotchas
 
-Agent teams are experimental. Be aware of:
-
-- **No session resumption**: `/resume` and `/rewind` do not restore in-process teammates. After resuming, spawn new teammates if needed.
-- **Task status lag**: teammates sometimes forget to mark tasks completed, blocking dependents. Nudge them or update manually.
-- **Shutdown can be slow**: teammates finish their current request or tool call before shutting down.
-- **One team per session**: clean up the current team before starting a new one.
-- **No nested teams**: teammates cannot spawn their own teams. Only the lead manages the team.
-- **Lead is fixed**: the session that creates the team leads it for its lifetime. No promotions.
-- **Permissions**: teammates inherit the lead's permission mode by default. Use `mode` to override per-teammate at spawn, or change individually after spawning.
-- **Split panes**: require tmux or iTerm2. Not supported in VS Code terminal, Windows Terminal, or Ghostty.
-- **Worktree support**: `ExitWorktree` lets teammates leave worktree sessions. `WorktreeCreate` and `WorktreeRemove` hooks can set up and tear down per-teammate environments.
+- Idle is not done. Teammates go idle after every turn. Normal behavior. Don't react to idle notifications unless work is actually stuck.
+- Don't spawn >5 teammates. Coordination cost scales quadratically.
+- Don't overlap file ownership. If two teammates need the same file, one owns it and the other reads it.
+- Teammates can't see each other's file edits in real-time unless using worktrees. Coordinate changes via messages.
+- Teammates sometimes forget to mark tasks completed. Nudge them.
+- Task dependencies must form a DAG. Circular deps deadlock the team.
+- `/resume` and `/rewind` do not restore in-process teammates. After resuming, spawn new teammates if needed.
+- Shutdown can be slow: teammates finish their current request or tool call before shutting down.
+- One team per session. Clean up the current team before starting a new one.
+- Teammates cannot spawn their own teams. Only the lead manages the team.
+- The session that creates the team leads it for its lifetime. No promotions.
+- Teammates inherit the lead's permission mode by default. Use `mode` to override per-teammate at spawn, or change individually after spawning.
+- Split panes require tmux or iTerm2. Not supported in VS Code terminal, Windows Terminal, or Ghostty.
+- `ExitWorktree` lets teammates leave worktree sessions. `WorktreeCreate` and `WorktreeRemove` hooks can set up and tear down per-teammate environments.
 
 Teammates read `CLAUDE.md` from their working directory. Use this to provide project-specific guidance to all teammates.
