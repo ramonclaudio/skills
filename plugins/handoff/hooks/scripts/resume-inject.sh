@@ -1,5 +1,5 @@
 #!/bin/bash
-# Resume context injection for SessionStart and PostCompact hooks.
+# Resume context injection for SessionStart hook (startup, resume, compact).
 [ "${HANDOFF_DISABLED:-0}" = "1" ] && exit 0
 STATE="${CLAUDE_PROJECT_DIR:-.}/.handoff/state.json"
 [ -f "$STATE" ] || exit 0

@@ -3,26 +3,13 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume",
+        "matcher": "startup|resume|compact",
         "hooks": [
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/resume-inject.sh",
             "timeout": 5,
             "statusMessage": "Loading handoff context..."
-          }
-        ]
-      }
-    ],
-    "PostCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/resume-inject.sh",
-            "timeout": 5,
-            "statusMessage": "Re-injecting handoff context..."
           }
         ]
       }

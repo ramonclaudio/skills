@@ -24,7 +24,6 @@ allowed-tools:
   - TaskGet
   - TaskList
 model: opus
-disable-model-invocation: true
 ---
 
 # Handoff End
@@ -90,3 +89,11 @@ Senior engineer closing a shift. Precise state capture: exact errors, specific f
 
 DON'T: Skip health checks. Write vague resume ("keep working on X"). Leave READY with failing tests.
 DO: Exact error messages. Specific file:line in resume. Honest severity.
+
+## Gotchas
+
+- Atomic write (`mv .tmp.$$ state.json`) fails silently if `.handoff/` doesn't exist yet. Always bootstrap the directory before writing.
+- `jq` is an allowed tool but not guaranteed installed. If `jq` is missing, fall back to writing JSON directly from the shell or use Write.
+- Health checks can hang indefinitely on projects with interactive test watchers (Jest `--watch`, Vitest default). Always pass `--watchAll=false` or `--run` flags.
+- Setting severity to READY when there are uncommitted changes is a lie. Uncommitted work means IN_PROGRESS, even if build/test/lint all pass.
+- The `session_id` field is only useful for `--resume` on the same machine. If the user switches devices, the resume hint is misleading.

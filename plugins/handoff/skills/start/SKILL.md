@@ -44,3 +44,10 @@ Branch: !`git branch --show-current 2>/dev/null`
    - Create resume task blocked by blockers (metadata: `resume: true, handoff: true`)
    - Skip if matching tasks already exist
 5. **Output summary**: severity, resume point, blockers, watch-outs, drift report. End with: `Ready. What would you like to work on?`
+
+## Gotchas
+
+- If `.handoff/state.json` doesn't exist, the pre-loaded state outputs a raw string, not JSON. Don't try to parse it. Tell the user to run `/handoff:end` first.
+- The `resume.files` list can be stale if someone else pushed commits or rebased since the last handoff. Always verify files exist before referencing them.
+- `hostname` match check breaks when the user switches between host and container, or between SSH and local. Don't block resume on hostname mismatch, just note it.
+- `gh pr list` fails without GitHub CLI auth. Swallow the error and skip the PR section rather than erroring out.

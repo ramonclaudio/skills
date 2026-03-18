@@ -27,12 +27,11 @@ Built-in features handle most session continuity. Auto memory persists preferenc
 
 ## Hooks
 
-Two hooks run automatically:
+One hook runs automatically:
 
-- `SessionStart` (startup + resume): injects severity, resume point, blockers, and `--resume` hint from `state.json`.
-- `PostCompact` (v2.1.76): re-injects the same context after compaction so nothing is lost.
+- `SessionStart` (startup, resume, compact): injects severity, resume point, blockers, and `--resume` hint from `state.json`. Also fires after compaction so context is re-injected.
 
-Both run `resume-inject.sh`. Takes <1s. Skipped when `HANDOFF_DISABLED=1`.
+Runs `resume-inject.sh`. Takes <1s. Skipped when `HANDOFF_DISABLED=1`.
 
 ## State File
 

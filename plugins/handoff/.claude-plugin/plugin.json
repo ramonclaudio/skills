@@ -1,12 +1,11 @@
 {
   "name": "handoff",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Session quality gate for Claude Code. Health checks, resume points, and cross-machine continuity.",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com"
   },
-  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/handoff",
   "repository": "https://github.com/ramonclaudio/skills",
   "license": "MIT",
   "keywords": ["session", "handoff", "health-check", "resume", "continuity"]
