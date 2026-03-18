@@ -1,6 +1,6 @@
 {
   "name": "qmd",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid, manage embeddings and models. All on-device.",
   "author": {
     "name": "ramonclaudio",
