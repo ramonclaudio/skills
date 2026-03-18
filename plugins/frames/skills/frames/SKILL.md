@@ -97,3 +97,11 @@ Pick frame numbers evenly spaced across the total. Read them with the Read tool,
 | Quoted paths fail | Glob avoids quoting issues |
 | `cd` fails (zoxide) | Never use `cd`, use absolute paths |
 | Shell aliases interfere | Use `/bin/cp`, `/bin/ls` for reliability |
+
+## Gotchas
+
+- `scale=640:-1` fails on videos with odd-height dimensions. Use `scale=640:-2` if ffmpeg errors with "height not divisible by 2".
+- HDR screen recordings (common on Apple XDR displays) produce washed-out frames. Check `color_transfer=smpte2084` in probe output and tone-map to SDR first with `avconvert`.
+- Long videos at native FPS can dump thousands of PNGs and eat gigabytes of `/tmp` disk. Always check duration before extracting and pick a conservative FPS.
+- If ffprobe returns no duration (e.g., some `.webm` or piped streams), the FPS table breaks. Fall back to 1 FPS and count frames after extraction.
+- Glob-based copy (`/bin/cp -f *UNIQUE*`) matches multiple files if the substring isn't unique. Verify only one file matches before proceeding.
