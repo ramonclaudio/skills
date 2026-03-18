@@ -1,6 +1,6 @@
 {
   "name": "commit",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Atomic commits with conventional format, grouped by architectural layer. GPG signs when available.",
   "author": {
     "name": "ramonclaudio",
