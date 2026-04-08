@@ -1,26 +1,20 @@
 ---
-description: Start, stop, or manage the QMD MCP server
+description: Start, stop, or check the qmd MCP server (stdio or HTTP daemon)
 allowed-tools:
   - Bash(qmd mcp*)
   - Bash(qmd status*)
 argument-hint: [stop|--http|--daemon|--port N]
 ---
 
-Route based on arguments:
-- No args: suggest `qmd mcp --http --daemon` for background daemon, or `qmd mcp` for stdio
-- `stop` (positional subcommand): run `qmd mcp stop`. Stops daemon via PID file at ~/.cache/qmd/mcp.pid
-- `--http`: run `qmd mcp --http`. HTTP transport on port 8181 (foreground)
-- `--daemon`: run `qmd mcp --http --daemon`. Detach as background process
-- `--port N`: run `qmd mcp --http --port N`. Custom port
-- `status`: run `qmd status`. Shows MCP running status with PID
+Route based on `$ARGUMENTS`:
 
-Transport modes:
-- stdio (default): used by .mcp.json plugin config, launched automatically by Claude Code
-- HTTP: `POST /mcp` (Streamable HTTP, JSON responses), `GET /health` (liveness with uptime)
-- Daemon: background process, PID at ~/.cache/qmd/mcp.pid, logs at ~/.cache/qmd/mcp.log
+- (no args) — recommend `/qmd:mcp --daemon` for the background daemon, or note that stdio is launched automatically by Claude Code via `.mcp.json`
+- `stop` — `qmd mcp stop` (kills the daemon via PID file at `~/.cache/qmd/mcp.pid`)
+- `--http` — `qmd mcp --http` (foreground on port 8181)
+- `--daemon` — `qmd mcp --http --daemon` (background, PID file)
+- `--port N` — `qmd mcp --http --port N`
+- `status` — `qmd status` (shows MCP daemon PID if running)
 
-Daemon mode keeps models loaded in VRAM between queries (~16s → ~10s first query).
+The plugin's `.mcp.json` already wires up the stdio transport for Claude Code, so most users never need this command. Use `--daemon` only if you want a long-lived shared HTTP server for multiple clients.
 
-After starting daemon, verify with `qmd status`.
-
-If port in use: reports error, try different port or stop existing instance.
+Note: the SDK forces `disposeModelsOnInactivity: true`, so an idle daemon will unload models after 5 min and reload them on the next request (~3-8s cold start).
