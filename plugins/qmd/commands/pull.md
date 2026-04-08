@@ -1,20 +1,15 @@
 ---
-description: Download or verify QMD GGUF models from HuggingFace
+description: Download or verify the 3 GGUF models qmd needs (embeddinggemma, qwen3-reranker, qmd-query-expansion)
 allowed-tools: Bash(qmd pull*)
 argument-hint: [--refresh]
 ---
 
-Run `qmd pull` (or `qmd pull --refresh` if user asks to re-download).
+Run `qmd pull $ARGUMENTS`. Downloads (or verifies) the 3 models qmd needs into `${XDG_CACHE_HOME:-~/.cache}/qmd/models/`:
 
-`--refresh`: Re-download models even if already cached (checks ETag for staleness).
+- `embeddinggemma-300M-Q8_0.gguf` (~300 MB) — vector embeddings
+- `qmd-query-expansion-1.7B-q4_k_m.gguf` (~1.1 GB) — query expansion (CLI plain-string path only)
+- `qwen3-reranker-0.6b-q8_0.gguf` (~640 MB) — cross-encoder reranking
 
-Downloads 3 GGUF models to `~/.cache/qmd/models/`:
-1. embeddinggemma-300M-Q8_0.gguf (~300MB): vector embeddings (768 dimensions)
-2. qmd-query-expansion-1.7B-q4_k_m.gguf (~1.1GB): custom GRPO fine-tuned query expansion
-3. qwen3-reranker-0.6b-q8_0.gguf (~640MB): cross-encoder reranking
+`--refresh` re-checks the HuggingFace ETag and re-downloads if remote changed.
 
-Reports per model: name, path, size, status (cached/checked or refreshed).
-
-Total: ~2GB download on first run.
-
-Models are auto-downloaded on first embed/search, but `qmd pull` lets you pre-download.
+Models also auto-download on first use, so `qmd pull` is just for pre-warming or recovering from a corrupted cache.

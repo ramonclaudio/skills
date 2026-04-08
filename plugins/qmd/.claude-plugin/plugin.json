@@ -1,12 +1,13 @@
 {
   "name": "qmd",
-  "version": "1.7.0",
-  "description": "Reference repo manager. Clone GitHub repos, index with QMD, search with BM25/vector/hybrid, manage embeddings and models. All on-device.",
+  "version": "1.8.0",
+  "description": "Wraps the qmd MCP server so Claude can search indexed reference repos (Convex, Expo, Next.js, etc) with hybrid BM25 + vector + reranking. Ships a search SKILL that teaches Claude how to compose typed sub-queries with intent, plus an /qmd:add SKILL that clones and indexes a GitHub repo end-to-end.",
   "author": {
     "name": "ramonclaudio",
     "email": "hello@ramonclaudio.com"
   },
+  "homepage": "https://github.com/ramonclaudio/skills/tree/main/plugins/qmd",
   "repository": "https://github.com/ramonclaudio/skills",
   "license": "MIT",
-  "keywords": ["search", "documentation", "bm25", "vector-search", "embeddings"]
+  "keywords": ["search", "mcp", "bm25", "vector-search", "rag", "reference-repos", "embeddings", "qmd"]
 }

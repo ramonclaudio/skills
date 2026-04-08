@@ -1,0 +1,102 @@
+# QMD Collections Configuration
+# Location: ${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml
+#
+# Custom example for the qmd plugin. Shows reference repos + local notes pattern.
+# Upstream qmd uses personal notes only (Meetings, journals, codex).
+#
+# This file defines all collections, their contexts, ignore patterns, and
+# optional per-index model overrides. You can edit it directly. Changes take
+# effect on the next qmd command.
+
+# Global context applied to all collections
+# Use this for universal search instructions or patterns
+global_context: "If you see a relevant [[WikiWord]], you can search for that WikiWord to get more context."
+
+# Optional: clickable OSC 8 editor links in TTY output
+# Placeholders: {path} (URI-encoded absolute path), {line}, {col}
+# Override with QMD_EDITOR_URI env var
+editor_uri: "vscode://file/{path}:{line}:{col}"
+# editor_uri: "cursor://file/{path}:{line}:{col}"
+# editor_uri: "zed://file/{path}:{line}:{col}"
+# editor_uri: "subl://open?url=file://{path}&line={line}"
+
+# Optional: per-index model overrides
+# Resolution order: yaml models > env var (QMD_*_MODEL) > built-in default
+# After changing the embed model, run `qmd embed -f` to re-vectorize.
+# models:
+#   embed: "hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf"
+#   rerank: "hf:ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF/qwen3-reranker-0.6b-q8_0.gguf"
+#   generate: "hf:tobil/qmd-query-expansion-1.7B-gguf/qmd-query-expansion-1.7B-q4_k_m.gguf"
+
+# Collection definitions
+collections:
+  # Reference repos cloned via /qmd:add
+  next.js:
+    path: ~/Developer/refs/next.js
+    pattern: "**/*.{md,mdx,txt,ts,tsx,js,jsx,json,yaml,yml,css}"
+    ignore:
+      - "node_modules/**"
+      - "dist/**"
+      - "build/**"
+      - "out/**"
+      - ".next/**"
+      - "**/*.test.*"
+      - "**/*.spec.*"
+      - "**/__tests__/**"
+      - "**/__snapshots__/**"
+    update: "git -C ~/Developer/refs/next.js pull --ff-only"
+    context:
+      "/": "Next.js framework source code and documentation"
+      "/docs": "Official Next.js documentation"
+      "/packages/next/src": "Core Next.js runtime source"
+
+  react:
+    path: ~/Developer/refs/react
+    pattern: "**/*.{md,txt,ts,tsx,js,jsx,json,yaml,yml}"
+    ignore:
+      - "node_modules/**"
+      - "build/**"
+      - "**/*.test.*"
+    update: "git -C ~/Developer/refs/react pull --ff-only"
+    context:
+      "/": "React library source code"
+
+  rust-lang:
+    path: ~/Developer/refs/rust
+    pattern: "**/*.{rs,md,toml}"
+    ignore:
+      - "target/**"
+      - "**/tests/**"
+    update: "git -C ~/Developer/refs/rust pull --ff-only"
+    context:
+      "/": "Rust standard library and compiler source"
+
+  qmd:
+    path: ~/Developer/refs/qmd
+    pattern: "**/*.{md,txt,ts,tsx,js,jsx,json,yaml,yml}"
+    ignore:
+      - "node_modules/**"
+      - "dist/**"
+      - "test/**"
+    update: "git -C ~/Developer/refs/qmd pull --ff-only"
+    context:
+      "/": "QMD search engine. On-device BM25, vector, and hybrid search"
+      "/src": "QMD core source code"
+
+  # Local notes (not managed by /qmd:add)
+  notes:
+    path: ~/Documents/Notes
+    pattern: "**/*.md"
+    context:
+      "/": "Personal notes and ideas"
+      "/journal/2024": "Daily notes from 2024"
+      "/journal/2025": "Daily notes from 2025"
+      "/journal/2026": "Daily notes from 2026"
+
+  # Excluded by default — only searched when targeted with -c sessions
+  sessions:
+    path: ~/Documents/Sessions
+    pattern: "**/*.md"
+    includeByDefault: false
+    context:
+      "/": "Per-session scratch notes, intentionally noisy"

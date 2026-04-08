@@ -1,25 +1,18 @@
 ---
-description: Update and re-index all QMD collections
+description: Pull all reference repos, re-index changed files, and embed new content. Long running.
 allowed-tools:
   - Bash(qmd update*)
   - Bash(qmd embed*)
 ---
 
-Run `qmd update && qmd embed`. Report any collections whose update command failed.
+Run `qmd update && qmd embed`. Report:
 
-`qmd update` always updates ALL collections. There is no argument to target a single collection.
+- Per-collection update command output (usually `git pull --ff-only`)
+- Indexed/updated/unchanged/removed counts
+- Embedding progress and final pending count
 
-`--pull` appears in `qmd --help` output but is a dead flag. Defined in the CLI parser but never actually used. Update commands configured in YAML always run regardless of this flag.
-
-Pipeline:
-1. Clear LLM cache (entire `llm_cache` table wiped)
-2. For each collection sequentially:
-   a. Execute update command (if configured in YAML, e.g. `git pull --ff-only`)
-   b. Index files matching the collection's glob pattern
-   c. Report indexed/updated/unchanged/removed counts
-   d. Clean orphaned content hashes
-3. Post-check: warns if documents need embedding, suggests `qmd embed`
-
-If any collection's update command exits non-zero, `qmd update` calls `process.exit(exitCode)` immediately. Remaining collections are NOT processed. There is no `--continue-on-error` flag.
-
-If the user asks to force re-embed everything (e.g., after model changes or corrupted embeddings), run `qmd embed -f` (separate from update).
+Notes:
+- `qmd update` always processes ALL collections (no per-collection flag).
+- If any collection's update command exits non-zero, `qmd update` exits immediately and skips remaining collections. Report the failing collection so the user can fix and re-run.
+- The `--pull` flag in `qmd --help` is dead (parser-only, never read). Update commands come from each collection's YAML `update:` field.
+- For force re-embed (after model change or corruption), suggest `/qmd:embed --force`.

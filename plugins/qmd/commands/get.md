@@ -1,29 +1,24 @@
 ---
-description: Retrieve a document by path or docid
+description: Retrieve a document body by path or docid via the qmd CLI. CLI fallback for the MCP get tool.
 allowed-tools: Bash(qmd get*)
 argument-hint: <file>[:line] [--from N] [-l N] [--line-numbers]
 ---
 
-Run `qmd get $ARGUMENTS`.
+Run `qmd get $ARGUMENTS`. Prints a document body to stdout.
 
-This is the CLI fallback for `get` MCP tool. Use when MCP is down.
+Path resolution order:
 
-Path formats (in resolution order):
-1. Docid: `#abc123` or `abc123` (6-char content hash prefix)
+1. Docid: `#abc123` (6-char content hash)
 2. Virtual path: `qmd://collection/path/to/file.md`
-3. Collection/path: `collection/path/to/file.md`
-4. Filesystem: `/absolute/path` or `~/path` or relative path
-5. Suffix match: if exact match fails, tries matching end of path
+3. Collection-prefixed: `next.js/docs/api.md`
+4. Filesystem: absolute, `~/`, or relative path
+5. Suffix match (last resort)
 
-Line range: `file.md:100` starts at line 100 (shorthand for --from 100).
+Useful flags:
+- `file.md:N` — start at line N (shorthand for `--from N`)
+- `--from N` / `-l N` — line offset and max lines
+- `--line-numbers` — prefix each line with `N: `
 
-Flags:
-- `--from <N>`: start from line N (1-indexed)
-- `-l <N>`: maximum lines to return
-- `--line-numbers`: prefix each line with line number ("N: content")
+CLI prints "Document not found" on miss; the MCP `get` tool also suggests similar files via Levenshtein-style suffix matching, which the CLI does not.
 
-Output: optional context header (from hierarchical context config) + document body.
-
-If not found: prints "Document not found" error. The MCP `get` tool (not CLI) suggests similar files via Levenshtein distance fuzzy matching.
-
-Prefer MCP `get` tool when available. This command is for when MCP is down or for piping output.
+Prefer the MCP `get` tool when available — it returns a `resource` content block that Claude Code surfaces as a document attachment, not just stdout text.

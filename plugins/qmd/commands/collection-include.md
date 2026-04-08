@@ -1,12 +1,11 @@
 ---
-description: Include a collection in default queries
-allowed-tools:
-  - Bash(qmd collection include*)
+description: Include a qmd collection in default queries (sets includeByDefault true). Reverses /qmd:collection-exclude.
+allowed-tools: Bash(qmd collection include*)
 argument-hint: <name>
 ---
 
-Run `qmd collection include $ARGUMENTS`.
+Run `qmd collection include $ARGUMENTS`. Sets `includeByDefault: true` for the collection in YAML.
 
-Sets `includeByDefault: true` for the collection. This is the default state. Collection appears in all queries.
+`true` is the default state. Including a collection means it shows up in every search where the user (or Claude) doesn't pass an explicit `collections: [...]` filter. Reverses `/qmd:collection-exclude`.
 
-Opposite of `qmd collection exclude`.
+To verify the change, suggest `/qmd:collection-show <name>` (which prints `Include: yes (default)` or `no`). Note that `/qmd:status` and the MCP `status` tool do NOT show include/exclude state — only `qmd collection list` (CLI direct) and `qmd collection show` do.

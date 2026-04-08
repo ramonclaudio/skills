@@ -1,25 +1,18 @@
 ---
-description: Generate or refresh vector embeddings for indexed documents
+description: Generate or refresh vector embeddings for indexed documents. Long running.
 allowed-tools:
   - Bash(qmd embed*)
   - Bash(qmd status*)
-argument-hint: [-f|--force]
+argument-hint: [-f|--force] [--chunk-strategy auto|regex] [--max-docs-per-batch N] [--max-batch-mb N]
 ---
 
-Run `qmd embed` (or `qmd embed -f` if user passes --force or -f).
+Run `qmd embed $ARGUMENTS`. Defaults to incremental (only embeds hashes without vectors).
 
-`-f` / `--force`: Clear all existing vectors and re-embed everything from scratch.
+Useful flags:
+- `-f` / `--force`: clear all vectors and re-embed everything (after model change, dimension mismatch, or strategy switch).
+- `--chunk-strategy auto`: AST-aware chunking for code files (`.ts/.tsx/.js/.jsx/.mts/.cts/.mjs/.cjs/.py/.go/.rs`). Recommended for code-heavy collections so chunks land on function/class boundaries instead of mid-statement.
+- `--max-docs-per-batch N` / `--max-batch-mb N`: bound peak memory on huge collections (defaults: 64 docs / 64 MB, whichever is hit first).
 
-What it does:
-- Finds documents needing embeddings
-- Chunks them (900 tokens with 15% overlap, markdown-aware break points)
-- Embeds in batches of 32 via embeddinggemma-300M
-- Shows progress bar with throughput and ETA
+After embedding, run `qmd status` and confirm zero pending embeds. First run downloads ~300 MB embedding model; pre-download all 3 models (~2 GB) with `/qmd:pull`.
 
-First run downloads the embedding model (~300MB) if not cached.
-
-After embed completes, run `qmd status` to confirm zero pending embeddings.
-
-If interrupted: safe to re-run, picks up where it left off (only embeds hashes without vectors).
-
-Force re-embed use cases: after model update, corrupted embeddings, switching embedding models.
+Embeddings are safe to interrupt and resume — the next run picks up from where it stopped.
