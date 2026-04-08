@@ -1,8 +1,33 @@
 # QMD Hybrid Pipeline Internals
 
-## Query Expansion
+## Intent (Disambiguation)
 
-The hybrid pipeline uses a GRPO-optimized query expansion model (fine-tuned from Qwen3-1.7B with Group Relative Policy Optimization) to generate 3 types of sub-queries:
+Available since upstream 1.1.5. Pass `intent` to steer ambiguous queries without searching on it. Affects 5 stages of the pipeline:
+
+1. **Expansion**: the LLM prompt includes `Query intent: {intent}` so generated lex/vec/hyde variants align with the domain.
+2. **Strong-signal bypass**: skipped when intent is set (the obvious BM25 match may not be what you want).
+3. **Chunk selection**: intent terms are scored at 0.5x weight alongside query terms (1.0x) when picking the best chunk per document.
+4. **Reranking**: intent is prepended to the rerank query so Qwen3-Reranker scores with domain context.
+5. **Snippet extraction**: intent terms scored at 0.3x weight to nudge snippets toward intent-relevant lines.
+
+CLI: `--intent <text>` flag or `intent:` line in a query document. MCP: `intent` parameter on the `query` tool. At most one `intent:` line per query document, and it cannot appear alone (must accompany at least one `lex:`/`vec:`/`hyde:` line).
+
+Without intent, "performance" is ambiguous (web-perf? team health? fitness?). With `intent: "web page load times and Core Web Vitals"`, the pipeline preferentially expands, ranks, and snippets web-perf content.
+
+## Two Pipeline Paths
+
+QMD has two entry points into the hybrid pipeline:
+
+| Function | Caller | Behavior |
+|----------|--------|----------|
+| `hybridQuery()` | `qmd query "plain text"` | Runs the local 1.7B expansion model first, then BM25 + vector + RRF + rerank. ~10s. |
+| `structuredSearch()` | `qmd query $'lex: ...\nvec: ...'` and the **MCP `query` tool** | Skips expansion entirely. The caller provides typed sub-queries. ~3-8s. |
+
+Both paths converge after step 2. The MCP server always uses `structuredSearch` because the LLM caller (you, in Claude Code) is expected to do the expansion. This is why composing good `lex:`/`vec:`/`hyde:` sub-queries matters more from MCP than from the bare CLI.
+
+## Query Expansion (CLI plain-text only)
+
+The hybrid pipeline (`hybridQuery`) uses a GRPO-optimized query expansion model (fine-tuned from Qwen3-1.7B with Group Relative Policy Optimization) to generate 3 types of sub-queries:
 
 | Type | Purpose | Routed to | Example for "auth middleware" |
 |------|---------|-----------|-------------------------------|
@@ -72,7 +97,11 @@ After fusion, the top 40 candidates (RERANK_CANDIDATE_LIMIT) pass to the reranke
 
 For each candidate document, the pipeline picks the single best chunk (by keyword overlap with the query) and sends only that chunk to the LLM cross-encoder reranker. There is no multi-chunk score aggregation. One chunk per document.
 
-The reranker uses node-llama-cpp's `createRankingContext()` and `rankAll()` API with a 2048-token context window and flash attention enabled.
+The reranker uses node-llama-cpp's `createRankingContext()` and `rankAndSort()` API with a **4096-token context window** (configurable via `QMD_RERANK_CONTEXT_SIZE`) and flash attention enabled. Template overhead is **512 tokens** (raised from 200 in upstream 2.1.0). Document chunks get the remaining `RERANK_CONTEXT_SIZE - 512 - queryTokens`.
+
+**Skipping the reranker:** Pass `--no-rerank` (CLI) or `rerank: false` (MCP `query` tool) to return RRF-fused scores only. Much faster on CPU-only machines.
+
+**Tuning candidate count:** `-C` / `--candidate-limit` (CLI) or `candidateLimit` (MCP). Default 40. Lower = faster, may miss results.
 
 ## Position-Aware Blending
 
@@ -111,6 +140,34 @@ Code fences are never split. Break scores decay quadratically with distance from
 
 Search matches point to the chunk, not the exact line. To narrow down after finding the right document, use `get` with `fromLine` and `maxLines` parameters.
 
+### AST-Aware Chunking (`--chunk-strategy auto`)
+
+Added in upstream 2.1.0. For supported code files, QMD parses the source with `web-tree-sitter` and adds AST-derived breakpoints that merge with the regex breakpoint scores above:
+
+| AST Node | Score | Languages |
+|----------|-------|-----------|
+| Class / interface / struct / impl / trait | 100 | All |
+| Function / method | 90 | All |
+| Type alias / enum | 80 | All |
+| Import / use declaration | 60 | All |
+
+Supported file extensions: `.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.cts`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`. Markdown and unknown file types always use regex chunking regardless of `--chunk-strategy`.
+
+The flag is exposed on both `qmd embed` (chunks at index time) and `qmd query` (chunks at retrieval time). Both should use the same strategy. Tree-sitter grammars are optional; missing grammars fall back to regex.
+
+## Score Traces (`--explain`)
+
+Added in upstream 1.1.2. `qmd query --explain` (and the `--json --explain` combo) emits per-result score traces so you can see exactly why each result ranked where it did:
+
+- `ftsScores`: BM25 score per query variant
+- `vectorScores`: vector cosine score per query variant
+- `rrf.contributions`: per-list RRF contribution
+- `rrf.totalScore` / `rrf.baseScore` / `rrf.topRankBonus`: fused RRF score breakdown
+- `rerankScore`: raw reranker output (0-1)
+- `blendedScore` and `rrf.weight`: position-aware blend (e.g. `75%*0.33 + 25%*0.81 = 0.45`)
+
+Useful for debugging surprising rankings, A/B testing config changes, and understanding what `--no-rerank` would do.
+
 ## Latency Expectations
 
 | Approach | CLI Command | MCP Sub-query | Typical Latency | Notes |
@@ -119,7 +176,7 @@ Search matches point to the chunk, not the exact line. To narrow down after find
 | Vector search | `qmd vsearch` | `vec:`/`hyde:` | ~2s | Embedding + vector lookup + optional expansion |
 | Full hybrid | `qmd query` | `lex`+`vec`+`hyde` (CLI also: `expand:`) | ~10s | Expansion + BM25 + vector + reranking |
 
-First query is slower while models load into VRAM. Use MCP HTTP daemon mode (`qmd mcp --http --daemon`) to keep models warm between requests (~16s → ~10s).
+First query is slower while models load into VRAM. The MCP HTTP daemon (`qmd mcp --http --daemon`) keeps models warm as long as queries arrive within the 5-min idle window — but the SDK forces `disposeModelsOnInactivity: true`, so a fully-idle daemon will pay the cold-start cost on the next request.
 
 ## BM25 Scoring
 
@@ -133,17 +190,21 @@ FTS5 columns: filepath (10x weight), title (1x), body (1x). Uses Porter stemmer 
 | `qwen3-reranker-0.6b` (Q8_0) | Cross-encoder re-ranking | ~640MB (600M params) | From `ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF` |
 | `qmd-query-expansion-1.7B` (Q4_K_M) | Query expansion | ~1.1GB (GRPO fine-tuned from Qwen3-1.7B) | From `tobil/qmd-query-expansion-1.7B-gguf` |
 
-Models are cached in `~/.cache/qmd/models/`. Auto-downloaded on first use via node-llama-cpp, or manually via `qmd pull [--refresh]`. GPU parallelism (multiple LlamaContext instances) is used when available for faster embedding and reranking, up to 2.7x speedup.
+Models are cached in `${XDG_CACHE_HOME:-~/.cache}/qmd/models/`. Auto-downloaded on first use via node-llama-cpp, or manually via `qmd pull [--refresh]`. GPU parallelism (multiple LlamaContext instances) is used when available for faster embedding and reranking, up to 2.7x speedup. Override the GPU backend with `QMD_LLAMA_GPU=cuda|metal|vulkan|cpu`.
 
 ## Constants
 
 ```
-STRONG_SIGNAL_MIN_SCORE = 0.85
-STRONG_SIGNAL_MIN_GAP = 0.15
-RERANK_CANDIDATE_LIMIT = 40
-CHUNK_SIZE_TOKENS = 900
-CHUNK_OVERLAP_TOKENS = 135 (15%)
-CHUNK_WINDOW_TOKENS = 200
+STRONG_SIGNAL_MIN_SCORE  = 0.85
+STRONG_SIGNAL_MIN_GAP    = 0.15
+RERANK_CANDIDATE_LIMIT   = 40    (override: -C / --candidate-limit / candidateLimit)
+RERANK_CONTEXT_SIZE      = 4096  (override: QMD_RERANK_CONTEXT_SIZE)
+RERANK_TEMPLATE_OVERHEAD = 512
+EMBED_CONTEXT_SIZE       = 2048  (override: QMD_EMBED_CONTEXT_SIZE)
+EXPAND_CONTEXT_SIZE      = 2048  (override: QMD_EXPAND_CONTEXT_SIZE)
+CHUNK_SIZE_TOKENS        = 900
+CHUNK_OVERLAP_TOKENS     = 135   (15%)
+CHUNK_WINDOW_TOKENS      = 200
 ```
 
 Note: RRF k=60 is a default parameter in `reciprocalRankFusion(lists, weights, k=60)`, not a named constant.

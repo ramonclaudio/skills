@@ -1,257 +1,153 @@
 ---
 name: search
-description: When to use the query MCP tool and query documents to search indexed reference collections.
+description: Search indexed reference codebases (Convex, Expo, Next.js, Better Auth, Remotion, etc) via the qmd MCP query tool. Use when looking up framework APIs, finding code examples in third-party repos, or answering questions about external libraries that aren't in the current working directory.
 user-invocable: false
+allowed-tools:
+  - mcp__qmd__query
+  - mcp__qmd__get
+  - mcp__qmd__multi_get
+  - mcp__qmd__status
 ---
 
-# QMD Search Guide
+# QMD Search
 
-## Current State
-- **Collections:** !`qmd status 2>/dev/null | grep -c '^  ' || echo "0"`
-- **Status:** !`qmd status 2>/dev/null | head -1 || echo "QMD not running"`
+Decision rules and patterns for searching indexed reference collections via the qmd MCP server.
 
-## When to use QMD
+## Status
 
-QMD searches **indexed collections**: external codebases, notes, docs you've added with `qmd collection add`. For files in the current working directory, use Grep and Glob instead. They're faster, cheaper on context, and more precise.
+- **Index:** !`qmd status 2>/dev/null | head -1 || echo "qmd not running"`
+- **Collections:** !`qmd status 2>/dev/null | grep -cE '^  [a-z]' || echo 0`
 
-## Modality
+## When to use QMD vs Grep/Glob
 
-| Approach | When to use | How |
-|----------|-------------|-----|
-| Typed queries (MCP + CLI) | You know what you need. Exact terms, semantic concepts, or both. | MCP: `searches: [{type: "lex", query: "handleAuth"}, {type: "vec", query: "how auth works"}]`. CLI: `qmd query $'lex: handleAuth\nvec: how auth works'` |
-| Auto-expand (CLI only) | Most CLI queries. Let the pipeline decide. | CLI: `qmd query "auth middleware"`. Not available via MCP. |
+| Source of files | Use |
+|-----------------|-----|
+| The current working directory (the user's repo) | `Grep`, `Glob`, `Read` |
+| Indexed reference repos (`~/Developer/refs/*`) | `mcp__qmd__query` |
+| Personal notes / docs that the user added with `/qmd:add` | `mcp__qmd__query` |
 
-**Use `query` for everything.** MCP accepts typed sub-queries (`lex`, `vec`, `hyde`). CLI also supports `expand:` and plain text (auto-expand).
+QMD is for content you can't reach with `Grep` because it's outside the working tree. Don't use it for files in the current project — `Grep`/`Glob` are faster, cheaper, and more precise.
 
-## How `query` Works
+## Pipeline note (matters for query quality)
 
-Hybrid pipeline with GRPO-optimized query expansion → BM25 + vector search → RRF fusion → LLM cross-encoder reranking → position-aware blending → dedup. For pipeline internals (sub-query types, blending weights, conditional expansion logic), see [references/pipeline.md](references/pipeline.md).
+The MCP `query` tool calls `structuredSearch`, which **skips the local LLM query expansion**. The model never gets a chance to fix a vague `vec:` line. You (Claude) are the expansion model. Compose typed sub-queries deliberately:
 
-Documents are chunked into 900-token pieces with 15% overlap. Search matches point to the chunk, not the exact line. Use `get` with `fromLine`/`maxLines` to narrow down.
+- `lex:` for exact terms, identifiers, error codes, file/symbol names
+- `vec:` for semantic phrasing of the user's question
+- `hyde:` for nuanced topics — write 50-100 words of what the answer would look like
+- `intent:` for any ambiguous keyword (treat as required, see below)
 
-## Query Document Format
+The first sub-query gets 2x weight in RRF fusion. Put your strongest signal first.
 
-The `query` tool accepts an array of typed sub-queries. **MCP** uses structured JSON: `searches: [{type: "lex", query: "term"}, ...]` with types `lex`, `vec`, `hyde` only. **CLI** uses a text format: each line has an optional type prefix (`lex: term`). CLI also supports `expand:` and plain text (auto-expand).
+The upstream MCP server already injects a full description of the `query` tool with grammar, lex syntax, and worked examples — you don't need to memorize it, but you should compose queries with the same care you'd put into a vector DB query.
 
-### Grammar
+## Intent: treat as required
 
-MCP `type` enum: `"lex" | "vec" | "hyde"`. CLI adds `"expand"` and implicit expand (plain text).
+The MCP server's standing instruction is:
 
-```
-root    ::= line ("\n" line)*
-line    ::= (type ":" SP)? content
-type    ::= "lex" | "vec" | "hyde" | "expand"   # expand is CLI-only
-content ::= [^\n]+
-```
+> Always provide `intent` on every search call to disambiguate and improve snippets.
 
-### Types
+Follow it. `intent` doesn't search on its own — it steers query expansion, reranking, chunk selection, and snippet extraction. A 5-word intent string is essentially free and dramatically improves results for any keyword that's overloaded across domains.
 
-| Type | Routed to | Purpose | Availability |
-|------|-----------|---------|-------------|
-| `lex:` | BM25 only | Exact keywords, identifiers, error strings | MCP + CLI |
-| `vec:` | Vector only | Semantic rephrasing, concept search | MCP + CLI |
-| `hyde:` | Vector only | Hypothetical document. Describe what the answer looks like | MCP + CLI |
-| `expand:` | Full pipeline | Auto-expand into lex/vec/hyde sub-queries. Max one per query document. | CLI only |
-| _(plain text)_ | Full pipeline | Implicit `expand:`. Same as `expand:` but shorter to write. | CLI only |
+Words that almost always need intent: `performance`, `state`, `cache`, `pool`, `worker`, `signal`, `frame`, `model`, `router`, `context`, `session`, `migration`, `lock`, `queue`, `channel`, `agent`, `bridge`, `binding`, `hook`, `provider`, `adapter`, `client`, `store`.
 
-### Fusion Weight
+Good intent is specific to the user's actual stack:
 
-The **first query line gets 2x fusion weight** in RRF. Put your strongest signal first.
+- `"Convex authQuery wrapper for row-level security"` (not `"auth"`)
+- `"Expo SDK 56 native module bridging on iOS"` (not `"native module"`)
+- `"Next.js App Router server action with form action prop"` (not `"server action"`)
+- `"Postgres advisory lock for cron leader election"` (not `"locking"`)
 
-### Examples
+## Collections filter
 
-Single line, auto-expands (CLI only):
-```
-auth middleware
-```
+Always pass `collections: [...]` when you know which repo(s) to search. The user's indexed refs typically include `convex-docs`, `convex-src`, `expo-docs`, `expo-src`, `better-auth-docs`, `better-auth-src`, `remotion-docs`, `remotion-src`, `claude-code-docs`, `qmd`. Run `mcp__qmd__status` once per session to confirm what's available.
 
-Multi-line typed query:
-```
-lex:handleAuth JWT token
-vec:how does request authentication work
-hyde:The middleware validates the JWT token from the Authorization header and attaches the decoded user object to the request context
-```
+Omitting `collections` searches every default collection, which is slower and dilutes signal.
 
-Mixed, typed + auto-expand (CLI only, `expand:` not available via MCP):
-```
-lex:"ECONNREFUSED" retry logic
-expand:how connection errors are retried
+Collections marked `includeByDefault: false` are silently skipped unless explicitly named in the `collections` array. The MCP `status` tool's response does NOT include the include/exclude state, so you can't tell from `mcp__qmd__status` which collections are excluded — if a search returns nothing and the user expected results from a known collection, check via the bash fallback `qmd collection list` (which marks excluded ones with `[excluded]`) or `qmd collection show <name>`.
+
+## Named indexes
+
+qmd supports separate indexes via `--index <name>`. Each named index has its own SQLite DB and YAML config:
+
+- Default: `${XDG_CACHE_HOME:-~/.cache}/qmd/index.sqlite` + `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml`
+- Named: `${XDG_CACHE_HOME:-~/.cache}/qmd/<name>.sqlite` + `${XDG_CONFIG_HOME:-~/.config}/qmd/<name>.yml`
+
+The plugin's MCP server uses the default index. If the user has set up additional indexes (e.g. `work` for client repos, `personal` for notes), search them via the CLI fallback:
+
+```bash
+qmd --index work query "deployment runbook"
+qmd --index personal query "journal entry about last summer"
 ```
 
-## Lex Syntax
+Ask the user which index they want before searching if it's ambiguous. Most setups use only the default.
 
-Lex queries support phrase matching and exclusions:
-
-| Syntax | Meaning | Example |
-|--------|---------|---------|
-| `"exact phrase"` | Verbatim match | `lex:"error boundary"` |
-| `-term` | Exclude term | `lex:middleware -express` |
-| `-"phrase"` | Exclude phrase | `lex:router -"page router"` |
-| bare words | OR match (stemmed) | `lex:handleAuth parse token` |
-
-## Tools
-
-| Tool | Purpose |
-|------|---------|
-| `query` | Search: typed sub-queries (`lex`, `vec`, `hyde`). CLI also supports `expand:` and plain text. |
-| `get` | Retrieve one document by path |
-| `multi_get` | Retrieve multiple documents |
-| `status` | List collections, document counts, pending embeds |
-
-## Context hygiene
-
-Search results consume your main conversation context. For broad research across multiple collections, delegate to a subagent:
-
-```
-Use a subagent to research how Next.js handles routing
-by searching the next.js QMD collection.
-```
-
-The subagent runs searches in its own context and returns a summary. Your main conversation stays clean.
-
-For targeted lookups (one query, one collection), search directly. The overhead is low.
-
-## Retrieval
-
-After search returns results, retrieve full documents:
-
-| Task | MCP Tool | Example |
-|------|----------|---------|
-| Get by path | `get` | `file: "collection/path/to/doc.md"` |
-| Get by docid | `get` | `file: "#abc123"` |
-| Get with line numbers | `get` | `file: "docs/api.md", lineNumbers: true` |
-| Get from line offset | `get` | `file: "docs/api.md", fromLine: 100, maxLines: 50` |
-| Multiple by glob | `multi_get` | `pattern: "docs/*.md"` |
-| Multiple by list | `multi_get` | `pattern: "#abc123, #def456"` |
-
-## MCP ↔ CLI Reference
-
-| MCP Tool | CLI Equivalent | Key Parameters |
-|----------|---------------|----------------|
-| `query` | `qmd query` (alias: `deep-search`) | `searches` (array of `{type, query}` objects, types: `lex`/`vec`/`hyde`, min 1, max 10), `limit` (default 10), `minScore` (default 0), `collections` (array) |
-| `get` | `qmd get` | `file` (path or `#docid`), `fromLine`, `maxLines`, `lineNumbers` |
-| `multi_get` | `qmd multi-get` | `pattern` (glob or comma list), `maxLines`, `maxBytes` (default 10KB), `lineNumbers` |
-| `status` | `qmd status` | (none) |
-
-CLI has additional search commands (`qmd search`, `qmd vsearch`) that map to BM25-only and vector-only searches. Use these in CLI fallback scenarios when you need a specific modality.
-
-CLI defaults: 5 results in terminal mode, 20 for `--json`/`--files`. MCP defaults: 10.
-
-CLI supports multiple collection filters: `qmd search "query" -c react -c next.js`. MCP `collections` parameter takes an array of collection names.
-
-CLI output formats (not available via MCP): `--files`, `--json`, `--csv`, `--md`, `--xml`. MCP returns structured content via `structuredContent` field in addition to text.
-
-## Score Interpretation
+## Score interpretation
 
 | Score | Meaning | Action |
 |-------|---------|--------|
-| 0.8 - 1.0 | Highly relevant | Show to user |
-| 0.5 - 0.8 | Moderately relevant | Include if few results |
-| 0.2 - 0.5 | Somewhat relevant | Only if user wants more |
-| 0.0 - 0.2 | Low relevance | Usually skip |
+| 0.8 – 1.0 | Highly relevant | Show to user |
+| 0.5 – 0.8 | Moderately relevant | Include if few results, otherwise filter |
+| 0.2 – 0.5 | Somewhat relevant | Only if user wants more |
+| 0.0 – 0.2 | Low relevance | Usually skip |
 
-## Recommended Workflow
+`minScore` calibration:
 
-1. Check what's available: `status`
-2. Search: `query` with `lex`/`vec`/`hyde` sub-queries
-3. Refine: `lex:"exact term"` for identifiers, `vec:` for concepts, combine in one query document
-4. Retrieve full documents: `get` with path or `#docid`
+- **Default `minScore: 0`** is right for exploratory queries — don't pre-filter.
+- **`minScore: 0.3`** is the right floor when you want to prune obvious junk but keep partial matches.
+- **`minScore: 0.5`** is too aggressive for broad queries and will return zero rows for anything semantic. Only use for narrow, high-confidence lookups (exact identifier with `lex:` only).
 
-<examples>
-<example name="finding_implementation_patterns">
-<scenario>User asks how Next.js handles authentication middleware</scenario>
-<search>
-1. query(searches: [{type: "lex", query: "authentication middleware"}, {type: "vec", query: "how auth middleware validates requests"}], collections: ["next.js"], limit: 10)
-2. Review results, pick top 3 by score
-3. get(file: "next.js/packages/next/src/server/web/adapter.ts", lineNumbers: true)
-4. Summarize the pattern for the user
-</search>
-</example>
+If a search returns zero results with `minScore: 0.5`, retry without it before assuming the content isn't there.
 
-<example name="typed_query_for_precision">
-<scenario>User asks about a specific error in a known function</scenario>
-<search>
-1. query with typed query document:
-   lex:"NEXT_NOT_FOUND" handleNotFound
-   vec:how the not-found error propagates through the router
-   collections: ["next.js"], limit: 10
-2. get for top result with lineNumbers
-</search>
-</example>
+## Subagent hygiene
 
-<example name="comparing_across_repos">
-<scenario>User wants to compare error handling across React and Next.js</scenario>
-<search>
-1. query(searches: [{type: "lex", query: "error boundary"}, {type: "vec", query: "error boundary implementation"}], collections: ["react"], limit: 5)
-2. query(searches: [{type: "lex", query: "error handling middleware"}, {type: "vec", query: "how errors are handled in middleware"}], collections: ["next.js"], limit: 5)
-3. get for top results from each
-4. Compare approaches side-by-side
-</search>
-</example>
+Search results take real space in your context. For broad research (multiple queries, many results), delegate to a subagent so the raw retrieval stays out of the main thread:
 
-<example name="broad_research_with_subagent">
-<scenario>User asks to research all routing patterns in Next.js</scenario>
-<search>
-Delegate to subagent (broad research consumes context):
-"Search the next.js QMD collection for routing patterns.
- Use query for 'routing', 'middleware', 'route handler', 'page router', 'app router'.
- Retrieve top results with get. Summarize findings."
-</search>
-</example>
-</examples>
-
-## Tips
-
-- Run `status` first to see available collections and confirm zero pending embeddings.
-- Scope searches with the `collections` array parameter when you know which repos to search.
-- First query line gets 2x fusion weight. Put your strongest signal first.
-- Use typed queries when auto-expand misses: `lex:` for exact identifiers, `vec:` for concepts, `hyde:` for "what would the answer look like".
-- Max one `expand:` per query document (CLI only). Multiple `lex:`/`vec:`/`hyde:` lines are fine.
-- After search returns a path, use `@<absolute-path>` to pull the full file into context (the collection path is in `qmd status`).
-- If MCP tools are missing, the server may have disconnected. Run `/qmd:status` as a Bash fallback.
-- Multi-get with glob: `multi_get` pattern `"docs/*.md"` or comma list `"#abc, #def"`
-- Get with line offset: `get` file `"docs/api.md:100"` or use fromLine + maxLines params
-- Context is hierarchical: all matching path prefixes are concatenated (global → root → specific), not just the deepest match
-- For broad research, delegate to subagent to keep main context clean
-
-## CLI Fallback
-
-When MCP tools are unavailable (server disconnected, not installed), use CLI:
-
-```bash
-qmd search "exact term" -c collection -n 10 --json     # BM25
-qmd vsearch "concept" -c collection -n 10 --json       # Vector
-qmd query "question" -c collection -n 10 --json         # Hybrid
-qmd get path/to/file.md --line-numbers                  # Retrieve
-qmd multi-get "docs/*.md" --json                         # Batch retrieve
+```
+Use the Explore subagent to research how Convex handles row-level security across the convex-docs and convex-src collections. Use mcp__qmd__query and mcp__qmd__get. Return a summary with file:line references.
 ```
 
-CLI supports multiple `-c` flags: `qmd search "query" -c react -c next.js`
+For targeted lookups (one query, one collection, top 5 results), search directly. The overhead is fine.
 
-All 3 CLI search commands remain available. MCP has only `query`.
+## Retrieval
 
-## Named Indexes
+`get` returns an MCP `resource` content block with a `qmd://` URI and `text/markdown` mime type. Claude Code surfaces it as a document attachment, not inline text. Same for `multi_get` (one resource per file, plus text blocks for errors/skips).
 
-QMD supports separate indexes via `--index <name>`. Config at `~/.config/qmd/<name>.yml`, DB at `~/.cache/qmd/<name>.sqlite`. Useful for work/personal separation:
+Use `get` with `fromLine` + `maxLines` to narrow down: search matches point to a chunk (~900 tokens), not an exact line, so you'll often want to slice the result.
 
-```bash
-qmd --index work search "deployment"
-qmd --index personal search "journal"
-```
+**`@<absolute-path>` shortcut:** when a search hit points to a file on disk, you can reference it inline via `@/Users/.../refs/next.js/packages/.../router.ts` to attach the whole file to your reply context without calling `get`. The collection's on-disk path is in `mcp__qmd__status`. Useful when the user wants to see the full file rather than a chunked snippet.
 
 ## Recovery
 
-| Problem | Cause | Fix |
+| Symptom | Cause | Fix |
 |---------|-------|-----|
-| MCP tools missing from tool list | Server disconnected mid-session | Run `/qmd:status` (Bash fallback) or `/mcp` to check connection |
-| Zero results after successful embed | Mask excluded key files | Re-add with `/qmd:add <repo> --mask "<broader-glob>"` |
-| Search hangs or times out | Index corruption or model loading | Run `qmd cleanup` then `qmd embed -f` to rebuild |
-| Low-quality results | Query too vague or wrong approach | Use typed queries: `lex:` for exact terms, `vec:` for concepts, combine both |
-| "Collection not found" error | Typo or collection was removed | Run `status` to list available collections |
+| `mcp__qmd__*` tools missing from your tool list | MCP server disconnected | Run `/qmd:status` (Bash fallback) or `/mcp` to check |
+| Zero results after a successful index | Mask excluded the relevant files | Re-add with `/qmd:add <repo> --mask "<broader-glob>"` |
+| Timeouts or hangs | Index corruption | `/qmd:cleanup` then `/qmd:embed -f` |
+| Low-quality results | Vague vec query, no intent | Tighten `lex:`, add `intent:`, add a `hyde:` line |
+| "Collection not found" | Typo or removed collection | `mcp__qmd__status` to list current collections |
 
-## Gotchas
+## CLI fallback
 
-- `minScore: 0.5` filters too aggressively for broad queries. Use 0.3 for exploratory search.
-- BM25 (`lex`) is better for exact identifiers. Vec is better for concepts. Combine both for best recall.
-- `expand:` and plain text auto-expand are CLI-only. MCP requires explicit typed queries.
-- Chunks are 900 tokens with 15% overlap. Search matches point to chunks, not exact lines. Use `get` with `fromLine`/`maxLines` to narrow down.
+When the MCP server is down, fall back to bash via the slash commands or directly:
+
+```bash
+qmd query "<question>" -c <collection>             # Hybrid (slowest, highest quality)
+qmd query "<question>" --no-rerank -C 20           # Fast path: skip reranker, fewer candidates
+qmd search "<exact term>" -c <collection>          # BM25 only (fastest, no LLM)
+qmd get <path> --line-numbers                      # Retrieve a single doc
+qmd multi-get "docs/*.md" --json --max-bytes 20480 # Batch retrieve with size cap
+qmd query "<q>" --intent "<domain>" --explain --json  # Debug score traces
+qmd ls <collection>                                # Browse files in a collection (ls -l style)
+qmd ls <collection>/<path>                         # Browse a subdirectory
+qmd ls qmd://<collection>/<path>                   # Same, via virtual URI
+qmd collection list                                # Show all collections + ignore globs + [excluded] tags
+```
+
+CLI accepts multiple `-c` flags for cross-collection search. `qmd ls` is the only way to discover files in a collection without searching — useful when verifying that an `/qmd:add` mask actually indexed the right files, or when the user asks "what's in this collection?"
+
+## Examples
+
+For worked examples covering common patterns (precision queries, hyde for nuance, intent-aware disambiguation, subagent delegation), see [references/examples.md](references/examples.md).
+
+For pipeline internals (chunking, RRF blending, position-aware reranking, AST chunking), see [references/pipeline.md](references/pipeline.md).
