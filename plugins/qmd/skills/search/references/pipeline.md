@@ -138,7 +138,7 @@ Documents are chunked into 900-token pieces (≈3600 chars) with 15% overlap (13
 
 Code fences are never split. Break scores decay quadratically with distance from the ideal split point (decay factor 0.7).
 
-Search matches point to the chunk, not the exact line. To narrow down after finding the right document, use `get` with `fromLine` and `maxLines` parameters.
+Since qmd 2.5.0, search results return an absolute source-file `line` (no longer chunk-local), so a hit's `line` can be passed straight to `get` as `fromLine`. The snippet still scopes to the best matching chunk (~900 tokens); widen with `maxLines` for surrounding context.
 
 ### AST-Aware Chunking (`--chunk-strategy auto`)
 
@@ -190,7 +190,7 @@ FTS5 columns: filepath (10x weight), title (1x), body (1x). Uses Porter stemmer 
 | `qwen3-reranker-0.6b` (Q8_0) | Cross-encoder re-ranking | ~640MB (600M params) | From `ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF` |
 | `qmd-query-expansion-1.7B` (Q4_K_M) | Query expansion | ~1.1GB (GRPO fine-tuned from Qwen3-1.7B) | From `tobil/qmd-query-expansion-1.7B-gguf` |
 
-Models are cached in `${XDG_CACHE_HOME:-~/.cache}/qmd/models/`. Auto-downloaded on first use via node-llama-cpp, or manually via `qmd pull [--refresh]`. GPU parallelism (multiple LlamaContext instances) is used when available for faster embedding and reranking, up to 2.7x speedup. Override the GPU backend with `QMD_LLAMA_GPU=cuda|metal|vulkan|cpu`.
+Models are cached in `${XDG_CACHE_HOME:-~/.cache}/qmd/models/`. Auto-downloaded on first use via node-llama-cpp, or manually via `qmd pull [--refresh]`. GPU parallelism (multiple LlamaContext instances) is used when available for faster embedding and reranking, up to 2.7x speedup. Override the GPU backend with `QMD_LLAMA_GPU=cuda|metal|vulkan|cpu`, or force CPU entirely with `QMD_FORCE_CPU=1` or `--no-gpu` (qmd 2.5.0).
 
 ## Constants
 

@@ -7,8 +7,8 @@ What you get:
 - An MCP server (`mcp__qmd__query/get/multi_get/status`) auto-wired via `.mcp.json` so Claude can search your indexed reference repos as native tools.
 - A search SKILL that loads automatically when Claude needs to look something up in an indexed collection. It encodes the decisions Claude needs to make: when to use qmd vs Grep, how to compose typed sub-queries, when to pass `intent`, when to delegate to a subagent.
 - An `/qmd:add` SKILL that adds a reference collection to qmd. Accepts a GitHub URL, an `owner/repo` shorthand, OR a local directory path. Auto-detects file types, sets up `ignore:` globs, indexes with `--chunk-strategy auto`, embeds, and verifies — all in a forked subagent so it doesn't pollute your main context.
-- 17 slash commands for the operations you actually run by hand:
-  - **Indexing & maintenance**: `/qmd:status`, `/qmd:update`, `/qmd:embed`, `/qmd:cleanup`, `/qmd:pull`, `/qmd:bench`, `/qmd:mcp`
+- 18 slash commands for the operations you actually run by hand:
+  - **Indexing & maintenance**: `/qmd:status`, `/qmd:doctor`, `/qmd:update`, `/qmd:embed`, `/qmd:cleanup`, `/qmd:pull`, `/qmd:bench`, `/qmd:mcp`
   - **Collection management**: `/qmd:remove`, `/qmd:rename`, `/qmd:collection-show`, `/qmd:collection-update-cmd`, `/qmd:collection-include`, `/qmd:collection-exclude`, `/qmd:context`
   - **CLI fallbacks** (when MCP is down): `/qmd:search`, `/qmd:query`, `/qmd:get`
 
@@ -62,6 +62,7 @@ plugins/qmd/
 │           └── pipeline.md       # pipeline internals (chunking, RRF, blending)
 ├── commands/
 │   ├── status.md                 # /qmd:status               — index health
+│   ├── doctor.md                 # /qmd:doctor               — index + runtime diagnostics
 │   ├── update.md                 # /qmd:update               — pull + re-index + embed
 │   ├── embed.md                  # /qmd:embed                — manual embed
 │   ├── cleanup.md                # /qmd:cleanup              — clear caches + vacuum
@@ -169,7 +170,7 @@ If you want to compare, run `qmd skill show` to print the upstream version to st
 
 ## Requirements
 
-- `qmd` >= **2.1.0**: `npm install -g @tobilu/qmd` or `bun install -g @tobilu/qmd`
+- `qmd` >= **2.5.0**: `npm install -g @tobilu/qmd` or `bun install -g @tobilu/qmd`
 - Node.js >= 22 or Bun runtime
 - `git`
 - macOS: Homebrew SQLite (`brew install sqlite`) for extension support
@@ -177,4 +178,4 @@ If you want to compare, run `qmd skill show` to print the upstream version to st
 
 ## Version
 
-1.8.0 — wraps qmd CLI 2.1.0+. Plugin and tool versions are independent.
+1.9.0, wraps qmd CLI 2.5.2+. Plugin and tool versions are independent.

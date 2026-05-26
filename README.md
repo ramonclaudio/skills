@@ -139,7 +139,7 @@ Each plugin is a self-contained directory with a manifest, one or more skills, a
 | Plugin | What it ships | Requires | Version |
 | :--- | :--- | :--- | :--- |
 | [handoff](./plugins/handoff) | 2 skills, 2 hooks | `git` | 1.6.0 |
-| [qmd](./plugins/qmd) | 2 skills, 17 commands, 1 MCP server | `qmd`, `git` | 1.8.0 |
+| [qmd](./plugins/qmd) | 2 skills, 18 commands, 1 MCP server | `qmd`, `git` | 1.9.0 |
 | [commit](./plugins/commit) | 1 skill, 1 hook, 2 scripts | `git`, `gh` | 1.5.0 |
 | [polish](./plugins/polish) | 1 skill | `git` | 1.5.0 |
 | [audit](./plugins/audit) | 1 skill, 1 script | `git` | 1.5.0 |
@@ -166,13 +166,13 @@ Hooks run automatically. The only command you run is `/handoff:end` when you're 
 
 ### qmd
 
-Reference collection manager. Clone GitHub repos OR register local directories, index them, search with hybrid BM25/vector/reranking. All on-device. Wraps qmd CLI 2.1.0+ as a Claude Code skill — Claude searches via the MCP server, you run slash commands for indexing and maintenance.
+Reference collection manager. Clone GitHub repos OR register local directories, index them, search with hybrid BM25/vector/reranking. All on-device. Wraps qmd CLI 2.5.2+ as a Claude Code skill — Claude searches via the MCP server, you run slash commands for indexing and maintenance.
 
 **Skills:**
 - `/qmd:add <url|owner/repo|local-path>` - clone (GitHub) or register (local), auto-detect file types, write `ignore:` globs, embed with AST chunking, verify
 - `qmd:search` - non-invocable guide teaching Claude when and how to compose `mcp__qmd__query` calls with typed sub-queries (`lex`/`vec`/`hyde`) and `intent` for disambiguation
 
-**Commands (17):** `/qmd:status`, `/qmd:update`, `/qmd:embed`, `/qmd:cleanup`, `/qmd:bench`, `/qmd:pull`, `/qmd:mcp`, `/qmd:remove`, `/qmd:rename`, `/qmd:collection-show`, `/qmd:collection-update-cmd`, `/qmd:collection-include`, `/qmd:collection-exclude`, `/qmd:context`, `/qmd:search`, `/qmd:query`, `/qmd:get`
+**Commands (18):** `/qmd:status`, `/qmd:doctor`, `/qmd:update`, `/qmd:embed`, `/qmd:cleanup`, `/qmd:bench`, `/qmd:pull`, `/qmd:mcp`, `/qmd:remove`, `/qmd:rename`, `/qmd:collection-show`, `/qmd:collection-update-cmd`, `/qmd:collection-include`, `/qmd:collection-exclude`, `/qmd:context`, `/qmd:search`, `/qmd:query`, `/qmd:get`
 
 **MCP server:** Exposes `query` (hybrid pipeline with typed sub-queries + intent + reranking), `get`, `multi_get`, `status` — wired automatically via the plugin's `.mcp.json`.
 

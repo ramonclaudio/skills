@@ -2,6 +2,35 @@
 
 The plugin and the qmd CLI tool have independent version trees. Plugin versions are noted as `1.x` here. Upstream qmd CLI versions are referenced inline (e.g. "qmd CLI 2.1.0").
 
+## 1.9.0
+
+Sync with qmd CLI 2.5.2, up from the 2.1.0 surface the 1.8.0 plugin tracked. Upstream skipped the 2.2 through 2.4 version numbers and bundled the work into one large 2.5.0 release (2.5.1 is release infra, 2.5.2 is a Windows launcher fix). 2.5.0 is where every plugin-relevant change landed: `qmd doctor`, scoped `qmd embed -c`, absolute snippet line numbers, the `qmd status` GPU-probe move, the `qmd skills` family, and the `QMD_FORCE_CPU` force-CPU switch. The entries below track each one.
+
+### Added
+
+- **`/qmd:doctor`** wraps `qmd doctor` (qmd 2.5.0). It reports SQLite, `better-sqlite3`, and `sqlite-vec` versions, model-cache validity, the GPU device probe, and embedding fingerprint freshness. The command body tells Claude to act on the result rather than dump it: route to `/qmd:pull` for a bad model cache, `/qmd:embed --force` when stored vectors no longer reproduce or fingerprints are mixed, and `/qmd:embed` for pending work. It is the first thing to run when `qmd query` or `vsearch` returns nothing.
+
+### Fixed
+
+- **`/qmd:status`** dropped its stale GPU claim. qmd 2.5.0 moved device probing into `qmd doctor`, so `qmd status` no longer prints a Device section. The command now reports vectors alongside docs and pending, and points device, VRAM, and fingerprint questions at `/qmd:doctor`.
+- **`/qmd:embed`** gained `-c <collection>`. qmd 2.5.0 scopes embedding (and scoped `--force`) to one collection, clearing only that collection's vectors and preserving hashes shared with siblings. Was missing from the 1.8.0 sync.
+- **search SKILL and `pipeline.md`** updated for absolute line numbers. qmd 2.5.0 makes search hits carry an absolute source-file `line` instead of a chunk-local one, so the retrieval guidance now says to pass a hit's `line` straight to `get` as `fromLine` rather than always slicing by chunk.
+- **search SKILL recovery table** now routes to `/qmd:doctor` first when search returns nothing, errors, or misbehaves after an upgrade.
+- **`/qmd:add`** switched github-mode clone refresh and the generated `update:` command from `pull --ff-only` to `fetch --depth 1 && reset --hard FETCH_HEAD`, matching the rest of the index so read-only mirrors stay shallow and never hit a fast-forward failure. Local-mode repos keep `pull --ff-only` so a directory you might be editing is never `reset --hard`ed.
+- **search SKILL** stopped hardcoding a collection roster. The list had gone stale and a fixed list can anchor Claude on the wrong set instead of calling `status`. Replaced with the stable `-docs`/`-src`/`-skills` naming convention plus the existing pointer to `mcp__qmd__status` for the live set.
+- **`/qmd:add`** now preloads a single `qmd collection list` instead of dumping full `qmd status` (which lists every context entry) plus `cat`-ing the entire `index.yml` into the fork. Same dedup, pattern, and ignore awareness with far less context. Index health is still verified at Step 8, and the full YAML is read on demand when Step 5 edits it.
+
+### Intentionally not added
+
+- **`qmd init`** (project-local `.qmd` index). The plugin targets a personal, user-scope reference library, not per-project indexes.
+- **`qmd skills list|get|path` and `qmd skill show|install`**. The plugin already ships a richer search SKILL, and surfacing upstream skill management as slash commands invites the name collision the README warns about. Run `qmd skill show` from the CLI to inspect the upstream skill without writing it to disk.
+
+### Verified against qmd 2.5.2
+
+- `embed.md` already documented `--max-docs-per-batch` and `--max-batch-mb` (defaults 64 docs or 64 MB, whichever caps first) plus `--chunk-strategy auto` from the 1.8.0 sync. Still accurate.
+- `.mcp.json` still wires `qmd mcp` over stdio. Unchanged and correct.
+- `query`, `search`, `get`, `update`, `pull`, `cleanup`, `mcp`, `bench`, `remove`, `rename`, the `collection-*` family, and `context` were re-checked against the 2.5.2 CLI surface. No changes needed.
+
 ## 1.8.0
 
 Refocus the plugin as a tight Claude Code skill for using qmd CLI 2.1.0, not a documentation port of upstream qmd. Cleanup, restoration, and exhaustive cross-reference against `tobi/qmd@c2f3a40`.

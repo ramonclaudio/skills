@@ -138,7 +138,7 @@
       "name": "qmd",
       "source": "./plugins/qmd",
       "description": "Wraps the qmd MCP server so Claude can search indexed reference repos with hybrid BM25 + vector + reranking. Ships a search SKILL teaching Claude how to compose typed sub-queries with intent, plus /qmd:add to clone or register a collection (GitHub repo or local directory) end-to-end.",
-      "version": "1.8.0",
+      "version": "1.9.0",
       "author": {
         "name": "ramonclaudio",
         "email": "hello@ramonclaudio.com"
