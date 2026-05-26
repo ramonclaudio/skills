@@ -60,7 +60,7 @@ Good intent is specific to the user's actual stack:
 
 ## Collections filter
 
-Always pass `collections: [...]` when you know which repo(s) to search. The user's indexed refs typically include `convex-docs`, `convex-src`, `expo-docs`, `expo-src`, `better-auth-docs`, `better-auth-src`, `remotion-docs`, `remotion-src`, `claude-code-docs`, `qmd`. Run `mcp__qmd__status` once per session to confirm what's available.
+Always pass `collections: [...]` when you know which repo(s) to search. The indexed set changes over time, so run `mcp__qmd__status` once per session to see the live list rather than assuming a fixed roster. Names follow a stable convention: `<framework>-docs` for markdown docs, `<framework>-src` for TypeScript source, `<tool>-skills` for agent skill guides, plus `qmd` itself.
 
 Omitting `collections` searches every default collection, which is slower and dilutes signal.
 
@@ -113,7 +113,7 @@ For targeted lookups (one query, one collection, top 5 results), search directly
 
 `get` returns an MCP `resource` content block with a `qmd://` URI and `text/markdown` mime type. Claude Code surfaces it as a document attachment, not inline text. Same for `multi_get` (one resource per file, plus text blocks for errors/skips).
 
-Use `get` with `fromLine` + `maxLines` to narrow down: search matches point to a chunk (~900 tokens), not an exact line, so you'll often want to slice the result.
+Search results now carry an absolute source-file `line` (qmd 2.5.0), so you can pass a hit's `line` straight to `get` as `fromLine` to land near the match. The snippet still covers the best matching chunk (~900 tokens), so widen with `maxLines` when you need surrounding context.
 
 **`@<absolute-path>` shortcut:** when a search hit points to a file on disk, you can reference it inline via `@/Users/.../refs/next.js/packages/.../router.ts` to attach the whole file to your reply context without calling `get`. The collection's on-disk path is in `mcp__qmd__status`. Useful when the user wants to see the full file rather than a chunked snippet.
 
@@ -121,9 +121,10 @@ Use `get` with `fromLine` + `maxLines` to narrow down: search matches point to a
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
+| Search returns nothing, errors, or misbehaves after an upgrade | Model, GPU, or index health | Run `/qmd:doctor` first to isolate it |
 | `mcp__qmd__*` tools missing from your tool list | MCP server disconnected | Run `/qmd:status` (Bash fallback) or `/mcp` to check |
 | Zero results after a successful index | Mask excluded the relevant files | Re-add with `/qmd:add <repo> --mask "<broader-glob>"` |
-| Timeouts or hangs | Index corruption | `/qmd:cleanup` then `/qmd:embed -f` |
+| Timeouts or hangs | Index corruption | `/qmd:doctor`, then `/qmd:cleanup` and `/qmd:embed -f` |
 | Low-quality results | Vague vec query, no intent | Tighten `lex:`, add `intent:`, add a `hyde:` line |
 | "Collection not found" | Typo or removed collection | `mcp__qmd__status` to list current collections |
 

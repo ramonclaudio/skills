@@ -25,11 +25,8 @@ ultrathink
 You are a reference library curator. Your job is to add new collections to qmd: cloning external GitHub repos OR registering existing local directories, detecting their structure, setting ignore globs, indexing them for search, embedding, and verifying they're ready for retrieval. You care about file type detection, mask correctness, ignore patterns, and index health. You execute every step and verify its output before proceeding.
 </role>
 
-## Current State
-!`qmd status 2>/dev/null || echo "No QMD index yet"`
-
-## Current Config
-!`cat "${XDG_CONFIG_HOME:-$HOME/.config}/qmd/index.yml" 2>/dev/null || echo "No config yet"`
+## Current Collections
+!`qmd collection list 2>/dev/null || echo "No collections yet"`
 
 ## Arguments
 
@@ -93,14 +90,10 @@ Print the parsed mode + name + final collection path before proceeding so the us
 mkdir -p $REFS
 ```
 
-If `$REFS/<name>` already exists:
+If `$REFS/<name>` already exists, refresh it to the remote tip. A shallow fetch + reset keeps the read-only mirror shallow and never hits a fast-forward failure:
 ```bash
-git -C $REFS/<name> pull --ff-only
+git -C $REFS/<name> fetch --depth 1 origin HEAD && git -C $REFS/<name> reset --hard FETCH_HEAD
 ```
-
-If pull fails with `fatal: Not possible to fast-forward`:
-- Report: "Branch diverged from remote. Re-run with manual resolution or run `git -C $REFS/<name> pull --rebase`."
-- Stop. Do not continue.
 
 Otherwise, shallow clone (default):
 ```bash
@@ -176,10 +169,10 @@ qmd collection add <path> --name <name> --mask "<mask>"
 
 ## Step 5: Set auto-pull (github mode) and ignore patterns
 
-**If mode = `github`:** configure the pre-update command:
+**If mode = `github`:** configure the pre-update command. Use a shallow fetch + reset so the read-only mirror stays shallow and never hits a fast-forward failure:
 
 ```bash
-qmd collection update-cmd <name> "git -C $REFS/<name> pull --ff-only"
+qmd collection update-cmd <name> "git -C $REFS/<name> fetch --depth 1 origin HEAD && git -C $REFS/<name> reset --hard FETCH_HEAD"
 ```
 
 **If mode = `local`:** check whether the directory is a git repo:
@@ -188,7 +181,7 @@ qmd collection update-cmd <name> "git -C $REFS/<name> pull --ff-only"
 test -d <path>/.git && echo "git" || echo "not-git"
 ```
 
-- If it's a git repo, set the same update command pointed at the local path: `qmd collection update-cmd <name> "git -C <path> pull --ff-only"`.
+- If it's a git repo, set a non-destructive pull (never `reset --hard` a directory the user might be editing): `qmd collection update-cmd <name> "git -C <path> pull --ff-only"`. If it can't fast-forward, `/qmd:update` surfaces the error and the user resolves it, which is safer than discarding their work.
 - If it's not a git repo (e.g. notes folder), leave the update command unset. `/qmd:update` will still re-index it on each run (file mtime detection picks up changes).
 
 Then write `ignore:` globs into the YAML for the collection. The CLI has no subcommand to set ignore patterns — edit `${XDG_CONFIG_HOME:-~/.config}/qmd/index.yml` directly:

@@ -138,7 +138,7 @@ Documents are chunked into 900-token pieces (≈3600 chars) with 15% overlap (13
 
 Code fences are never split. Break scores decay quadratically with distance from the ideal split point (decay factor 0.7).
 
-Search matches point to the chunk, not the exact line. To narrow down after finding the right document, use `get` with `fromLine` and `maxLines` parameters.
+Since qmd 2.5.0, search results return an absolute source-file `line` (no longer chunk-local), so a hit's `line` can be passed straight to `get` as `fromLine`. The snippet still scopes to the best matching chunk (~900 tokens); widen with `maxLines` for surrounding context.
 
 ### AST-Aware Chunking (`--chunk-strategy auto`)
 
