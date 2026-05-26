@@ -1,6 +1,6 @@
 {
   "name": "qmd",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Wraps the qmd MCP server so Claude can search indexed reference repos (Convex, Expo, Next.js, etc) with hybrid BM25 + vector + reranking. Ships a search SKILL that teaches Claude how to compose typed sub-queries with intent, plus an /qmd:add SKILL that clones and indexes a GitHub repo end-to-end.",
   "author": {
     "name": "ramonclaudio",
