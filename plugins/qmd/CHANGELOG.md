@@ -4,7 +4,7 @@ The plugin and the qmd CLI tool have independent version trees. Plugin versions 
 
 ## 1.9.0
 
-Sync with qmd CLI 2.5.2. The CLI jumped 2.1.0 to 2.5.2 with no 2.2 through 2.4 releases. The only surface change that touches the plugin landed in 2.5.0: a new `qmd doctor` command, and GPU probing moved out of `qmd status`.
+Sync with qmd CLI 2.5.2, up from the 2.1.0 surface the 1.8.0 plugin tracked. Upstream skipped the 2.2 through 2.4 version numbers and bundled the work into one large 2.5.0 release (2.5.1 is release infra, 2.5.2 is a Windows launcher fix). 2.5.0 is where every plugin-relevant change landed: `qmd doctor`, scoped `qmd embed -c`, absolute snippet line numbers, the `qmd status` GPU-probe move, the `qmd skills` family, and the `QMD_FORCE_CPU` force-CPU switch. The entries below track each one.
 
 ### Added
 
